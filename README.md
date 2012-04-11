@@ -1,11 +1,6 @@
 Meerkat-Monitor
-===============
 
-Network Monitor Tool
---------------------
+Core codebase of Meerkat-Monitor.
 
-Project homepage: [http://meerkat-monitor.org/] [s]
+Project homepage: http://meerkat-monitor.org/
 
-
-
-	[s]: http://meerkat-monitor.org/  "Markdown Syntax"
