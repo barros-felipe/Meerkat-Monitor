@@ -12,6 +12,9 @@ meerkat.properties
 meerkat.webapps.xml
 pom.xml
 
+# Temp files
+*.*~
+
 # Eclipse
 .classpath
 .project
