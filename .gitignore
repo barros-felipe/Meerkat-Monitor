@@ -1,0 +1,32 @@
+# Misc
+bin/
+build/
+DOC/
+INSTALLER/
+lib/
+setup/
+build.xml
+*.log
+meerkat.properties
+meerkat.webapps.xml
+pom.xml
+
+
+# Eclipse
+.classpath
+.project
+.settings
+
+
+# ---- Mac OS X
+.DS_Store?
+Icon?
+# Thumbnails
+._*
+
+
+# ---- Windows
+# Windows image file caches
+Thumbs.db
+# Folder config file
+Desktop.ini
