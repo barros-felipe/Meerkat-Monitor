@@ -3,7 +3,6 @@ bin/
 build/
 DOC/
 INSTALLER/
-lib/
 setup/
 src/example/
 build*.xml
