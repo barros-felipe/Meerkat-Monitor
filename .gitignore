@@ -5,11 +5,13 @@ DOC/
 INSTALLER/
 setup/
 src/example/
-build*.xml
 *.log
 meerkat.properties
 meerkat.webapps.xml
 pom.xml
+
+# ORA jdbc driver
+ojdbc*.jar
 
 # Temp files
 *.*~
