@@ -281,6 +281,7 @@ public class WebApp implements Serializable {
 	 * @param origClient
 	 * @return HttpClient
 	 */
+	@SuppressWarnings("deprecation")
 	public HttpClient httpClientSSLAuth() {
 		HttpClient httpclient = new DefaultHttpClient();
 

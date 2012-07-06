@@ -25,10 +25,12 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.log4j.Logger;
+/**
 import org.gnome.gtk.Gtk;
 import org.gnome.notify.Notification;
 import org.gnome.notify.Notify;
 import org.gnome.notify.Urgency;
+*/
 
 public class SimplePopup {
 
@@ -109,6 +111,7 @@ public class SimplePopup {
 				JOptionPane.INFORMATION_MESSAGE);
 	}
 
+	/**
 	public final void showGnomeNotification() {
 		Gtk.init(null);
 
@@ -131,5 +134,6 @@ public class SimplePopup {
 		notification.show();
 
 	}
+	*/
 
 }
