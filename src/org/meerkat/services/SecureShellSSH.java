@@ -47,12 +47,10 @@ public class SecureShellSSH extends WebApp {
 	private String port;
 	private String cmdToExecute;
 	@XStreamOmitField
-	private BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+	private BasicTextEncryptor textEncryptor;
 	@XStreamOmitField
-	PropertiesLoader pL = new PropertiesLoader();
-	@XStreamOmitField
-	Properties properties = pL.getPropetiesFromFile("meerkat.properties");
-
+	PropertiesLoader pL;
+	
 	/**
 	 * SecureShellSSH
 	 * 
@@ -80,6 +78,7 @@ public class SecureShellSSH extends WebApp {
 	 * checkWebAppStatus
 	 */
 	public final WebAppResponse checkWebAppStatus() {
+		setupMainPassword(); // so textEncryptor is not null
 		setCurrentResponse("");
 		WebAppResponse response = new WebAppResponse();
 		response.setResponseSSH();
@@ -90,10 +89,8 @@ public class SecureShellSSH extends WebApp {
 
 		try {
 			JSch jsch = new JSch();
-			Session session = jsch
-					.getSession(user, host, Integer.valueOf(port));
-			SecureShellSSHUserInfo userInfo = new SecureShellSSHUserInfo(
-					textEncryptor.decrypt(passwd));
+			Session session = jsch.getSession(user, host, Integer.valueOf(port));
+			SecureShellSSHUserInfo userInfo = new SecureShellSSHUserInfo(textEncryptor.decrypt(passwd));
 			session.setUserInfo(userInfo);
 			session.setPassword(textEncryptor.decrypt(passwd));
 
@@ -107,8 +104,7 @@ public class SecureShellSSH extends WebApp {
 			InputStream in = channel.getInputStream();
 			channel.connect();
 
-			ByteArrayInputStream bs = new ByteArrayInputStream(
-					cmdToExecute.getBytes());
+			ByteArrayInputStream bs = new ByteArrayInputStream(cmdToExecute.getBytes());
 			channel.setInputStream(bs);
 			channel.getOutputStream();
 
@@ -236,6 +232,7 @@ public class SecureShellSSH extends WebApp {
 	 *            the passwd to set
 	 */
 	public final void setPasswd(String passwd) {
+		setupMainPassword();
 		this.passwd = textEncryptor.encrypt(passwd);
 	}
 
@@ -243,12 +240,19 @@ public class SecureShellSSH extends WebApp {
 	 * @return the passwd
 	 */
 	public final String getDecryptedPasswd() {
+		setupMainPassword();
 		return textEncryptor.decrypt(passwd);
 	}
 
+	/**
+	 * setupMainPassword
+	 */
 	public final void setupMainPassword() {
-		textEncryptor.setPassword(properties
-				.getProperty("meerkat.password.master"));
+		String propertiesFile = "meerkat.properties";
+		PropertiesLoader pL = new PropertiesLoader();
+		Properties properties = pL.getPropetiesFromFile(propertiesFile);
+		textEncryptor = new BasicTextEncryptor();
+		textEncryptor.setPassword(properties.getProperty("meerkat.password.master"));
 	}
 
 }

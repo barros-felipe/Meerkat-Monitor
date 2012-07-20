@@ -47,8 +47,7 @@ public class StdOutErrLog4j {
 	 * @param realPrintStream
 	 * @return
 	 */
-	public static PrintStream createLoggingProxy(
-			final PrintStream realPrintStream) {
+	public static PrintStream createLoggingProxy(final PrintStream realPrintStream) {
 		return new PrintStream(realPrintStream) {
 			public void print(final String string) {
 				realPrintStream.print(string);

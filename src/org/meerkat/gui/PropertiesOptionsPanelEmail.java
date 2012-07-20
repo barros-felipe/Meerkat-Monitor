@@ -234,7 +234,7 @@ public class PropertiesOptionsPanelEmail extends JPanel {
 
 		// Send email test button
 		JButton btnSendTestEmail = new JButton("Send test email");
-		btnSendTestEmail.setBounds(10, 362, 105, 23);
+		btnSendTestEmail.setBounds(10, 362, 122, 23);
 		add(btnSendTestEmail);
 
 		btnSendTestEmail.addActionListener(new ActionListener() {

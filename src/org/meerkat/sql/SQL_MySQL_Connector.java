@@ -95,7 +95,7 @@ public class SQL_MySQL_Connector {
 			ResultSet rs = stmt.executeQuery(query);
 			try {
 				rs.next();
-				result = (String) rs.getObject(1);
+				result = String.valueOf(rs.getObject(1));
 			} finally {
 				try {
 					rs.close();

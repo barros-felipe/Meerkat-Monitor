@@ -94,7 +94,7 @@ public class SQL_MSSQL_Connector {
 			ResultSet rs = stmt.executeQuery(query);
 			try {
 				rs.next();
-				result = (String) rs.getString(1);
+				result = String.valueOf(rs.getObject(1));
 			} finally {
 				try {
 					rs.close();

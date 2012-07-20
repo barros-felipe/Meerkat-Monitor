@@ -32,6 +32,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -54,7 +55,6 @@ import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
 import org.meerkat.util.PropertiesLoader;
 import org.meerkat.util.ResourceManager;
-import org.meerkat.util.StdOutErrLog4j;
 import org.meerkat.util.XStreamMeerkatConfig;
 import org.meerkat.util.ZipUtil;
 import org.meerkat.webapp.WebAppCollection;
@@ -69,11 +69,9 @@ public class MeerkatMonitor {
 
 	private static Logger log = Logger.getLogger(MeerkatMonitor.class);
 	private static Mail email = new Mail();
-	private static String smtp, smtpUser, smtpPort, smtpSecurity, smtpPass, to,
-			from, subject;
+	private static String smtp, smtpUser, smtpPort, smtpSecurity, smtpPass, to, from, subject;
 	private static Integer testPause, webserverPort;
-	private static Boolean testEmailSending, sendEmails, autosaveOnExit,
-			autoLoadOnStart;
+	private static Boolean testEmailSending, sendEmails, autosaveOnExit, autoLoadOnStart;
 	private static String propertiesFile;
 
 	private static String sessionSaveFile = "meerkatDataSession.mrk";
@@ -99,8 +97,7 @@ public class MeerkatMonitor {
 	private static DateUtil dateUtil = new DateUtil();
 	private static WebAppEvent ev;
 	private static RSS rssFeed;
-	private static String tempWorkingDir = System.getProperty("java.io.tmpdir")
-			+ System.getProperty("file.separator") + "meerkat/";
+	private static String tempWorkingDir = System.getProperty("java.io.tmpdir")	+ System.getProperty("file.separator") + "meerkat/";
 	private static WebAppCollection webAppsCollection = new WebAppCollection();
 	private static AppGroupCollection appGroupCollection = new AppGroupCollection();
 	private static String[] expectedProperties = new String[19];
@@ -124,7 +121,18 @@ public class MeerkatMonitor {
 		// sp.showGnomeNotification();
 
 		// append stdout and stderr to log4j
-		StdOutErrLog4j.appendSystemOutAndErrToLog();
+		// - This should be replaced with a real automatic bug submission tool 
+		//StdOutErrLog4j.appendSystemOutAndErrToLog();
+		//@TODO this should be replace with a automatic error submission mechanism
+		FileOutputStream fileOutputStream = null;
+		try {
+			fileOutputStream = new FileOutputStream("meerkat-inter-err.log");
+		} catch (FileNotFoundException e) {
+			log.error("Faile to write internal application errors file.");
+		}
+		PrintStream printStream = new PrintStream(fileOutputStream);
+		System.setErr(printStream);
+		//System.setOut(printStream); //for redirecting stdout
 
 		// Register required properties
 		// NOTE: The same are reflected in method generateDefaultPropertiesFile
@@ -198,8 +206,7 @@ public class MeerkatMonitor {
 		File prop = new File(propertiesFile);
 		if (!prop.exists()) {
 			log.fatal("Cannot find properties file meerkat.properties!");
-			SimplePopup sp = new SimplePopup(
-					"File meerkat.properties was not found.\nA default properties file file has been created.");
+			SimplePopup sp = new SimplePopup("Properties file not found.\nA default one has been created.");
 			sp.show();
 			pL.generateDefaultPropertiesFile(propertiesFile);
 		}
@@ -276,29 +283,24 @@ public class MeerkatMonitor {
 		if (sendEmails) {
 			smtp = properties.getProperty("meerkat.email.smtp.server");
 			smtpPort = properties.getProperty("meerkat.email.smtp.port");
-			smtpSecurity = properties
-					.getProperty("meerkat.email.smtp.security");
+			smtpSecurity = properties.getProperty("meerkat.email.smtp.security");
 			smtpUser = properties.getProperty("meerkat.email.smtp.user");
 			smtpPass = properties.getProperty("meerkat.email.smtp.password");
 			to = properties.getProperty("meerkat.email.to");
 			from = properties.getProperty("meerkat.email.from");
 			subject = properties.getProperty("meerkat.email.subjectPrefix");
-			testEmailSending = Boolean.parseBoolean(properties
-					.getProperty("meerkat.email.sending.test"));
+			testEmailSending = Boolean.parseBoolean(properties.getProperty("meerkat.email.sending.test"));
 		}
 
-		testPause = Integer.parseInt(properties
-				.getProperty("meerkat.monit.test.time"));
+		testPause = Integer.parseInt(properties.getProperty("meerkat.monit.test.time"));
 		// Convert seconds to milliseconds
 		pauseTime = TimeUnit.MINUTES.toMillis(testPause);
 
-		webserverPort = Integer.parseInt(properties
-				.getProperty("meerkat.webserver.port"));
+		webserverPort = Integer.parseInt(properties.getProperty("meerkat.webserver.port"));
 
 		// Test email sending if true in properties
 		if (sendEmails && testEmailSending) {
-			email = new Mail(smtp, smtpUser, smtpPass, smtpPort, smtpSecurity,
-					to, from);
+			email = new Mail(smtp, smtpUser, smtpPass, smtpPort, smtpSecurity, to, from);
 			email.testEmailServer();
 			log.info("Sent a test email to: " + to);
 		}
@@ -396,7 +398,7 @@ public class MeerkatMonitor {
 						String aboutstr = "\nMeerkat Monitor - Network Monitor Tool - v."
 								+ version
 								+ "\n"
-								+ "Copyright (C) 2011 meerkat-monitor.org\n"
+								+ "Copyright (C) 2012 meerkat-monitor.org\n"
 								+ "\n"
 								+ "This program is free software: you can redistribute it and/or modify\n"
 								+ "it under the terms of the GNU General Public License as published by\n"
@@ -570,8 +572,7 @@ public class MeerkatMonitor {
 		httpWebServer.refreshIndex();
 
 		systray.addSystrayIcon();
-		log.info("Load Session: loaded "
-				+ webAppsCollection.getWebAppCollectionSize() + " objects");
+		log.info("Load Session: loaded "+ webAppsCollection.getWebAppCollectionSize() + " objects");
 	}
 
 	/**
@@ -582,12 +583,10 @@ public class MeerkatMonitor {
 
 		log.info("");
 		log.info("Meerkat Monitor v." + version + " started.");
-		systray.showMessage("Meerkat Monitor",
-				"Meerkat Monitor is up and running!");
+		systray.showMessage("Meerkat Monitor", "Meerkat Monitor is up and running!");
 
 		// Autoload last session if enabled in properties
-		autoLoadOnStart = Boolean.parseBoolean(properties
-				.getProperty("meerkat.autoload.start"));
+		autoLoadOnStart = Boolean.parseBoolean(properties.getProperty("meerkat.autoload.start"));
 		if (autoLoadOnStart) {
 			log.info("Autoload on start enable. Loading last session..");
 			loadSession();
@@ -608,10 +607,8 @@ public class MeerkatMonitor {
 			Iterator<WebApp> i = webAppListCopy.iterator();
 			while (i.hasNext()) {
 				currentWebApp = i.next();
-				// check if the webApp is ready to monit or not - temp created
-				// in the gui
+				// check if the webApp is ready to monit or not - temp created in the gui
 				if (currentWebApp.isActive()) {
-
 					currentWebAppResponse = new WebAppResponse();
 
 					// Check the status
@@ -619,8 +616,7 @@ public class MeerkatMonitor {
 
 					// First test to set the lastStatus
 					if (currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase(
-									"NA")) {
+							&& currentWebApp.getlastStatus().equalsIgnoreCase("NA")) {
 						currentWebApp.setlastStatus("online");
 						currentWebApp.increaseNumberOfTests();
 
@@ -634,39 +630,29 @@ public class MeerkatMonitor {
 								currentWebAppResponse.getHttpStatus(),
 								eventNewMonitoringStart, tempWorkingDir);
 						// Save load time and latency
-						ev.setPageLoadTime(currentWebAppResponse
-								.getPageLoadTime());
+						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(
-								currentWebApp.getCurrentResponse(),
-								currentWebApp);
+						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(), currentWebApp);
 						currentWebApp.addEvent(ev);
 
 					} else if (!currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase(
-									"NA")) {
+							&& currentWebApp.getlastStatus().equalsIgnoreCase("NA")) {
 						currentWebApp.setlastStatus("offline");
 
-						log.warn("OFFLINE\t| " + currentWebApp.getName()
-								+ "\t | " + currentWebApp.getUrl());
+						log.warn("OFFLINE\t| " + currentWebApp.getName()+ "\t | " + currentWebApp.getUrl());
 						currentWebApp.increaseNumberOfTests();
 						currentWebApp.increaseNumberOfOfflines();
 
 						if (sendEmails) {
-							email = new Mail(smtp, smtpUser, smtpPass,
-									smtpPort, smtpSecurity, to, from);
-							email.setSubject(subject + " - "
-									+ currentWebApp.getName() + " is OFFLINE");
-							email.setMessage("The webapp "
-									+ currentWebApp.getName() + " on "
-									+ currentWebApp.getUrl() + " is OFFLINE!");
+							email = new Mail(smtp, smtpUser, smtpPass, smtpPort, smtpSecurity, to, from);
+							email.setSubject(subject + " - "+ currentWebApp.getName() + " is OFFLINE");
+							email.setMessage("The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl() + " is OFFLINE!");
 							email.sendEmail();
 						}
 
-						systray.showMessageError(currentWebApp.getName(),
-								currentWebApp.getName() + " is OFFLINE!");
+						systray.showMessageError(currentWebApp.getName(), currentWebApp.getName() + " is OFFLINE!");
 
 						// Add event
 						String now = dateUtil.now();
@@ -679,35 +665,25 @@ public class MeerkatMonitor {
 								eventNewMonitoringStart, tempWorkingDir);
 						// Save load time and latency
 						ev.setLatency(currentWebApp.getLatency());
-						ev.setPageLoadTime(currentWebAppResponse
-								.getPageLoadTime());
+						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(
-								currentWebApp.getCurrentResponse(),
-								currentWebApp);
+						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(), currentWebApp);
 						currentWebApp.addEvent(ev);
 						// httpWebServer.addEventResponse(currentWebApp);
 
 						// Add RSS item
-						rssFeed.addItem(currentWebApp.getName(),
-								currentWebApp.getDataFileName(), now,
-								currentWebApp.getName() + " is OFFLINE");
+						rssFeed.addItem(currentWebApp.getName(), currentWebApp.getDataFileName(), now, currentWebApp.getName() + " is OFFLINE");
 
 						// Execute the executeOnOffline
-						if (!currentWebApp.getExecuteOnOffline()
-								.equalsIgnoreCase("")) {
-							systray.showMessage(currentWebApp.getName(),
-									"Taking action on offline: "
-											+ currentWebApp.getName());
+						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
+							systray.showMessage(currentWebApp.getName(), "Taking action on offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
 
 					// If last status was online
-					else if (currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase(
-									"online")) {
+					else if (currentWebAppResponse.isOnline() && currentWebApp.getlastStatus().equalsIgnoreCase("online")) {
 						currentWebApp.setlastStatus("online");
 						currentWebApp.increaseNumberOfTests();
 
@@ -721,39 +697,29 @@ public class MeerkatMonitor {
 								currentWebAppResponse.getHttpStatus(),
 								eventStandard, tempWorkingDir);
 						// Save load time and latency
-						ev.setPageLoadTime(currentWebAppResponse
-								.getPageLoadTime());
+						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(
-								currentWebApp.getCurrentResponse(),
-								currentWebApp);
+						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(), currentWebApp);
 						currentWebApp.addEvent(ev);
 
 					} else if (!currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase(
-									"online")) {
+							&& currentWebApp.getlastStatus().equalsIgnoreCase("online")) {
 						currentWebApp.setlastStatus("offline");
 
-						log.warn("OFFLINE\t| " + currentWebApp.getName()
-								+ "\t | " + currentWebApp.getUrl());
+						log.warn("OFFLINE\t| " + currentWebApp.getName()+ "\t | " + currentWebApp.getUrl());
 						currentWebApp.increaseNumberOfTests();
 						currentWebApp.increaseNumberOfOfflines();
 
 						if (sendEmails) {
-							email = new Mail(smtp, smtpUser, smtpPass,
-									smtpPort, smtpSecurity, to, from);
-							email.setSubject(subject + currentWebApp.getName()
-									+ " is OFFLINE");
-							email.setMessage("The webapp "
-									+ currentWebApp.getName() + " on "
-									+ currentWebApp.getUrl() + " is OFFLINE!");
+							email = new Mail(smtp, smtpUser, smtpPass,smtpPort, smtpSecurity, to, from);
+							email.setSubject(subject + currentWebApp.getName()+ " is OFFLINE");
+							email.setMessage("The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl() + " is OFFLINE!");
 							email.sendEmail();
 						}
 
-						systray.showMessageError(currentWebApp.getName(),
-								currentWebApp.getName() + " is OFFLINE!");
+						systray.showMessageError(currentWebApp.getName(),currentWebApp.getName() + " is OFFLINE!");
 						// Add event
 						String now = dateUtil.now();
 						ev = new WebAppEvent(
@@ -764,47 +730,32 @@ public class MeerkatMonitor {
 								currentWebAppResponse.getHttpStatus(),
 								eventGoOffline, tempWorkingDir);
 						// Save load time and latency
-						ev.setPageLoadTime(currentWebAppResponse
-								.getPageLoadTime());
+						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(
-								currentWebApp.getCurrentResponse(),
-								currentWebApp);
+						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(),currentWebApp);
 						currentWebApp.addEvent(ev);
 
 						// Add RSS item
-						rssFeed.addItem(currentWebApp.getName(),
-								currentWebApp.getDataFileName(), now,
-								currentWebApp.getName() + " is OFFLINE");
+						rssFeed.addItem(currentWebApp.getName(),currentWebApp.getDataFileName(), now, currentWebApp.getName() + " is OFFLINE");
 
 						// Execute the executeOnOffline
-						if (!currentWebApp.getExecuteOnOffline()
-								.equalsIgnoreCase("")) {
-							systray.showMessageError(currentWebApp.getName(),
-									"Taking action on offline: "
-											+ currentWebApp.getName());
+						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
+							systray.showMessageError(currentWebApp.getName(), "Taking action on offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
 
 					// If last status was offline
-					else if (currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase(
-									"offline")) {
+					else if (currentWebAppResponse.isOnline() && currentWebApp.getlastStatus().equalsIgnoreCase("offline")) {
 						currentWebApp.setlastStatus("online");
 						currentWebApp.increaseNumberOfTests();
 
 						if (sendEmails) {
-							email = new Mail(smtp, smtpUser, smtpPass,
-									smtpPort, smtpSecurity, to, from);
-							email.setSubject(subject + currentWebApp.getName()
-									+ " is BACK ONLINE");
-							email.setMessage("The webapp "
-									+ currentWebApp.getName() + " on "
-									+ currentWebApp.getUrl()
-									+ " is BACK ONLINE!");
+							email = new Mail(smtp, smtpUser, smtpPass, smtpPort, smtpSecurity, to, from);
+							email.setSubject(subject + currentWebApp.getName()+ " is BACK ONLINE");
+							email.setMessage("The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl()+ " is BACK ONLINE!");
 							email.sendEmail();
 						}
 
@@ -818,32 +769,23 @@ public class MeerkatMonitor {
 								currentWebAppResponse.getHttpStatus(),
 								eventBackOnline, tempWorkingDir);
 						// Save load time and latency
-						ev.setPageLoadTime(currentWebAppResponse
-								.getPageLoadTime());
+						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(
-								currentWebApp.getCurrentResponse(),
-								currentWebApp);
+						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(),currentWebApp);
 						currentWebApp.addEvent(ev);
 						// httpWebServer.addEventResponse(currentWebApp);
 
-						systray.showMessage(currentWebApp.getName(),
-								currentWebApp.getName() + " is BACK ONLINE!");
+						systray.showMessage(currentWebApp.getName(),currentWebApp.getName() + " is BACK ONLINE!");
 
 						// Add RSS item
-						rssFeed.addItem(currentWebApp.getName(),
-								currentWebApp.getDataFileName(), now,
-								currentWebApp.getName() + " is BACK ONLINE!");
+						rssFeed.addItem(currentWebApp.getName(),currentWebApp.getDataFileName(), now,currentWebApp.getName() + " is BACK ONLINE!");
 
-					} else if (!currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase(
-									"offline")) {
+					} else if (!currentWebAppResponse.isOnline()&& currentWebApp.getlastStatus().equalsIgnoreCase("offline")) {
 						currentWebApp.setlastStatus("offline");
 
-						log.warn("STILL OFFLINE\t| " + currentWebApp.getName()
-								+ "\t | " + currentWebApp.getUrl());
+						log.warn("STILL OFFLINE\t| " + currentWebApp.getName()+ "\t | " + currentWebApp.getUrl());
 						currentWebApp.increaseNumberOfTests();
 						currentWebApp.increaseNumberOfOfflines();
 
@@ -857,22 +799,16 @@ public class MeerkatMonitor {
 								currentWebAppResponse.getHttpStatus(),
 								eventStandard, tempWorkingDir);
 						// Save load time and latency
-						ev.setPageLoadTime(currentWebAppResponse
-								.getPageLoadTime());
+						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(
-								currentWebApp.getCurrentResponse(),
-								currentWebApp);
+						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(),currentWebApp);
 						currentWebApp.addEvent(ev);
 
 						// Execute the executeOnOffline
-						if (!currentWebApp.getExecuteOnOffline()
-								.equalsIgnoreCase("")) {
-							systray.showMessageError(currentWebApp.getName(),
-									"Taking action on still offline: "
-											+ currentWebApp.getName());
+						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
+							systray.showMessageError(currentWebApp.getName(),"Taking action on still offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
@@ -886,8 +822,7 @@ public class MeerkatMonitor {
 			httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
 			httpWebServer.refreshIndex();
 
-			log.info("Next round in: " + testPause + " minute(s) [" + pauseTime
-					+ "ms]");
+			log.info("Next round in: " + testPause + " minute(s) [" + pauseTime+ "ms]");
 			log.info("");
 			try {
 				Thread.sleep(pauseTime);
@@ -905,8 +840,7 @@ public class MeerkatMonitor {
 	 */
 	private static void extractLocalResources() {
 		// Create temp dir to hold the resources
-		File resourcesDir = new File(tempWorkingDir + "resources" + "/"
-				+ "images");
+		File resourcesDir = new File(tempWorkingDir + "resources" + "/"+ "images");
 		if (!resourcesDir.mkdirs()) {
 			log.error("ERROR: Failed to create resources directory!");
 		}
