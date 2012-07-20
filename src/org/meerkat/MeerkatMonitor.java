@@ -846,7 +846,7 @@ public class MeerkatMonitor {
 		}
 
 		// Register resources
-		String[] resources = new String[20];
+		String[] resources = new String[21];
 		resources[0] = "resources/demo_page.css";
 		resources[1] = "resources/demo_table_jui.css";
 		resources[2] = "resources/jquery-ui-1.8.4.custom.css";
@@ -867,7 +867,8 @@ public class MeerkatMonitor {
 		resources[17] = "resources/up-green.png";
 		resources[18] = "resources/tango-slink.png";
 		resources[19] = "resources/404_meerkat.png";
-
+		resources[20] = "resources/tango_wsdl.png";
+		
 		String[] resourcesImages = new String[13];
 		resourcesImages[0] = "resources/images/ui-bg_flat_0_aaaaaa_40x100.png";
 		resourcesImages[1] = "resources/images/ui-bg_flat_75_ffffff_40x100.png";
