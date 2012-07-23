@@ -120,6 +120,10 @@ public class MeerkatMonitor {
 		// SimplePopup sp = new SimplePopup("Test notification popup!");
 		// sp.showGnomeNotification();
 
+		// Set up embedded jetty log
+		Properties systemProperties = System.getProperties();
+		systemProperties.setProperty("org.eclipse.jetty.LEVEL", "WARN");
+		
 		// append stdout and stderr to log4j
 		// - This should be replaced with a real automatic bug submission tool 
 		//StdOutErrLog4j.appendSystemOutAndErrToLog();
@@ -467,8 +471,7 @@ public class MeerkatMonitor {
 
 		ObjectOutput out = null;
 		try {
-			out = new ObjectOutputStream(new FileOutputStream(tempWorkingDir
-					+ sessionSaveFile));
+			out = new ObjectOutputStream(new FileOutputStream(tempWorkingDir + sessionSaveFile));
 		} catch (FileNotFoundException e) {
 			log.error("Session file not found", e);
 		} catch (IOException e) {

@@ -47,7 +47,7 @@ public class SecureShellSSH extends WebApp {
 	private String port;
 	private String cmdToExecute;
 	@XStreamOmitField
-	private BasicTextEncryptor textEncryptor;
+	transient private BasicTextEncryptor textEncryptor;
 	@XStreamOmitField
 	PropertiesLoader pL;
 	

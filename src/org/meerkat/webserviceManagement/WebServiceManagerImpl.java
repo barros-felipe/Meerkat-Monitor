@@ -8,7 +8,7 @@ public class WebServiceManagerImpl implements WebServiceManager{
 
 	@Override
 	public String getVersion(String version) {
-		return "Yeah!! It works fucker!";
+		return "Yeah!! It works!";
 	}
 
 }
