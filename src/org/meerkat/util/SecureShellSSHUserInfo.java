@@ -17,7 +17,7 @@
  * along with Meerkat Monitor.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.meerkat.ssh;
+package org.meerkat.util;
 
 import com.jcraft.jsch.UserInfo;
 

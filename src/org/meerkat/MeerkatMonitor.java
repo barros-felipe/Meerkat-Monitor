@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.xml.ws.Endpoint;
 
 import org.apache.log4j.Logger;
 import org.meerkat.group.AppGroupCollection;
@@ -49,6 +50,7 @@ import org.meerkat.gui.SplashScreen;
 import org.meerkat.gui.SysTrayIcon;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.network.Mail;
+import org.meerkat.network.NetworkUtil;
 import org.meerkat.network.RSS;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.DateUtil;
@@ -60,6 +62,7 @@ import org.meerkat.util.ZipUtil;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
 import org.meerkat.webapp.WebAppResponse;
+import org.meerkat.ws.MeerkatWebService;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -87,8 +90,11 @@ public class MeerkatMonitor {
 
 	private static WebApp currentWebApp;
 	private static WebAppResponse currentWebAppResponse;
-
+	
+	private static NetworkUtil netUtil = new NetworkUtil();
+	private static String hostname = netUtil.getHostname();
 	private static HttpServer httpWebServer;
+	private static String wsdlUrl = "";
 
 	private static String eventGoOffline = "Offline";
 	private static String eventBackOnline = "Back Online";
@@ -181,25 +187,38 @@ public class MeerkatMonitor {
 				tmp.getAbsolutePath());
 
 		// Set httpclient log to error only
-		System.setProperty("org.apache.commons.logging.Log",
-				"org.apache.commons.logging.impl.SimpleLog");
-		System.setProperty("org.apache.commons.logging.simplelog.showdatetime",
-				"true");
-		System.setProperty(
-				"org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient",
-				"error");
+		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
+		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "error");
 
 		readProperties();
 		loadWebAppXML();
 		generateGroups();
 		loadEmailProperties();
 		setLookAndFeel();
+		startWebServices();
 		startHttpWebServer();
 		createSystray();
 		extractLocalResources();
 		startMonitor();
 	}
 
+	
+	/**
+	 * startWebServices
+	 */
+	public static void startWebServices(){
+		// Webservice - related to org.meerkat.ws package
+		String wsdlEndpoint = "";
+		wsdlEndpoint = "http://"+hostname+":"+(webserverPort+1)+"/ws/manager";
+		wsdlUrl = wsdlEndpoint+"?wsdl";
+		
+		// Setup web server
+		httpWebServer = new HttpServer(webserverPort, version, wsdlUrl, tempWorkingDir);
+		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(properties.getProperty("meerkat.password.master"), webAppsCollection, httpWebServer));	
+	}
+	
+	
 	/**
 	 * readProperties
 	 */
@@ -449,9 +468,6 @@ public class MeerkatMonitor {
 	 * startHttpWebServer
 	 */
 	private static void startHttpWebServer() {
-		// Launch the webserver
-		httpWebServer = new HttpServer(webserverPort, version, tempWorkingDir);
-
 		// Set the data
 		httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
 

@@ -24,8 +24,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
 
-import javax.xml.ws.Endpoint;
-
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -39,7 +37,6 @@ import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
 import org.meerkat.util.PropertiesLoader;
 import org.meerkat.webapp.WebAppCollection;
-import org.meerkat.webserviceManagement.WebServiceManagerImpl;
 
 
 public class HttpServer {
@@ -47,7 +44,7 @@ public class HttpServer {
 	private DateUtil date = new DateUtil();
 	private String version;
 	private int webServerPort;
-	private NetworkUtil netUtil = new NetworkUtil();;
+	private NetworkUtil netUtil = new NetworkUtil();
 	private FileUtil fu = new FileUtil();
 	private String tempWorkingDir;
 	private String propertiesFile = "meerkat.properties";
@@ -60,7 +57,6 @@ public class HttpServer {
 	private static Boolean allowRemoteConfig;
 	private static String configFile = "meerkat.webapps.xml";
 	private String rssResource = "/rss.xml";
-	private String wsdlEndpoint = "";
 	private String wsdlUrl = "";
 	private String timeLineFile = "TimeLine.html";
 	private String hostname = netUtil.getHostname();
@@ -70,13 +66,11 @@ public class HttpServer {
 	private String bottomContent = "</tbody>\n</table>\n" + "</div>\n";
 	private String bodyEnd = "</body>\n" + "</html>\n";
 
-	public HttpServer(final int webServerPort, String version, String tempWorkingDir) {
+	public HttpServer(final int webServerPort, String version, String wsdlUrl, String tempWorkingDir) {
 		this.webServerPort = webServerPort;
-		wsdlEndpoint = "http://"+hostname+":"+(webServerPort+1)+"/ws/manager";
-		wsdlUrl = wsdlEndpoint+"?wsdl";
 		this.version = version;
 		this.setFooter(this.version);
-
+		this.wsdlUrl = wsdlUrl;
 		this.tempWorkingDir = tempWorkingDir;
 
 		// Create the index startup page
@@ -95,12 +89,6 @@ public class HttpServer {
 		HandlerList handlers = new HandlerList();
 		handlers.setHandlers(new Handler[] { resourceHandler, customResHandler });
 		mServer.setHandler(handlers);
-
-		// Webservice - related to org.meerkat.webserviceManagent package
-		Endpoint.publish(wsdlEndpoint, new WebServiceManagerImpl());
-
-		
-		
 		
 		try {
 			mServer.start();
@@ -175,9 +163,6 @@ public class HttpServer {
 				+ "<a href=\""
 				+ rssResource
 				+ "\"><img src=\"resources/tango_rss.png\" alt=\"RSS\" align=\"right\" style=\"border-style: none\"/></a> \n"
-				+ "<a href=\""
-				+ wsdlUrl
-				+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n"
 				+ "</div>\n"
 
 				+ "<div class=\"demo_jui\">\n"
@@ -271,9 +256,6 @@ public class HttpServer {
 				+ "<a href=\""
 				+ rssResource
 				+ "\"><img src=\"resources/tango_rss.png\" alt=\"RSS\" align=\"right\" style=\"border-style: none\"/></a> \n"
-				+ "<a href=\""
-				+ wsdlUrl
-				+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n"
 				+ "</div>\n"
 
 				+ "<div class=\"demo_jui\">\n"
@@ -492,6 +474,10 @@ public class HttpServer {
 		}
 
 		responseStatus += bottomContent;
+		responseStatus += "<a href=\""
+		+ wsdlUrl
+		+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n";
+		
 		responseStatus += "<br>\n<div>\nUpdated: " + date.now() + " ["
 				+ wac.getNumberOfEventsInCollection() + " tests]" + "</div>\n";
 		responseStatus += footer;

@@ -275,7 +275,7 @@ public class WebAppCollection implements Serializable {
 	 * @param name
 	 * @return
 	 */
-	private boolean isWebAppByNamePresent(String name) {
+	public boolean isWebAppByNamePresent(String name) {
 		List<WebApp> webAppsCollectionCopy = this.webAppsCollection;
 		Iterator<WebApp> it = webAppsCollectionCopy.iterator();
 

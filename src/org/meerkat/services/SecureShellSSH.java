@@ -25,9 +25,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.jasypt.util.text.BasicTextEncryptor;
-import org.meerkat.ssh.SecureShellSSHUserInfo;
 import org.meerkat.util.Counter;
 import org.meerkat.util.PropertiesLoader;
+import org.meerkat.util.SecureShellSSHUserInfo;
 import org.meerkat.webapp.WebAppResponse;
 
 import com.jcraft.jsch.Channel;
@@ -66,7 +66,10 @@ public class SecureShellSSH extends WebApp {
 			String port, String expectedResponse, String cmdToExecute) {
 		super(name, host, expectedResponse);
 		this.user = user;
+		
 		setupMainPassword();
+		setPasswd(passwd);
+		
 		this.host = host;
 		this.port = port;
 		this.cmdToExecute = cmdToExecute;
