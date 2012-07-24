@@ -118,8 +118,7 @@ public class OptionsPanelSSH extends JPanel {
 		lblPassword.setBounds(10, 139, 102, 14);
 		add(lblPassword);
 
-		final JPasswordField textField_passwd = new JPasswordField(
-				webApp.getDecryptedPasswd());
+		final JPasswordField textField_passwd = new JPasswordField(webApp.getPassword()); //Encrypted password
 		textField_passwd.setBounds(122, 136, 135, 20);
 		add(textField_passwd);
 		textField_passwd.setColumns(10);
@@ -185,8 +184,7 @@ public class OptionsPanelSSH extends JPanel {
 				String new_passwd = new String(textField_passwd.getPassword());
 				String new_sendString = textField_sendString.getText();
 				String new_expectedResponse = expectedResponse.getText();
-				String new_executeOnOffline = textField_executeOnOffline
-						.getText();
+				String new_executeOnOffline = textField_executeOnOffline.getText();
 				String new_groups = textField_groups.getText();
 
 				if (new_name.equals("") || new_host.equals("")
@@ -232,6 +230,8 @@ public class OptionsPanelSSH extends JPanel {
 		button_delete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				wAppCollection.removeWebApp(webApp);
+				wAppCollection.writeWebAppCollectionDataFile();
+				wAppCollection.saveConfigXMLFile();
 				mainMAppWindow.removeSelectNodeElementFromTree();
 			}
 		});

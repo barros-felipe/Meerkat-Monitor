@@ -21,12 +21,10 @@ package org.meerkat.services;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.jasypt.util.text.BasicTextEncryptor;
 import org.meerkat.util.Counter;
-import org.meerkat.util.PropertiesLoader;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.SecureShellSSHUserInfo;
 import org.meerkat.webapp.WebAppResponse;
 
@@ -47,10 +45,8 @@ public class SecureShellSSH extends WebApp {
 	private String port;
 	private String cmdToExecute;
 	@XStreamOmitField
-	transient private BasicTextEncryptor textEncryptor;
-	@XStreamOmitField
-	PropertiesLoader pL;
-	
+	MasterKeyManager mkm;
+
 	/**
 	 * SecureShellSSH
 	 * 
@@ -62,14 +58,12 @@ public class SecureShellSSH extends WebApp {
 	 * @param expectedResponse
 	 * @param cmdToExecute
 	 */
-	public SecureShellSSH(String name, String user, String passwd, String host,
+	public SecureShellSSH(MasterKeyManager mkm, String name, String user, String passwd, String host,
 			String port, String expectedResponse, String cmdToExecute) {
 		super(name, host, expectedResponse);
+		this.mkm = mkm;
 		this.user = user;
-		
-		setupMainPassword();
 		setPasswd(passwd);
-		
 		this.host = host;
 		this.port = port;
 		this.cmdToExecute = cmdToExecute;
@@ -81,7 +75,10 @@ public class SecureShellSSH extends WebApp {
 	 * checkWebAppStatus
 	 */
 	public final WebAppResponse checkWebAppStatus() {
-		setupMainPassword(); // so textEncryptor is not null
+		if(mkm == null){
+			mkm = this.getMasterKeyManager();
+		}
+		
 		setCurrentResponse("");
 		WebAppResponse response = new WebAppResponse();
 		response.setResponseSSH();
@@ -93,9 +90,9 @@ public class SecureShellSSH extends WebApp {
 		try {
 			JSch jsch = new JSch();
 			Session session = jsch.getSession(user, host, Integer.valueOf(port));
-			SecureShellSSHUserInfo userInfo = new SecureShellSSHUserInfo(textEncryptor.decrypt(passwd));
+			SecureShellSSHUserInfo userInfo = new SecureShellSSHUserInfo(mkm.getDecryptedPassword(passwd));
 			session.setUserInfo(userInfo);
-			session.setPassword(textEncryptor.decrypt(passwd));
+			session.setPassword(mkm.getDecryptedPassword(passwd));
 
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.connect(30000);
@@ -231,31 +228,21 @@ public class SecureShellSSH extends WebApp {
 	}
 
 	/**
-	 * @param passwd
-	 *            the passwd to set
+	 * @param passwd the passwd to set       
 	 */
 	public final void setPasswd(String passwd) {
-		setupMainPassword();
-		this.passwd = textEncryptor.encrypt(passwd);
+		this.passwd = mkm.getEncryptedPassword(passwd);
 	}
-
+	
 	/**
-	 * @return the passwd
+	 * getPassword
+	 * @return Encrypted password
 	 */
-	public final String getDecryptedPasswd() {
-		setupMainPassword();
-		return textEncryptor.decrypt(passwd);
-	}
-
-	/**
-	 * setupMainPassword
-	 */
-	public final void setupMainPassword() {
-		String propertiesFile = "meerkat.properties";
-		PropertiesLoader pL = new PropertiesLoader();
-		Properties properties = pL.getPropetiesFromFile(propertiesFile);
-		textEncryptor = new BasicTextEncryptor();
-		textEncryptor.setPassword(properties.getProperty("meerkat.password.master"));
+	public final String getPassword(){
+		if(mkm == null){ //If app loaded from xml
+			mkm = new MasterKeyManager();
+		}
+		return mkm.getDecryptedPassword(passwd);
 	}
 
 }

@@ -55,6 +55,7 @@ import org.meerkat.network.RSS;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.PropertiesLoader;
 import org.meerkat.util.ResourceManager;
 import org.meerkat.util.XStreamMeerkatConfig;
@@ -75,11 +76,11 @@ public class MeerkatMonitor {
 	private static String smtp, smtpUser, smtpPort, smtpSecurity, smtpPass, to, from, subject;
 	private static Integer testPause, webserverPort;
 	private static Boolean testEmailSending, sendEmails, autosaveOnExit, autoLoadOnStart;
-	private static String propertiesFile;
 
 	private static String sessionSaveFile = "meerkatDataSession.mrk";
 	private static String saveFile = "meerkat-session-save.dat";
 
+	private static String propertiesFile = "meerkat.properties";
 	private static String configFile = "meerkat.webapps.xml";
 	private static PropertiesLoader pL;
 	private static Properties properties;
@@ -107,6 +108,7 @@ public class MeerkatMonitor {
 	private static WebAppCollection webAppsCollection = new WebAppCollection();
 	private static AppGroupCollection appGroupCollection = new AppGroupCollection();
 	private static String[] expectedProperties = new String[19];
+	private static MasterKeyManager mkm;
 
 	public MeerkatMonitor() {
 
@@ -190,12 +192,16 @@ public class MeerkatMonitor {
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
 		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "error");
-
+		
 		readProperties();
 		loadWebAppXML();
 		generateGroups();
 		loadEmailProperties();
 		setLookAndFeel();
+		
+		// Create the MasterKeyManager
+		mkm = new MasterKeyManager(propertiesFile, webAppsCollection);
+						
 		startWebServices();
 		startHttpWebServer();
 		createSystray();
@@ -215,7 +221,7 @@ public class MeerkatMonitor {
 		
 		// Setup web server
 		httpWebServer = new HttpServer(webserverPort, version, wsdlUrl, tempWorkingDir);
-		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(properties.getProperty("meerkat.password.master"), webAppsCollection, httpWebServer));	
+		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));	
 	}
 	
 	
@@ -223,7 +229,6 @@ public class MeerkatMonitor {
 	 * readProperties
 	 */
 	private static void readProperties() {
-		propertiesFile = "meerkat.properties";
 		pL = new PropertiesLoader();
 
 		File prop = new File(propertiesFile);
@@ -237,7 +242,7 @@ public class MeerkatMonitor {
 		properties = pL.getPropetiesFromFile(propertiesFile);
 		// Validate required properties
 		pL.propertiesValidator(expectedProperties);
-
+		
 	}
 
 	/**
@@ -266,7 +271,7 @@ public class MeerkatMonitor {
 			}
 
 		} catch (Exception e) {
-			log.warn("Unable to load applications from config xml!");
+			log.warn("Unable to load applications from config xml!", e);
 			log.warn("Considering that is empty.");
 			webAppsCollection = new WebAppCollection();
 		}
@@ -352,7 +357,7 @@ public class MeerkatMonitor {
 	 */
 	private static void createSystray() {
 		// Create the icon tray
-		systray = new SysTrayIcon();
+		systray = new SysTrayIcon(mkm);
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -626,6 +631,8 @@ public class MeerkatMonitor {
 			Iterator<WebApp> i = webAppListCopy.iterator();
 			while (i.hasNext()) {
 				currentWebApp = i.next();
+				currentWebApp.setMasterKeyManager(mkm);
+								
 				// check if the webApp is ready to monit or not - temp created in the gui
 				if (currentWebApp.isActive()) {
 					currentWebAppResponse = new WebAppResponse();

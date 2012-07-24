@@ -31,6 +31,7 @@ import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
@@ -52,9 +53,9 @@ public class OptionsPanelDataBase extends JPanel {
 	JEditorPane editorPane;
 	WebAppResponse testCurrentWebAppResponse;
 	JButton button_test;
-	private String[] dbTypes = { "", "MySQL", "Oracle", "MSSQL", };
+	private String[] dbTypes = { "", SQLService.TYPE_MYSQL, SQLService.TYPE_ORA, SQLService.TYPE_MSSQL };
 	private String selected = dbTypes[0];
-
+	
 	/**
 	 * Create the panel.
 	 */
@@ -120,8 +121,7 @@ public class OptionsPanelDataBase extends JPanel {
 		lblUsername.setBounds(10, 139, 102, 14);
 		add(lblUsername);
 
-		final JTextField textField_username = new JTextField(
-				webApp.getUsername());
+		final JTextField textField_username = new JTextField(webApp.getUsername());
 		textField_username.setBounds(122, 136, 392, 20);
 		add(textField_username);
 		textField_username.setColumns(10);
@@ -131,11 +131,10 @@ public class OptionsPanelDataBase extends JPanel {
 		lblPassword.setBounds(10, 164, 102, 14);
 		add(lblPassword);
 
-		final JTextField textField_password = new JTextField(
-				webApp.getPassword());
-		textField_password.setBounds(122, 161, 392, 20);
-		add(textField_password);
-		textField_password.setColumns(10);
+		final JPasswordField textField_passwd = new JPasswordField(webApp.getPassword()); //Encrypted password
+		textField_passwd.setBounds(122, 161, 392, 20);
+		add(textField_passwd);
+		textField_passwd.setColumns(10);
 
 		// Query
 		JLabel lblQuery = new JLabel("Query");
@@ -147,8 +146,7 @@ public class OptionsPanelDataBase extends JPanel {
 		lbl_expectedResponse.setBounds(10, 259, 102, 14);
 		add(lbl_expectedResponse);
 
-		final JTextField expectedResponse = new JTextField(
-				webApp.getExpectedString());
+		final JTextField expectedResponse = new JTextField(webApp.getExpectedString());
 		expectedResponse.setBounds(122, 256, 392, 20);
 		add(expectedResponse);
 		expectedResponse.setColumns(10);
@@ -189,12 +187,12 @@ public class OptionsPanelDataBase extends JPanel {
 		JLabel lblDbType = new JLabel("DB Type");
 		lblDbType.setBounds(10, 338, 46, 14);
 		add(lblDbType);
-		if (webApp.getDBType().equals("mysql")) {
+		if (webApp.getDBType().equals(SQLService.TYPE_MYSQL)) {
 			comboBox.setSelectedIndex(1);
-		} else if (webApp.getDBType().equals("ora")) {
+		} else if (webApp.getDBType().equals(SQLService.TYPE_ORA)) {
 			comboBox.setSelectedIndex(2);
 		}
-		if (webApp.getDBType().equals("mssql")) {
+		if (webApp.getDBType().equals(SQLService.TYPE_MSSQL)) {
 			comboBox.setSelectedIndex(3);
 		}
 
@@ -212,11 +210,10 @@ public class OptionsPanelDataBase extends JPanel {
 				String new_port = textField_port.getText();
 				String new_db = textField_db.getText();
 				String new_username = textField_username.getText();
-				String new_password = textField_password.getText();
+				String new_password = new String(textField_passwd.getPassword());
 				String new_query = editorPane.getText();
 				String new_expectedResponse = expectedResponse.getText();
-				String new_executeOnOffline = textField_executeOnOffline
-						.getText();
+				String new_executeOnOffline = textField_executeOnOffline.getText();
 				String new_groups = textField_groups.getText();
 
 				if (new_name.equals("") || new_host.equals("")
@@ -243,11 +240,11 @@ public class OptionsPanelDataBase extends JPanel {
 					webApp.setQuery(new_query);
 					webApp.setExpectedString(new_expectedResponse);
 					webApp.setExecuteOnOffline(new_executeOnOffline);
-					if (selected.equalsIgnoreCase("MySQL")) {
+					if (selected.equalsIgnoreCase(SQLService.TYPE_MYSQL)) {
 						webApp.setDBTypeMySQL();
-					} else if (selected.equalsIgnoreCase("Oracle")) {
+					} else if (selected.equalsIgnoreCase(SQLService.TYPE_ORA)) {
 						webApp.setDBTypeORA();
-					} else if (selected.equalsIgnoreCase("MSSQL")) {
+					} else if (selected.equalsIgnoreCase(SQLService.TYPE_MSSQL)) {
 						webApp.setDBTypeMSSQL();
 					}
 
@@ -273,6 +270,8 @@ public class OptionsPanelDataBase extends JPanel {
 		button_delete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				wAppCollection.removeWebApp(webApp);
+				wAppCollection.writeWebAppCollectionDataFile();
+				wAppCollection.saveConfigXMLFile();
 				mainMAppWindow.removeSelectNodeElementFromTree();
 			}
 		});
@@ -288,10 +287,8 @@ public class OptionsPanelDataBase extends JPanel {
 
 		// Test button
 		button_test = new JButton("Test");
-		final Cursor WAIT_CURSOR = Cursor
-				.getPredefinedCursor(Cursor.WAIT_CURSOR);
-		final Cursor DEFAULT_CURSOR = Cursor
-				.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
+		final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
+		final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 		button_test.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				// Disable components

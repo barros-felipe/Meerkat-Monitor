@@ -206,6 +206,8 @@ public class OptionsPanelSocketService extends JPanel {
 		button_delete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				wAppCollection.removeWebApp(webApp);
+				wAppCollection.writeWebAppCollectionDataFile();
+				wAppCollection.saveConfigXMLFile();
 				mainMAppWindow.removeSelectNodeElementFromTree();
 			}
 		});
@@ -214,10 +216,8 @@ public class OptionsPanelSocketService extends JPanel {
 
 		// Test button
 		button_test = new JButton("Test");
-		final Cursor WAIT_CURSOR = Cursor
-				.getPredefinedCursor(Cursor.WAIT_CURSOR);
-		final Cursor DEFAULT_CURSOR = Cursor
-				.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
+		final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
+		final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 		button_test.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				// Disable components
@@ -238,8 +238,7 @@ public class OptionsPanelSocketService extends JPanel {
 							+ "\n\nStatus: Online");
 					p.showMsg();
 				} else {
-					trw = new TestResultWindow("Result for " + webApp.getName()
-							+ ": FAILED!", webApp.getCurrentResponse());
+					trw = new TestResultWindow("Result for " + webApp.getName()+ ": FAILED!", webApp.getCurrentResponse());
 					trw.showUp();
 				}
 

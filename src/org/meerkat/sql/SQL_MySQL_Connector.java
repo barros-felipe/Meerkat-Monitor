@@ -76,8 +76,8 @@ public class SQL_MySQL_Connector {
 					+ ":" + port + "/" + db + "", username, password);
 		} catch (SQLException e) {
 			log.error("SQL Exception getting connection: " + dbMachine + ":"
-					+ port + "/" + db + "", e);
-			result += e.getCause();
+					+ port + "/" + db + ". "+e.getMessage());
+			result += e.getMessage();
 			return result;
 		}
 
@@ -86,8 +86,8 @@ public class SQL_MySQL_Connector {
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
 			log.error("Cannot create Statement: " + dbMachine + ":" + port
-					+ "/" + db + "", e);
-			result += e.getCause();
+					+ "/" + db + ". "+e.getMessage());
+			result += e.getMessage();
 			return result;
 		}
 
@@ -107,8 +107,8 @@ public class SQL_MySQL_Connector {
 			}
 		} catch (SQLException e) {
 			log.error("Cannot execute query (" + dbMachine + ":" + port + "/"
-					+ db + ")", e);
-			result += e.getCause();
+					+ db + ") "+e.getMessage());
+			result += e.getMessage();
 			return result;
 		} finally {
 			try {

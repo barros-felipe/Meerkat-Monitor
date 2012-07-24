@@ -29,12 +29,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
 import org.meerkat.httpServer.HttpServer;
+import org.meerkat.util.MasterKeyManager;
 
 public class PropertiesOptionsMain extends JFrame {
 
 	private static final long serialVersionUID = -2793847259821897518L;
 	private JPanel contentPane;
 	private HttpServer httpServer;
+	private MasterKeyManager mkm;
 
 	/**
 	 * Launch the application.
@@ -43,8 +45,7 @@ public class PropertiesOptionsMain extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					PropertiesOptionsMain frame = new PropertiesOptionsMain(
-							httpServer);
+					PropertiesOptionsMain frame = new PropertiesOptionsMain(mkm, httpServer);
 					frame.setLocationRelativeTo(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -57,7 +58,8 @@ public class PropertiesOptionsMain extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public PropertiesOptionsMain(HttpServer httpServer) {
+	public PropertiesOptionsMain(MasterKeyManager mkm, HttpServer httpServer) {
+		this.mkm = mkm;
 		this.httpServer = httpServer;
 		setAlwaysOnTop(true);
 		setTitle("Settings");
@@ -66,8 +68,7 @@ public class PropertiesOptionsMain extends JFrame {
 		setBounds(100, 100, 620, 480);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setIconImage(Toolkit.getDefaultToolkit().getImage(
-				MainWindow.class.getResource("/resources/tray_icon.gif")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/resources/tray_icon.gif")));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
@@ -78,10 +79,8 @@ public class PropertiesOptionsMain extends JFrame {
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		scrollPane.setViewportView(tabbedPane);
 
-		tabbedPane.addTab("General", null, new PropertiesOptionsPanelGeneral(
-				this, httpServer), null);
-		tabbedPane.addTab("Email", null, new PropertiesOptionsPanelEmail(this),
-				null);
+		tabbedPane.addTab("General", null, new PropertiesOptionsPanelGeneral(mkm, this, httpServer), null);
+		tabbedPane.addTab("Email", null, new PropertiesOptionsPanelEmail(this), null);
 
 	}
 

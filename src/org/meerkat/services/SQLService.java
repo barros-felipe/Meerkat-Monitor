@@ -24,22 +24,27 @@ import org.meerkat.sql.SQL_MSSQL_Connector;
 import org.meerkat.sql.SQL_MySQL_Connector;
 import org.meerkat.sql.SQL_ORA_Connector;
 import org.meerkat.util.Counter;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppResponse;
+
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 public class SQLService extends WebApp {
 
 	private static Logger log = Logger.getLogger(SQLService.class);
 	private static final long serialVersionUID = 1L;
-	private static String mysql = "mysql";
-	private static String ora = "ora";
-	private static String mssql = "mssql";
+	public static String TYPE_MYSQL = "MYSQL";
+	public static String TYPE_ORA = "ORA";
+	public static String TYPE_MSSQL = "MSSQL";
 	private String dbMachine;
 	private String port;
-	private String db;
+	private String dbName;
 	private String username;
 	private String password;
 	private String query;
 	private String dbType = "";
+	@XStreamOmitField
+	MasterKeyManager mkm;
 
 	/**
 	 * ORA SQLService
@@ -53,16 +58,17 @@ public class SQLService extends WebApp {
 	 * @param username
 	 * @param password
 	 */
-	public SQLService(String name, String query, String expectedResponse,
-			String dbMachine, String port, String db, String username,
+	public SQLService(MasterKeyManager mkm, String name, String query, String expectedResponse,
+			String dbMachine, String port, String dbName, String username,
 			String password) {
 		super(name, dbMachine, expectedResponse);
+		this.mkm = mkm;
 		this.dbMachine = dbMachine;
 		this.query = query;
 		this.port = port;
-		this.db = db;
+		this.dbName = dbName;
 		this.username = username;
-		this.password = password;
+		setPassword(password);
 		this.setTypeSQL();
 	}
 
@@ -77,14 +83,15 @@ public class SQLService extends WebApp {
 	 * @param username
 	 * @param password
 	 */
-	public SQLService(String name, String query, String expectedResponse,
+	public SQLService(MasterKeyManager mkm, String name, String query, String expectedResponse,
 			String dbMachine, String port, String username, String password) {
 		super(name, dbMachine, expectedResponse);
+		this.mkm = mkm;
 		this.dbMachine = dbMachine;
 		this.query = query;
 		this.port = port;
 		this.username = username;
-		this.password = password;
+		setPassword(password);
 		this.setTypeSQL();
 	}
 
@@ -100,23 +107,24 @@ public class SQLService extends WebApp {
 	 * checkWebAppStatus
 	 */
 	public final WebAppResponse checkWebAppStatus() {
+		if(mkm == null){
+			mkm = this.getMasterKeyManager();
+		}
+		
 		// Set the response at this point to empty in case of no response at all
 		setCurrentResponse("");
 
 		Object connector = null;
 
-		if (this.getDBType().equals(ora)) {
+		if (this.getDBType().equals(TYPE_ORA)) {
 			// Create an instance of SQL_ORA_Connector
-			connector = new SQL_ORA_Connector(dbMachine, port, db, username,
-					password);
-		} else if (this.getDBType().equals(mysql)) {
+			connector = new SQL_ORA_Connector(dbMachine, port, dbName, username, mkm.getDecryptedPassword(password));
+		} else if (this.getDBType().equals(TYPE_MYSQL)) {
 			// Create an instance of SQL_MySQL_Connector
-			connector = new SQL_MySQL_Connector(dbMachine, port, db, username,
-					password);
-		} else if (this.getDBType().equals(mssql)) {
+			connector = new SQL_MySQL_Connector(dbMachine, port, dbName, username, mkm.getDecryptedPassword(password));
+		} else if (this.getDBType().equals(TYPE_MSSQL)) {
 			// Create an instance of SQL_MySQL_Connector
-			connector = new SQL_MSSQL_Connector(dbMachine, port, db, username,
-					password);
+			connector = new SQL_MSSQL_Connector(dbMachine, port, dbName, username, mkm.getDecryptedPassword(password));
 		}
 
 		WebAppResponse response = new WebAppResponse();
@@ -131,15 +139,12 @@ public class SQLService extends WebApp {
 
 		// Get the response
 		try {
-			if (this.getDBType().equals(ora)) {
-				setCurrentResponse(((SQL_ORA_Connector) connector)
-						.executeQuery(this.getQuery()));
-			} else if (this.getDBType().equals(mysql)) {
-				setCurrentResponse(((SQL_MySQL_Connector) connector)
-						.executeQuery(this.getQuery()));
-			} else if (this.getDBType().equals(mssql)) {
-				setCurrentResponse(((SQL_MSSQL_Connector) connector)
-						.executeQuery(this.getQuery()));
+			if (this.getDBType().equals(TYPE_ORA)) {
+				setCurrentResponse(((SQL_ORA_Connector) connector).executeQuery(this.getQuery()));
+			} else if (this.getDBType().equals(TYPE_MYSQL)) {
+				setCurrentResponse(((SQL_MySQL_Connector) connector).executeQuery(this.getQuery()));
+			} else if (this.getDBType().equals(TYPE_MSSQL)) {
+				setCurrentResponse(((SQL_MSSQL_Connector) connector).executeQuery(this.getQuery()));
 			}
 		} catch (Exception e) {
 			log.error("Cannot execute query! " + this.getName(), e);
@@ -250,21 +255,21 @@ public class SQLService extends WebApp {
 	 * setDBTypeORA
 	 */
 	public final void setDBTypeORA() {
-		this.dbType = ora;
+		this.dbType = TYPE_ORA;
 	}
 
 	/**
 	 * setDBTypeMySQL
 	 */
 	public final void setDBTypeMySQL() {
-		this.dbType = mysql;
+		this.dbType = TYPE_MYSQL;
 	}
 
 	/**
 	 * setDBTypeMSSQL
 	 */
 	public final void setDBTypeMSSQL() {
-		this.dbType = mssql;
+		this.dbType = TYPE_MSSQL;
 	}
 
 	/**
@@ -318,7 +323,7 @@ public class SQLService extends WebApp {
 	 * @return
 	 */
 	public final String getDB() {
-		return db;
+		return dbName;
 	}
 
 	/**
@@ -327,7 +332,7 @@ public class SQLService extends WebApp {
 	 * @param dbs
 	 */
 	public final void setDB(String dbs) {
-		db = dbs;
+		dbName = dbs;
 	}
 
 	/**
@@ -354,7 +359,11 @@ public class SQLService extends WebApp {
 	 * @return
 	 */
 	public final String getPassword() {
-		return password;
+		if(mkm == null){ // If app loaded from xml
+			mkm = new MasterKeyManager();
+		}
+		
+		return mkm.getDecryptedPassword(password);
 	}
 
 	/**
@@ -363,7 +372,7 @@ public class SQLService extends WebApp {
 	 * @param passwd
 	 */
 	public final void setPassword(String passwd) {
-		password = passwd;
+		this.password = mkm.getEncryptedPassword(passwd);
 	}
 
 	/**

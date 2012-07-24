@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.util.ImageUtil;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppCollection;
 
 public class SysTrayIcon {
@@ -55,11 +56,13 @@ public class SysTrayIcon {
 	private WebAppCollection webAppsCollection;
 	private AppGroupCollection groupsCollection;
 	private HttpServer httpServer;
+	private MasterKeyManager mkm;
 
 	/**
 	 * SysTrayIcon
 	 */
-	public SysTrayIcon() {
+	public SysTrayIcon(final MasterKeyManager mKm) {
+		this.mkm = mKm;
 		InetAddress netAddr;
 		try {
 			netAddr = InetAddress.getLocalHost();
@@ -103,8 +106,7 @@ public class SysTrayIcon {
 		// Double-click default event
 		trayIcon.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				MainWindow appWin = new MainWindow(webAppsCollection,
-						groupsCollection, httpServer);
+				MainWindow appWin = new MainWindow(mkm, webAppsCollection, groupsCollection, httpServer);
 				appWin.showUp();
 			}
 		});
@@ -112,8 +114,7 @@ public class SysTrayIcon {
 		// Open main app window
 		ActionListener openAppWindow = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				MainWindow appWin = new MainWindow(webAppsCollection,
-						groupsCollection, httpServer);
+				MainWindow appWin = new MainWindow(mkm, webAppsCollection, groupsCollection, httpServer);
 				appWin.showUp();
 			}
 		};

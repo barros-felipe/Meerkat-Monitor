@@ -85,13 +85,13 @@ public class XmlFormatter implements Serializable {
 			is.setEncoding("UTF-8");
 			return db.parse(is);
 		} catch (ParserConfigurationException e) {
-			log.error("Parsing XML ", e);
+			log.error("ParserConfigurationException Parsing XML ");
 			return null;
 		} catch (SAXException e) {
-			log.error("Parsing XML ", e);
+			log.error("SAXException Parsing XML");
 			return null;
 		} catch (IOException e) {
-			log.error("Parsing XML ", e);
+			log.error("IOException Parsing XML ");
 			return null;
 		}
 	}

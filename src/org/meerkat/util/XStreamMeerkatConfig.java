@@ -42,8 +42,7 @@ public class XStreamMeerkatConfig {
 		xstream.alias("webservice", WebService.class);
 
 		xstream.alias("meerkat-monitor", WebAppCollection.class);
-		xstream.addImplicitCollection(WebAppCollection.class,
-				"webAppsCollection");
+		xstream.addImplicitCollection(WebAppCollection.class, "webAppsCollection");
 	}
 
 	/**

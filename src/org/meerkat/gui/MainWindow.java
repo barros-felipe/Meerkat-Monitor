@@ -70,6 +70,7 @@ import org.meerkat.services.SecureShellSSH;
 import org.meerkat.services.SocketService;
 import org.meerkat.services.WebApp;
 import org.meerkat.services.WebService;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppCollection;
 
 public class MainWindow {
@@ -79,6 +80,7 @@ public class MainWindow {
 	private WebAppCollection webCollection;
 	private AppGroupCollection groupsCollection;
 	private HttpServer httpServer;
+	private MasterKeyManager mkm;
 	private JTree appTree;
 	private JTabbedPane tabbedPane;
 	private JPanel appListJpanelContainer;
@@ -105,8 +107,7 @@ public class MainWindow {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					window = new MainWindow(webCollection, groupsCollection,
-							httpServer);
+					window = new MainWindow(mkm, webCollection, groupsCollection,httpServer);
 					window.frmMeerkatMonitor.setLocationRelativeTo(null);
 					window.frmMeerkatMonitor.setVisible(true);
 				} catch (Exception e) {
@@ -119,8 +120,8 @@ public class MainWindow {
 	/**
 	 * Create the application.
 	 */
-	public MainWindow(WebAppCollection appCollection,
-			AppGroupCollection groupsCollection, HttpServer httpServer) {
+	public MainWindow(MasterKeyManager mkm, WebAppCollection appCollection, AppGroupCollection groupsCollection, HttpServer httpServer) {
+		this.mkm = mkm;
 		this.webCollection = appCollection;
 		this.groupsCollection = groupsCollection;
 		this.httpServer = httpServer;
@@ -135,20 +136,16 @@ public class MainWindow {
 		frmMeerkatMonitor = new JFrame();
 		frmMeerkatMonitor.setTitle("Meerkat Monitor - Network Monitor Tool");
 		frmMeerkatMonitor.setResizable(false);
-		frmMeerkatMonitor.setIconImage(Toolkit.getDefaultToolkit().getImage(
-				MainWindow.class.getResource("/resources/tray_icon.gif")));
+		frmMeerkatMonitor.setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/resources/tray_icon.gif")));
 		frmMeerkatMonitor.setBounds(100, 100, 800, 700);
 		frmMeerkatMonitor.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		JMenuBar menuBar = new JMenuBar();
 		frmMeerkatMonitor.setJMenuBar(menuBar);
 		frmMeerkatMonitor.getContentPane().setLayout(null);
-		KeyStroke keystrokeF5 = KeyStroke
-				.getKeyStroke(KeyEvent.VK_F5, 0, false);
-		KeyStroke keystrokeF6 = KeyStroke
-				.getKeyStroke(KeyEvent.VK_F6, 0, false);
-		KeyStroke keystrokeF10 = KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0,
-				false);
+		KeyStroke keystrokeF5 = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0, false);
+		KeyStroke keystrokeF6 = KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0, false);
+		KeyStroke keystrokeF10 = KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0, false);
 
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
@@ -203,8 +200,7 @@ public class MainWindow {
 		mntmProperties.setAccelerator(keystrokeF10);
 		mntmProperties.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				PropertiesOptionsMain ped = new PropertiesOptionsMain(
-						httpServer);
+				PropertiesOptionsMain ped = new PropertiesOptionsMain(mkm, httpServer);
 				ped.showUp();
 			}
 		});
@@ -254,8 +250,7 @@ public class MainWindow {
 		tabbedPane.setBounds(10, 11, 245, 545);
 		appListJpanelContainer.add(tabbedPane);
 
-		appOptionsPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null,
-				null));
+		appOptionsPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null,null));
 		appOptionsPanel.setBounds(260, 11, 524, 545);
 		appListJpanelContainer.add(appOptionsPanel);
 		appOptionsPanel.setLayout(null);
@@ -296,8 +291,7 @@ public class MainWindow {
 		frmMeerkatMonitor.getContentPane().add(panel);
 
 		// Footer
-		final JLabel footer = new JLabel("Meerkat Monitor v."
-				+ webCollection.getAppVersion() + " - Open Source GPL");
+		final JLabel footer = new JLabel("Meerkat Monitor v."+ webCollection.getAppVersion() + " - Open Source GPL");
 		footer.setBounds(278, 0, 237, 14);
 		footer.setForeground(new Color(0, 51, 153));
 		footer.setFont(new Font("Arial", Font.PLAIN, 11));
@@ -313,7 +307,6 @@ public class MainWindow {
 			}
 		});
 		panel.setLayout(null);
-
 		panel.add(footer);
 
 		// Refresh and populate
@@ -350,19 +343,18 @@ public class MainWindow {
 			DefaultMutableTreeNode webApp = new DefaultMutableTreeNode(
 					currentWebApp.getName());
 
-			if (currentWebApp.getType().equals("webapp")) {
+			if (currentWebApp.getType().equals(WebApp.TYPE_WEBAPP)) {
 				groupWebApps.add(webApp);
-			} else if (currentWebApp.getType().equals("webservice")) {
+			} else if (currentWebApp.getType().equals(WebApp.TYPE_WEBSERVICE)) {
 				groupWebServices.add(webApp);
-			} else if (currentWebApp.getType().equals("sql")) {
+			} else if (currentWebApp.getType().equals(WebApp.TYPE_SQL)) {
 				groupDatabases.add(webApp);
-			} else if (currentWebApp.getType().equals("socketservice")) {
+			} else if (currentWebApp.getType().equals(WebApp.TYPE_SOCKET)) {
 				groupSocketServices.add(webApp);
-			} else if (currentWebApp.getType().equals("ssh")) {
+			} else if (currentWebApp.getType().equals(WebApp.TYPE_SSH)) {
 				groupSSHServices.add(webApp);
 			} else {
-				log.error("Failed to find app type of "
-						+ currentWebApp.getName());
+				log.error("Failed to find type of app: "+ currentWebApp.getName());
 			}
 
 		}
@@ -370,136 +362,124 @@ public class MainWindow {
 		meerkatModel = new DefaultTreeModel(root);
 		appTree = new JTree(meerkatModel);
 		appTree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION); // Control tree item
-															// selection
+				TreeSelectionModel.SINGLE_TREE_SELECTION); // Control tree item selection
 		appTree.addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent e) {
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) appTree
-						.getLastSelectedPathComponent();
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) appTree.getLastSelectedPathComponent();
 				selectedNode = node;
 				if (selectedNode == null) {
 					selectedNode = node;
 				} else
-				// Check if is a main parent node (group) or a leaf (webApp)
-				if (selectedNode.getPath().length <= 2) {
-					// show the app logo
-					appOptionsPanel.removeAll();
-					appOptionsPanel.add(mainFrameAppLogo());
-					appOptionsPanel.add(mainFrameAppVersion());
-					appOptionsPanel.add(mainFrameAppIcon());
-					appOptionsPanel.repaint();
-
-					wsOptionsPanel.removeAll();
-					wsOptionsPanel.add(mainFrameAppLogo());
-					wsOptionsPanel.add(mainFrameAppVersion());
-					wsOptionsPanel.add(mainFrameAppIcon());
-					wsOptionsPanel.repaint();
-
-					sqlOptionsPanel.removeAll();
-					sqlOptionsPanel.add(mainFrameAppLogo());
-					sqlOptionsPanel.add(mainFrameAppVersion());
-					sqlOptionsPanel.add(mainFrameAppIcon());
-					sqlOptionsPanel.repaint();
-
-					socketServiceOptionsPanel.removeAll();
-					socketServiceOptionsPanel.add(mainFrameAppLogo());
-					socketServiceOptionsPanel.add(mainFrameAppVersion());
-					socketServiceOptionsPanel.add(mainFrameAppIcon());
-					socketServiceOptionsPanel.repaint();
-
-					sshOptionsPanel.removeAll();
-					sshOptionsPanel.add(mainFrameAppLogo());
-					sshOptionsPanel.add(mainFrameAppVersion());
-					sshOptionsPanel.add(mainFrameAppIcon());
-					sshOptionsPanel.repaint();
-
-				} else {
-					/* retrieve the node that was selected */
-					WebApp clickedWebAppLeaf = webCollection
-							.getWebAppByName(node.getUserObject().toString());
-
-					if (clickedWebAppLeaf != null) { // In case of select father
-														// node
-						/* React to the node selection. */
-						if (clickedWebAppLeaf.getType().equalsIgnoreCase(
-								"webapp")) {
-							appListJpanelContainer.remove(appOptionsPanel);
-							appListJpanelContainer.remove(wsOptionsPanel);
-							appListJpanelContainer.remove(sqlOptionsPanel);
-							appListJpanelContainer
-									.remove(socketServiceOptionsPanel);
-							appListJpanelContainer.remove(sshOptionsPanel);
-
-							appOptionsPanel = new OptionsPanelWebApp(
-									clickedWebAppLeaf, webCollection, window);
-							appListJpanelContainer.add(appOptionsPanel);
-
-						} else if (clickedWebAppLeaf.getType()
-								.equalsIgnoreCase("webservice")) {
-							appListJpanelContainer.remove(appOptionsPanel);
-							appListJpanelContainer.remove(wsOptionsPanel);
-							appListJpanelContainer.remove(sqlOptionsPanel);
-							appListJpanelContainer
-									.remove(socketServiceOptionsPanel);
-							appListJpanelContainer.remove(sshOptionsPanel);
-
-							wsOptionsPanel = new OptionsPanelWebService(
-									(WebService) clickedWebAppLeaf,
-									webCollection, window);
-							appListJpanelContainer.add(wsOptionsPanel);
-							wsOptionsPanel.revalidate();
-							wsOptionsPanel.repaint();
-						} else if (clickedWebAppLeaf.getType()
-								.equalsIgnoreCase("sql")) {
-							appListJpanelContainer.remove(appOptionsPanel);
-							appListJpanelContainer.remove(wsOptionsPanel);
-							appListJpanelContainer.remove(sqlOptionsPanel);
-							appListJpanelContainer
-									.remove(socketServiceOptionsPanel);
-							appListJpanelContainer.remove(sshOptionsPanel);
-
-							sqlOptionsPanel = new OptionsPanelDataBase(
-									(SQLService) clickedWebAppLeaf,
-									webCollection, window);
-							appListJpanelContainer.add(sqlOptionsPanel);
-							sqlOptionsPanel.revalidate();
-							sqlOptionsPanel.repaint();
-						} else if (clickedWebAppLeaf.getType()
-								.equalsIgnoreCase("socketservice")) {
-							appListJpanelContainer.remove(appOptionsPanel);
-							appListJpanelContainer.remove(wsOptionsPanel);
-							appListJpanelContainer.remove(sqlOptionsPanel);
-							appListJpanelContainer
-									.remove(socketServiceOptionsPanel);
-							appListJpanelContainer.remove(sshOptionsPanel);
-
-							socketServiceOptionsPanel = new OptionsPanelSocketService(
-									(SocketService) clickedWebAppLeaf,
-									webCollection, window);
-							appListJpanelContainer
-									.add(socketServiceOptionsPanel);
-							socketServiceOptionsPanel.revalidate();
-							socketServiceOptionsPanel.repaint();
-						} else if (clickedWebAppLeaf.getType()
-								.equalsIgnoreCase("ssh")) {
-							appListJpanelContainer.remove(appOptionsPanel);
-							appListJpanelContainer.remove(wsOptionsPanel);
-							appListJpanelContainer.remove(sqlOptionsPanel);
-							appListJpanelContainer
-									.remove(socketServiceOptionsPanel);
-							appListJpanelContainer.remove(sshOptionsPanel);
-
-							sshOptionsPanel = new OptionsPanelSSH(
-									(SecureShellSSH) clickedWebAppLeaf,
-									webCollection, window);
-							appListJpanelContainer.add(sshOptionsPanel);
-							sshOptionsPanel.revalidate();
-							sshOptionsPanel.repaint();
-						}
-
+					// Check if is a main parent node (group) or a leaf (webApp)
+					if (selectedNode.getPath().length <= 2) {
+						// show the app logo
+						appOptionsPanel.removeAll();
+						appOptionsPanel.add(mainFrameAppLogo());
+						appOptionsPanel.add(mainFrameAppVersion());
+						appOptionsPanel.add(mainFrameAppIcon());
 						appOptionsPanel.repaint();
+
+						wsOptionsPanel.removeAll();
+						wsOptionsPanel.add(mainFrameAppLogo());
+						wsOptionsPanel.add(mainFrameAppVersion());
+						wsOptionsPanel.add(mainFrameAppIcon());
+						wsOptionsPanel.repaint();
+
+						sqlOptionsPanel.removeAll();
+						sqlOptionsPanel.add(mainFrameAppLogo());
+						sqlOptionsPanel.add(mainFrameAppVersion());
+						sqlOptionsPanel.add(mainFrameAppIcon());
+						sqlOptionsPanel.repaint();
+
+						socketServiceOptionsPanel.removeAll();
+						socketServiceOptionsPanel.add(mainFrameAppLogo());
+						socketServiceOptionsPanel.add(mainFrameAppVersion());
+						socketServiceOptionsPanel.add(mainFrameAppIcon());
+						socketServiceOptionsPanel.repaint();
+
+						sshOptionsPanel.removeAll();
+						sshOptionsPanel.add(mainFrameAppLogo());
+						sshOptionsPanel.add(mainFrameAppVersion());
+						sshOptionsPanel.add(mainFrameAppIcon());
+						sshOptionsPanel.repaint();
+
+					} else {
+						/* retrieve the node that was selected */
+						WebApp clickedWebAppLeaf = webCollection.getWebAppByName(node.getUserObject().toString());
+
+						if (clickedWebAppLeaf != null) { // In case of select father node
+							/* React to the node selection. */
+							if (clickedWebAppLeaf.getType().equalsIgnoreCase(WebApp.TYPE_WEBAPP)) {
+								appListJpanelContainer.remove(appOptionsPanel);
+								appListJpanelContainer.remove(wsOptionsPanel);
+								appListJpanelContainer.remove(sqlOptionsPanel);
+								appListJpanelContainer.remove(socketServiceOptionsPanel);
+								appListJpanelContainer.remove(sshOptionsPanel);
+
+								appOptionsPanel = new OptionsPanelWebApp(clickedWebAppLeaf, webCollection, window);
+								appListJpanelContainer.add(appOptionsPanel);
+
+							} else if (clickedWebAppLeaf.getType().equalsIgnoreCase(WebApp.TYPE_WEBSERVICE)) {
+								appListJpanelContainer.remove(appOptionsPanel);
+								appListJpanelContainer.remove(wsOptionsPanel);
+								appListJpanelContainer.remove(sqlOptionsPanel);
+								appListJpanelContainer.remove(socketServiceOptionsPanel);
+								appListJpanelContainer.remove(sshOptionsPanel);
+
+								wsOptionsPanel = new OptionsPanelWebService(
+										(WebService) clickedWebAppLeaf,
+										webCollection, window);
+								appListJpanelContainer.add(wsOptionsPanel);
+								wsOptionsPanel.revalidate();
+								wsOptionsPanel.repaint();
+							} else if (clickedWebAppLeaf.getType().equalsIgnoreCase(WebApp.TYPE_SQL)) {
+								appListJpanelContainer.remove(appOptionsPanel);
+								appListJpanelContainer.remove(wsOptionsPanel);
+								appListJpanelContainer.remove(sqlOptionsPanel);
+								appListJpanelContainer
+								.remove(socketServiceOptionsPanel);
+								appListJpanelContainer.remove(sshOptionsPanel);
+
+								sqlOptionsPanel = new OptionsPanelDataBase(
+										(SQLService) clickedWebAppLeaf,
+										webCollection, window);
+								appListJpanelContainer.add(sqlOptionsPanel);
+								sqlOptionsPanel.revalidate();
+								sqlOptionsPanel.repaint();
+							} else if (clickedWebAppLeaf.getType().equalsIgnoreCase(WebApp.TYPE_SOCKET)) {
+								appListJpanelContainer.remove(appOptionsPanel);
+								appListJpanelContainer.remove(wsOptionsPanel);
+								appListJpanelContainer.remove(sqlOptionsPanel);
+								appListJpanelContainer
+								.remove(socketServiceOptionsPanel);
+								appListJpanelContainer.remove(sshOptionsPanel);
+
+								socketServiceOptionsPanel = new OptionsPanelSocketService(
+										(SocketService) clickedWebAppLeaf,
+										webCollection, window);
+								appListJpanelContainer
+								.add(socketServiceOptionsPanel);
+								socketServiceOptionsPanel.revalidate();
+								socketServiceOptionsPanel.repaint();
+							} else if (clickedWebAppLeaf.getType().equalsIgnoreCase(WebApp.TYPE_SSH)) {
+								appListJpanelContainer.remove(appOptionsPanel);
+								appListJpanelContainer.remove(wsOptionsPanel);
+								appListJpanelContainer.remove(sqlOptionsPanel);
+								appListJpanelContainer
+								.remove(socketServiceOptionsPanel);
+								appListJpanelContainer.remove(sshOptionsPanel);
+
+								sshOptionsPanel = new OptionsPanelSSH(
+										(SecureShellSSH) clickedWebAppLeaf,
+										webCollection, window);
+								appListJpanelContainer.add(sshOptionsPanel);
+								sshOptionsPanel.revalidate();
+								sshOptionsPanel.repaint();
+							}
+
+							appOptionsPanel.repaint();
+						}
 					}
-				}
 			}
 		});
 		appTree.setEditable(true);
@@ -572,8 +552,7 @@ public class MainWindow {
 	 */
 	private final JLabel mainFrameAppLogo() {
 		JLabel meerkatLogo = new JLabel("");
-		meerkatLogo.setIcon(new ImageIcon(MainWindow.class
-				.getResource("/resources/meerkat.png")));
+		meerkatLogo.setIcon(new ImageIcon(MainWindow.class.getResource("/resources/meerkat.png")));
 		meerkatLogo.setBounds(142, 67, 260, 30);
 
 		return meerkatLogo;
@@ -598,8 +577,7 @@ public class MainWindow {
 	 */
 	private final JLabel mainFrameAppIcon() {
 		JLabel icon = new JLabel("");
-		icon.setIcon(new ImageIcon(MainWindow.class
-				.getResource("/resources/meerkat-small.png")));
+		icon.setIcon(new ImageIcon(MainWindow.class.getResource("/resources/meerkat-small.png")));
 		icon.setBounds(244, 144, 43, 93);
 
 		return icon;
@@ -730,7 +708,7 @@ public class MainWindow {
 			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			setIconImage(Toolkit.getDefaultToolkit().getImage(
 					SimpleTextEditor.class
-							.getResource("/resources/tray_icon.gif")));
+					.getResource("/resources/tray_icon.gif")));
 			setTitle("Add New");
 			setBounds(100, 100, 239, 104);
 			contentPane = new JPanel();
@@ -773,8 +751,7 @@ public class MainWindow {
 								.getName());
 						groupWebServices.add(dmtnApp);
 					} else if (selected.equalsIgnoreCase(appTypes[2])) {
-						SQLService newWebApp = new SQLService("Untitled" + r,
-								"", "", "", "", "", "", "");
+						SQLService newWebApp = new SQLService(mkm, "Untitled" + r, "", "", "", "", "", "", "");
 						newWebApp.setActive(false);
 						newWebApp.setTempWorkingDir(wac.getTmpDir());
 						wac.addWebApp(newWebApp);
@@ -791,8 +768,7 @@ public class MainWindow {
 								.getName());
 						groupSocketServices.add(dmtnApp);
 					} else if (selected.equalsIgnoreCase(appTypes[4])) {
-						SecureShellSSH newWebApp = new SecureShellSSH(
-								"Untitled" + r, "", "", "", "", "", "");
+						SecureShellSSH newWebApp = new SecureShellSSH(mkm, "Untitled" + r, "", "", "", "", "", "");
 						newWebApp.setActive(false);
 						newWebApp.setTempWorkingDir(wac.getTmpDir());
 						wac.addWebApp(newWebApp);

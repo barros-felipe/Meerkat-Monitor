@@ -33,6 +33,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
 import org.meerkat.services.WebService;
+import org.meerkat.util.XmlFormatter;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppResponse;
 
@@ -214,6 +215,8 @@ public class OptionsPanelWebService extends JPanel {
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				wAppCollection.removeWebApp(webApp);
+				wAppCollection.writeWebAppCollectionDataFile();
+				wAppCollection.saveConfigXMLFile();
 				mainMAppWindow.removeSelectNodeElementFromTree();
 			}
 		});
@@ -241,13 +244,15 @@ public class OptionsPanelWebService extends JPanel {
 
 				SimplePopup p;
 				TestResultWindow trw;
+				XmlFormatter xmlf = new XmlFormatter();
 				if (testCurrentWebAppResponse.isOnline()) {
 					p = new SimplePopup("Result for " + webApp.getName()
 							+ "\n\nStatus: Online");
 					p.showMsg();
 				} else {
+					String formattedResponse = xmlf.format(webApp.getCurrentResponse());
 					trw = new TestResultWindow("Result for " + webApp.getName()
-							+ ": FAILED!", webApp.getCurrentResponse());
+							+ ": FAILED!", formattedResponse);
 					trw.showUp();
 				}
 

@@ -19,6 +19,7 @@
 
 package org.meerkat.gui;
 
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Properties;
@@ -31,12 +32,16 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HttpServer;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.PropertiesLoader;
 
 public class PropertiesOptionsPanelGeneral extends JPanel {
 
 	private static final long serialVersionUID = -4770982518031397455L;
+	private static Logger log = Logger.getLogger(PropertiesOptionsPanelGeneral.class);
+		
 	private Properties prop;
 	private JTextField textField_pauseMinutes;
 	private JTextField textField_webServerPort;
@@ -54,8 +59,7 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public PropertiesOptionsPanelGeneral(final JFrame jfather,
-			final HttpServer hserver) {
+	public PropertiesOptionsPanelGeneral(final MasterKeyManager mkm, final JFrame jfather, final HttpServer hserver) {
 		this.httpServer = hserver;
 		final PropertiesLoader pl = new PropertiesLoader();
 		prop = pl.getPropetiesFromFile(propertiesFile);
@@ -112,8 +116,7 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		checkBox_loadSessionStart.setBounds(216, 84, 97, 23);
 		add(checkBox_loadSessionStart);
 
-		loadSessionStart = Boolean.parseBoolean(prop
-				.getProperty("meerkat.autoload.start"));
+		loadSessionStart = Boolean.parseBoolean(prop.getProperty("meerkat.autoload.start"));
 		if (loadSessionStart) {
 			checkBox_loadSessionStart.setSelected(true);
 		}
@@ -128,8 +131,7 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		checkBox_showGroupsGauge.setBounds(216, 109, 97, 23);
 		add(checkBox_showGroupsGauge);
 
-		showGroupsGauge = Boolean.parseBoolean(prop
-				.getProperty("meerkat.dashboard.gauge"));
+		showGroupsGauge = Boolean.parseBoolean(prop.getProperty("meerkat.dashboard.gauge"));
 		if (showGroupsGauge) {
 			checkBox_showGroupsGauge.setSelected(true);
 		}
@@ -144,21 +146,19 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		checkBox_remoteconfig.setBounds(216, 134, 97, 23);
 		add(checkBox_remoteconfig);
 
-		boolean remoteconfig = Boolean.parseBoolean(prop
-				.getProperty("meerkat.webserver.rconfig"));
+		boolean remoteconfig = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.rconfig"));
 		if (remoteconfig) {
 			checkBox_remoteconfig.setSelected(true);
 		}
 		add(checkBox_remoteconfig);
 
 		// Master Key (encrypt passwords)
-		JLabel lblMasterPasswordencrypt = new JLabel(
-				"Master Key (encrypt passwords)");
+		JLabel lblMasterPasswordencrypt = new JLabel("Master Key (encrypt passwords)");
 		lblMasterPasswordencrypt.setBounds(10, 163, 200, 14);
 		add(lblMasterPasswordencrypt);
 
-		textField_masterPasswd = new JPasswordField(
-				prop.getProperty("meerkat.password.master"));
+		//textField_masterPasswd = new JPasswordField(prop.getProperty("meerkat.password.master"));
+		textField_masterPasswd = new JPasswordField(mkm.getMasterKey());
 		textField_masterPasswd.setBounds(220, 160, 86, 20);
 		add(textField_masterPasswd);
 		textField_masterPasswd.setColumns(10);
@@ -167,30 +167,34 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		lblNewLabel_1.setBounds(316, 163, 159, 14);
 		add(lblNewLabel_1);
 
+		final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
+		final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 		// Save button
-		JButton btnSave = new JButton("Save");
+		final JButton btnSave = new JButton("Save");
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				
+				btnSave.setEnabled(false);
+				setCursor(WAIT_CURSOR);
+				
 				// TODO validate input!
-				prop.setProperty("meerkat.monit.test.time",
-						textField_pauseMinutes.getText());
-				prop.setProperty("meerkat.webserver.port",
-						textField_webServerPort.getText());
-				prop.setProperty("meerkat.autosave.exit",
-						String.valueOf(checkBox_saveSessionExit.isSelected()));
-				prop.setProperty("meerkat.autoload.start",
-						String.valueOf(checkBox_loadSessionStart.isSelected()));
-				prop.setProperty("meerkat.dashboard.gauge",
-						String.valueOf(checkBox_showGroupsGauge.isSelected()));
-				prop.setProperty("meerkat.webserver.rconfig",
-						String.valueOf(checkBox_remoteconfig.isSelected()));
-				prop.setProperty("meerkat.password.master",
-						String.valueOf(textField_masterPasswd.getPassword()));
-
-				pl.writePropertiesToFile(prop, propertiesFile);
+				prop.setProperty("meerkat.monit.test.time", textField_pauseMinutes.getText());
+				prop.setProperty("meerkat.webserver.port", textField_webServerPort.getText());
+				prop.setProperty("meerkat.autosave.exit", String.valueOf(checkBox_saveSessionExit.isSelected()));
+				prop.setProperty("meerkat.autoload.start", String.valueOf(checkBox_loadSessionStart.isSelected()));
+				prop.setProperty("meerkat.dashboard.gauge", String.valueOf(checkBox_showGroupsGauge.isSelected()));
+				prop.setProperty("meerkat.webserver.rconfig", String.valueOf(checkBox_remoteconfig.isSelected()));
+				//prop.setProperty("meerkat.password.master", String.valueOf(textField_masterPasswd.getPassword()));
+				log.info("PREPARING TO SAVE MKM...");
+				mkm.changeMasterKey(String.valueOf(textField_masterPasswd.getPassword()));
+				log.info("DONE!");	
+				
 				httpServer.refreshIndex();
-
 				jfather.setAlwaysOnTop(false);
+				
+				btnSave.setEnabled(true);
+				setCursor(DEFAULT_CURSOR);
+				
 				SimplePopup p = new SimplePopup("Saved!");
 				p.show();
 				jfather.setAlwaysOnTop(true);

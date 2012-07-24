@@ -130,8 +130,7 @@ public class PropertiesLoader {
 	 */
 	public final void writePropertiesToFile(Properties p, String file) {
 		try {
-			p.store(new FileOutputStream(file),
-					" Meerkat-Monitor\n meerkat-monitor.org");
+			p.store(new FileOutputStream(file), "Meerkat-Monitor\n meerkat-monitor.org");
 		} catch (FileNotFoundException e) {
 			log.error("Failed to write properties file (not found)!", e);
 		} catch (IOException e) {

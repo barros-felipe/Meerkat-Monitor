@@ -375,8 +375,8 @@ public class WebAppCollection implements Serializable {
 	/**
 	 * saveConfigXMLFile Save configuration file
 	 */
-	public final void saveConfigXMLFile() {
-		System.gc();
+	public synchronized void saveConfigXMLFile() {
+		//System.gc();
 		XStreamMeerkatConfig xstreamConfig = new XStreamMeerkatConfig();
 		XStream xstream = xstreamConfig.getXstream();
 
@@ -397,6 +397,20 @@ public class WebAppCollection implements Serializable {
 		setTempWorkingDir(tempWorkingDir);
 		setConfigFile(configFile);
 		dataFileName = "TimeLine.html";
+	}
+	
+	
+	/**
+	 * printContainingAppsInfo
+	 */
+	public final void printContainingAppsInfo(){
+		Iterator<WebApp> it = getWebAppCollectionIterator();
+		WebApp curr;
+		while(it.hasNext()){
+			curr = it.next();
+			log.info("Name: "+curr.getName()+" \t|\t Type: "+curr.getType());
+		}
+		
 	}
 
 }

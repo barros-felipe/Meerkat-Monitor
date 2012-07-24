@@ -1,3 +1,21 @@
+/**
+ * Meerkat Monitor - Network Monitor Tool
+ * Copyright (C) 2012 Merkat-Monitor
+ * mailto: contact AT meerkat-monitor DOT org
+ * 
+ * Meerkat Monitor is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Meerkat Monitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *  
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Meerkat Monitor.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.meerkat.ws;
 
 import javax.jws.WebService;
@@ -5,6 +23,7 @@ import javax.jws.WebService;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.services.SecureShellSSH;
 import org.meerkat.services.WebApp;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppResponse;
 
@@ -14,7 +33,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 	WebAppCollection wapc;
 	HttpServer httpServer;
-	private String masterKey;
+	private MasterKeyManager mkm;
 	
 	/**
 	 * MeerkatWebService
@@ -22,8 +41,8 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	 * @param webAppsCollection
 	 * @param httpServer
 	 */
-	public MeerkatWebService(String masterKey, WebAppCollection webAppsCollection, HttpServer httpServer){
-		this.masterKey = masterKey;
+	public MeerkatWebService(MasterKeyManager mkm, WebAppCollection webAppsCollection, HttpServer httpServer){
+		this.mkm = mkm;
 		this.httpServer = httpServer;
 		this.wapc = webAppsCollection;
 	}
@@ -34,7 +53,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	 * @return
 	 */
 	private boolean checkKey(String givenKey){
-		if(givenKey.equals(masterKey)){
+		if(givenKey.equals(mkm.getMasterKey())){
 			return true;
 		}
 		return false;
@@ -53,14 +72,14 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			return "Incorrect key!";
 		}
 		
-		SecureShellSSH sshApp = new SecureShellSSH(name, user, passwd, host, port, expectedResponse, cmdToExecute);
+		SecureShellSSH sshApp = new SecureShellSSH(mkm, name, user, passwd, host, port, expectedResponse, cmdToExecute);
 		WebAppResponse currentStatus = sshApp.checkWebAppStatus();
 		String online = "OFFLINE";
 		if(currentStatus.isOnline()){
 			online = "ONLINE";
 		}
 		wapc.addWebApp(sshApp);
-		sshApp.writeWebAppVisualizationDataFile();
+		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
 		wapc.writeWebAppCollectionDataFile();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
@@ -85,6 +104,21 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			
 			return "Removed application "+name+".";
 		}
+	}
+
+	@Override
+	public String changeMasterKey(String oldMasterKey, String newMasterKey) {
+		if(!checkKey(oldMasterKey)){
+			return "Incorrect current key!";
+		}
+		
+		mkm.changeMasterKey(newMasterKey);
+		oldMasterKey = null;
+		newMasterKey = null;
+		
+		return "Master key changed successfully.";
+		
+		
 	}
 
 

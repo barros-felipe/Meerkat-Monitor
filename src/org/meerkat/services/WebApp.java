@@ -53,6 +53,7 @@ import org.meerkat.network.Availability;
 import org.meerkat.network.Latency;
 import org.meerkat.network.LoadTime;
 import org.meerkat.util.Counter;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.StringUtil;
 import org.meerkat.webapp.WebAppActionResultThread;
 import org.meerkat.webapp.WebAppActionThread;
@@ -70,9 +71,23 @@ public class WebApp implements Serializable {
 	private String url;
 	private String expectedString;
 	private String executeOnOffline = "";
+	
 	@XStreamOmitField
-	private String lastStatus = "NA"; // It may be online or offline - NA in the
-										// first run
+	public static String TYPE_WEBAPP = "WEBAPP";
+	@XStreamOmitField
+	public static String TYPE_WEBSERVICE = "WEBSERVICE";
+	@XStreamOmitField
+	public static String TYPE_SQL = "SQL";
+	@XStreamOmitField
+	public static String TYPE_SOCKET = "SOCKET";
+	@XStreamOmitField
+	public static String TYPE_SSH = "SSH";
+	
+	@XStreamOmitField
+	MasterKeyManager mkm;
+	
+	@XStreamOmitField
+	private String lastStatus = "NA"; // It may be online or offline - NA in the first run
 	@XStreamOmitField
 	private int numberOfTests = 0;
 	@XStreamOmitField
@@ -98,9 +113,9 @@ public class WebApp implements Serializable {
 	private String appVersion;
 	@XStreamOmitField
 	private String configXMLFile = "";
-	private String type = "webapp"; // Default or set to webservice
+	private String type = TYPE_WEBAPP; // Default or set to webservice, ssh, etc.
 	private boolean enabled = true;
-
+	
 	/**
 	 * WebApp
 	 * 
@@ -633,35 +648,35 @@ public class WebApp implements Serializable {
 	 * setTypeWebService
 	 */
 	public final void setTypeWebService() {
-		this.type = "webservice";
+		this.type = TYPE_WEBSERVICE;
 	}
 
 	/**
 	 * setTypeWebApp
 	 */
 	public final void setTypeWebApp() {
-		this.type = "webapp";
+		this.type = TYPE_WEBAPP;
 	}
 
 	/**
 	 * setTypeSQL
 	 */
 	public final void setTypeSQL() {
-		this.type = "sql";
+		this.type = TYPE_SQL;
 	}
 
 	/**
 	 * setTypeSocketService
 	 */
 	public final void setTypeSocketService() {
-		this.type = "socketservice";
+		this.type = TYPE_SOCKET;
 	}
 
 	/**
 	 * setTypeSSH
 	 */
 	public final void setTypeSSH() {
-		this.type = "ssh";
+		this.type = TYPE_SSH;
 	}
 
 	/**
@@ -958,6 +973,22 @@ public class WebApp implements Serializable {
 	 */
 	public final void setActive(Boolean isActive) {
 		this.enabled = isActive;
+	}
+	
+	/**
+	 * setMasterKeyManager
+	 * Need because check of passwd based applications loaded from XML
+	 * @param mkm
+	 */
+	public final void setMasterKeyManager(MasterKeyManager mkm){
+		this.mkm = mkm;
+	}
+	
+	/**
+	 * getMasterKeyManager
+	 */
+	public final MasterKeyManager getMasterKeyManager(){
+		return this.mkm;
 	}
 
 }

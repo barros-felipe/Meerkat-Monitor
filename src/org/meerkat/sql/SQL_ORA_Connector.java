@@ -76,8 +76,8 @@ public class SQL_ORA_Connector {
 					+ ":" + port + ":" + sid + "", username, password);
 		} catch (SQLException e) {
 			log.error("SQL Exception getting connection: " + dbMachine + ":"
-					+ port + ":" + sid + "", e);
-			result += e.getCause();
+					+ port + ":" + sid + " "+e.getMessage());
+			result += e.getMessage();
 			return result;
 		}
 
@@ -86,8 +86,8 @@ public class SQL_ORA_Connector {
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
 			log.error("Cannot create Statement: " + dbMachine + ":" + port
-					+ ":" + sid + "", e);
-			result += e.getCause();
+					+ ":" + sid + " "+e.getMessage());
+			result += e.getMessage();
 			return result;
 		}
 
@@ -107,8 +107,8 @@ public class SQL_ORA_Connector {
 			}
 		} catch (SQLException e) {
 			log.error("Cannot execute query (" + dbMachine + ":" + port + ":"
-					+ sid + ")", e);
-			result += e.getCause();
+					+ sid + " "+e.getMessage());
+			result += e.getMessage();
 			return result;
 		} finally {
 			try {

@@ -181,6 +181,8 @@ public class OptionsPanelWebApp extends JPanel {
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				wAppCollection.removeWebApp(webApp);
+				wAppCollection.writeWebAppCollectionDataFile();
+				wAppCollection.saveConfigXMLFile();
 				mainMAppWindow.removeSelectNodeElementFromTree();
 				// TODO Remove from file XML
 			}
