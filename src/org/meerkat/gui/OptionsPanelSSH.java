@@ -35,6 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
 import org.meerkat.services.SecureShellSSH;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppResponse;
 
@@ -52,6 +53,7 @@ public class OptionsPanelSSH extends JPanel {
 	JEditorPane editorPane;
 	WebAppResponse testCurrentWebAppResponse;
 	JButton button_test;
+	private MasterKeyManager mkm = new MasterKeyManager();
 
 	/**
 	 * Create the panel.
@@ -118,7 +120,7 @@ public class OptionsPanelSSH extends JPanel {
 		lblPassword.setBounds(10, 139, 102, 14);
 		add(lblPassword);
 
-		final JPasswordField textField_passwd = new JPasswordField(webApp.getPassword()); //Encrypted password
+		final JPasswordField textField_passwd = new JPasswordField(mkm.getDecryptedPassword(webApp.getPassword())); //Decrypted password
 		textField_passwd.setBounds(122, 136, 135, 20);
 		add(textField_passwd);
 		textField_passwd.setColumns(10);

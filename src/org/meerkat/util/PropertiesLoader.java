@@ -45,7 +45,7 @@ public class PropertiesLoader {
 	 * @param propertiesFile
 	 * @return properties
 	 */
-	public final Properties getPropetiesFromFile(String propertiesFile) {
+	public synchronized Properties getPropetiesFromFile(String propertiesFile) {
 		this.propertiesFile = propertiesFile;
 		// Read properties file.
 		Properties properties;

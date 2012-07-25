@@ -27,12 +27,11 @@ import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppResponse;
 
-@WebService(endpointInterface = "org.meerkat.ws.MeerkatWebServiceManager")
-
+@WebService
 public class MeerkatWebService implements MeerkatWebServiceManager{
 
-	WebAppCollection wapc;
-	HttpServer httpServer;
+	private WebAppCollection wapc;
+	private HttpServer httpServer;
 	private MasterKeyManager mkm;
 	
 	/**
@@ -41,12 +40,12 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	 * @param webAppsCollection
 	 * @param httpServer
 	 */
-	public MeerkatWebService(MasterKeyManager mkm, WebAppCollection webAppsCollection, HttpServer httpServer){
+	public MeerkatWebService(final MasterKeyManager mkm, WebAppCollection webAppsCollection, HttpServer httpServer){
 		this.mkm = mkm;
 		this.httpServer = httpServer;
 		this.wapc = webAppsCollection;
 	}
-	
+
 	/**
 	 * checkKey
 	 * @param givenKey
@@ -58,20 +57,19 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		return false;
 	}
-	
-	
+
+
 	@Override
 	public String getVersion() {
 		return wapc.getAppVersion();
 	}
 
-
 	@Override
-	public String addSSH(String masterKey, String name, String user, String passwd, String host, String port, String expectedResponse, String cmdToExecute) {
+	public String addSSH(String masterKey, String name, String user, String passwd, String host, String port, String expectedResponse, String cmdToExecute){
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
-		
+
 		SecureShellSSH sshApp = new SecureShellSSH(mkm, name, user, passwd, host, port, expectedResponse, cmdToExecute);
 		WebAppResponse currentStatus = sshApp.checkWebAppStatus();
 		String online = "OFFLINE";
@@ -83,7 +81,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.writeWebAppCollectionDataFile();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
-		
+
 		return "SSH application added! Current status: "+online+".";
 	}
 
@@ -93,7 +91,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
-		
+
 		if(!wapc.isWebAppByNamePresent(name)){
 			return "Application "+name+" is not present!";
 		}else{
@@ -101,33 +99,36 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			wapc.removeWebApp(tmp);
 			wapc.saveConfigXMLFile();
 			httpServer.refreshIndex();
-			
+
 			return "Removed application "+name+".";
 		}
 	}
 
 	@Override
-	public String changeMasterKey(String oldMasterKey, String newMasterKey) {
-		if(!checkKey(oldMasterKey)){
+	public String changeMasterKey(String currentMasterKey, String newMasterKey) {
+		if(!checkKey(currentMasterKey)){
 			return "Incorrect current key!";
 		}
+
+		if(newMasterKey.length() <=5){
+			return "Please choose a key with at least 6 characters.";
+		}
 		
-		mkm.changeMasterKey(newMasterKey);
-		oldMasterKey = null;
-		newMasterKey = null;
-		
+		mkm.changeMasterKey(String.valueOf(newMasterKey));
+				
 		return "Master key changed successfully.";
-		
-		
+
+
 	}
 
 
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
 
 }

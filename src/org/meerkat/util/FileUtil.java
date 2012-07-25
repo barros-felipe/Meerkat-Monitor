@@ -121,6 +121,7 @@ public class FileUtil implements Serializable {
 	public final void writeToFile(String filename, String contents) {
 		File outFile = new File(filename);
 		FileWriter out = null;
+				
 		try {
 			out = new FileWriter(outFile);
 			out.write(contents);
@@ -153,7 +154,7 @@ public class FileUtil implements Serializable {
 		return children;
 
 	}
-
+	
 	/**
 	 * getFiletypeFromDir
 	 * 

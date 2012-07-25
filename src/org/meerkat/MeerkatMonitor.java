@@ -91,7 +91,7 @@ public class MeerkatMonitor {
 
 	private static WebApp currentWebApp;
 	private static WebAppResponse currentWebAppResponse;
-	
+
 	private static NetworkUtil netUtil = new NetworkUtil();
 	private static String hostname = netUtil.getHostname();
 	private static HttpServer httpWebServer;
@@ -131,7 +131,7 @@ public class MeerkatMonitor {
 		// Set up embedded jetty log
 		Properties systemProperties = System.getProperties();
 		systemProperties.setProperty("org.eclipse.jetty.LEVEL", "WARN");
-		
+
 		// append stdout and stderr to log4j
 		// - This should be replaced with a real automatic bug submission tool 
 		//StdOutErrLog4j.appendSystemOutAndErrToLog();
@@ -192,16 +192,16 @@ public class MeerkatMonitor {
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
 		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "error");
-		
+
 		readProperties();
 		loadWebAppXML();
 		generateGroups();
 		loadEmailProperties();
 		setLookAndFeel();
-		
+
 		// Create the MasterKeyManager
 		mkm = new MasterKeyManager(propertiesFile, webAppsCollection);
-						
+
 		startWebServices();
 		startHttpWebServer();
 		createSystray();
@@ -209,7 +209,7 @@ public class MeerkatMonitor {
 		startMonitor();
 	}
 
-	
+
 	/**
 	 * startWebServices
 	 */
@@ -218,13 +218,13 @@ public class MeerkatMonitor {
 		String wsdlEndpoint = "";
 		wsdlEndpoint = "http://"+hostname+":"+(webserverPort+1)+"/ws/manager";
 		wsdlUrl = wsdlEndpoint+"?wsdl";
-		
+
 		// Setup web server
 		httpWebServer = new HttpServer(webserverPort, version, wsdlUrl, tempWorkingDir);
 		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));	
 	}
-	
-	
+
+
 	/**
 	 * readProperties
 	 */
@@ -242,7 +242,7 @@ public class MeerkatMonitor {
 		properties = pL.getPropetiesFromFile(propertiesFile);
 		// Validate required properties
 		pL.propertiesValidator(expectedProperties);
-		
+
 	}
 
 	/**
@@ -261,8 +261,7 @@ public class MeerkatMonitor {
 		}
 
 		try {
-			webAppsCollection = (WebAppCollection) xstream.fromXML(fu
-					.readFileContents(configFile));
+			webAppsCollection = (WebAppCollection) xstream.fromXML(fu.readFileContents(configFile));
 
 			// Validate if we got and invalid Meerkat-Monitor file
 			if (webAppsCollection.getWebAppCollectionSize() == null) {
@@ -271,7 +270,7 @@ public class MeerkatMonitor {
 			}
 
 		} catch (Exception e) {
-			log.warn("Unable to load applications from config xml!", e);
+			log.warn("Unable to load applications from config xml!");
 			log.warn("Considering that is empty.");
 			webAppsCollection = new WebAppCollection();
 		}
@@ -391,7 +390,7 @@ public class MeerkatMonitor {
 								"Load Session",
 								"Loaded session successfully: "
 										+ webAppsCollection
-												.getWebAppCollectionSize()
+										.getWebAppCollectionSize()
 										+ " apps.");
 					}
 				};
@@ -617,6 +616,15 @@ public class MeerkatMonitor {
 			log.info("Session loaded!");
 		}
 
+		List<WebApp> webAppListCopy = webAppsCollection.getCopyWebApps();
+		Iterator<WebApp> i = webAppListCopy.iterator();
+
+		// Prevent dashboard link from giving 404 at first round
+		while (i.hasNext()) {
+			currentWebApp = i.next();
+			currentWebApp.writeWebAppVisualizationDataFile(); 
+		}
+
 		// Launch the monitor process
 		while (true) {
 			// Check for updated user defined new properties
@@ -627,12 +635,13 @@ public class MeerkatMonitor {
 
 			// We iterate over a copy of the collection so we can prevent
 			// ConcurrentModificationException from the GUI
-			List<WebApp> webAppListCopy = webAppsCollection.getCopyWebApps();
-			Iterator<WebApp> i = webAppListCopy.iterator();
+			webAppListCopy = webAppsCollection.getCopyWebApps();
+			i = webAppListCopy.iterator();
+
 			while (i.hasNext()) {
 				currentWebApp = i.next();
 				currentWebApp.setMasterKeyManager(mkm);
-								
+
 				// check if the webApp is ready to monit or not - temp created in the gui
 				if (currentWebApp.isActive()) {
 					currentWebAppResponse = new WebAppResponse();
@@ -839,15 +848,18 @@ public class MeerkatMonitor {
 						}
 					}
 				}
+				// Refresh dashboard and app in every app cycle
+				webAppsCollection.writeWebAppCollectionDataFile();
+				httpWebServer.refreshIndex();
 			}
 
-			// Refresh webapp's TimeLine
-			webAppsCollection.writeWebAppCollectionDataFile();
-			// AppGroupCollection.writeAppGroupCollectionAvailabilityDataFileGauge();
-
 			httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
-			httpWebServer.refreshIndex();
 
+			// Get the time between rounds
+			properties = pL.getPropetiesFromFile(propertiesFile);
+			testPause = Integer.parseInt(properties.getProperty("meerkat.monit.test.time"));
+			pauseTime = TimeUnit.MINUTES.toMillis(testPause);
+			
 			log.info("Next round in: " + testPause + " minute(s) [" + pauseTime+ "ms]");
 			log.info("");
 			try {
@@ -859,6 +871,7 @@ public class MeerkatMonitor {
 			// Refresh systray
 			systray.reloadSystray();
 		}
+
 	}
 
 	/**
@@ -872,7 +885,7 @@ public class MeerkatMonitor {
 		}
 
 		// Register resources
-		String[] resources = new String[21];
+		String[] resources = new String[22];
 		resources[0] = "resources/demo_page.css";
 		resources[1] = "resources/demo_table_jui.css";
 		resources[2] = "resources/jquery-ui-1.8.4.custom.css";
@@ -894,7 +907,8 @@ public class MeerkatMonitor {
 		resources[18] = "resources/tango-slink.png";
 		resources[19] = "resources/404_meerkat.png";
 		resources[20] = "resources/tango_wsdl.png";
-		
+		resources[21] = "resources/tango-xml-config.png";
+
 		String[] resourcesImages = new String[13];
 		resourcesImages[0] = "resources/images/ui-bg_flat_0_aaaaaa_40x100.png";
 		resourcesImages[1] = "resources/images/ui-bg_flat_75_ffffff_40x100.png";

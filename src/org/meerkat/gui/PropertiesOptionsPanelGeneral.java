@@ -32,7 +32,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.PropertiesLoader;
@@ -40,8 +39,7 @@ import org.meerkat.util.PropertiesLoader;
 public class PropertiesOptionsPanelGeneral extends JPanel {
 
 	private static final long serialVersionUID = -4770982518031397455L;
-	private static Logger log = Logger.getLogger(PropertiesOptionsPanelGeneral.class);
-		
+
 	private Properties prop;
 	private JTextField textField_pauseMinutes;
 	private JTextField textField_webServerPort;
@@ -173,10 +171,10 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		final JButton btnSave = new JButton("Save");
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
+
 				btnSave.setEnabled(false);
 				setCursor(WAIT_CURSOR);
-				
+
 				// TODO validate input!
 				prop.setProperty("meerkat.monit.test.time", textField_pauseMinutes.getText());
 				prop.setProperty("meerkat.webserver.port", textField_webServerPort.getText());
@@ -184,17 +182,22 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 				prop.setProperty("meerkat.autoload.start", String.valueOf(checkBox_loadSessionStart.isSelected()));
 				prop.setProperty("meerkat.dashboard.gauge", String.valueOf(checkBox_showGroupsGauge.isSelected()));
 				prop.setProperty("meerkat.webserver.rconfig", String.valueOf(checkBox_remoteconfig.isSelected()));
+				
+				// Password is managed by MasterKeyManager
 				//prop.setProperty("meerkat.password.master", String.valueOf(textField_masterPasswd.getPassword()));
-				log.info("PREPARING TO SAVE MKM...");
+				
+				// Write properties file
+				pl.writePropertiesToFile(prop, propertiesFile);
+				
+				// Write master key
 				mkm.changeMasterKey(String.valueOf(textField_masterPasswd.getPassword()));
-				log.info("DONE!");	
 				
 				httpServer.refreshIndex();
 				jfather.setAlwaysOnTop(false);
-				
+
 				btnSave.setEnabled(true);
 				setCursor(DEFAULT_CURSOR);
-				
+
 				SimplePopup p = new SimplePopup("Saved!");
 				p.show();
 				jfather.setAlwaysOnTop(true);

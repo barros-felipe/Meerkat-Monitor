@@ -78,7 +78,7 @@ public class SecureShellSSH extends WebApp {
 		if(mkm == null){
 			mkm = this.getMasterKeyManager();
 		}
-		
+
 		setCurrentResponse("");
 		WebAppResponse response = new WebAppResponse();
 		response.setResponseSSH();
@@ -233,16 +233,13 @@ public class SecureShellSSH extends WebApp {
 	public final void setPasswd(String passwd) {
 		this.passwd = mkm.getEncryptedPassword(passwd);
 	}
-	
+
 	/**
 	 * getPassword
 	 * @return Encrypted password
 	 */
 	public final String getPassword(){
-		if(mkm == null){ //If app loaded from xml
-			mkm = new MasterKeyManager();
-		}
-		return mkm.getDecryptedPassword(passwd);
+		return passwd;
 	}
 
 }

@@ -37,6 +37,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
 import org.meerkat.services.SQLService;
+import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppResponse;
 
@@ -55,7 +56,8 @@ public class OptionsPanelDataBase extends JPanel {
 	JButton button_test;
 	private String[] dbTypes = { "", SQLService.TYPE_MYSQL, SQLService.TYPE_ORA, SQLService.TYPE_MSSQL };
 	private String selected = dbTypes[0];
-	
+	private MasterKeyManager mkm = new MasterKeyManager();
+
 	/**
 	 * Create the panel.
 	 */
@@ -131,7 +133,7 @@ public class OptionsPanelDataBase extends JPanel {
 		lblPassword.setBounds(10, 164, 102, 14);
 		add(lblPassword);
 
-		final JPasswordField textField_passwd = new JPasswordField(webApp.getPassword()); //Encrypted password
+		final JPasswordField textField_passwd = new JPasswordField(mkm.getDecryptedPassword(webApp.getPassword())); //Decrypted password
 		textField_passwd.setBounds(122, 161, 392, 20);
 		add(textField_passwd);
 		textField_passwd.setColumns(10);

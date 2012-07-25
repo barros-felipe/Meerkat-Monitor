@@ -81,25 +81,26 @@ public class MasterKeyManager implements Serializable{
 		oldTextEncrypt.setPassword(currMasterPasswd);
 
 		Iterator<WebApp> it = wac.getWebAppCollectionIterator();
-		wac.printContainingAppsInfo();
-
 		WebApp curr;
-		String currPasswd;
+		String passwd, currPasswd;
 		while(it.hasNext()){
 			curr = it.next();
 			String type = curr.getType();
 
 			if(type.equals(WebApp.TYPE_SSH)){ // If SSH we need to update the encrypted password
 				SecureShellSSH app = (SecureShellSSH)curr;
-				currPasswd = oldTextEncrypt.decrypt(app.getPassword());
+				passwd = app.getPassword();
+				currPasswd = oldTextEncrypt.decrypt(passwd);
 				app.setPasswd(currPasswd);
 
 			}else if(type.equals(WebApp.TYPE_SQL)){ // If SQL we need to update the encrypted password
 				SQLService app = (SQLService)curr;
-				currPasswd = oldTextEncrypt.decrypt(app.getPassword());
+				passwd = app.getPassword();
+				currPasswd = oldTextEncrypt.decrypt(passwd);
 				app.setPassword(currPasswd);
 			}
 		}
+
 		wac.saveConfigXMLFile();
 	}
 
@@ -127,7 +128,7 @@ public class MasterKeyManager implements Serializable{
 			devPasswd = textEncryptor.decrypt(encPasswd);
 		}catch(Exception e){
 			log.error("Failed to decrypt password. (Wrong master key?)");
-			log.error(e.getMessage());
+			log.error(e.getCause());
 		}
 
 		return devPasswd;

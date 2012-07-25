@@ -89,7 +89,7 @@ public class HttpServer {
 		HandlerList handlers = new HandlerList();
 		handlers.setHandlers(new Handler[] { resourceHandler, customResHandler });
 		mServer.setHandler(handlers);
-		
+
 		try {
 			mServer.start();
 		} catch (Exception e) {
@@ -300,8 +300,7 @@ public class HttpServer {
 		PropertiesLoader pl = new PropertiesLoader();
 		prop = pl.getPropetiesFromFile(propertiesFile);
 
-		displayGroupGauge = Boolean.parseBoolean(prop
-				.getProperty("meerkat.dashboard.gauge"));
+		displayGroupGauge = Boolean.parseBoolean(prop.getProperty("meerkat.dashboard.gauge"));
 		if (displayGroupGauge) {
 			responseStatus = this.getTopContentWithGauge(agc);
 		} else {
@@ -309,8 +308,7 @@ public class HttpServer {
 		}
 
 		// Check if remote access to config is allowed
-		allowRemoteConfig = Boolean.parseBoolean(prop
-				.getProperty("meerkat.webserver.rconfig"));
+		allowRemoteConfig = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.rconfig"));
 
 		if (allowRemoteConfig) {
 			FileUtil fu = new FileUtil();
@@ -319,7 +317,10 @@ public class HttpServer {
 		} else {
 			FileUtil fu = new FileUtil();
 			fu.writeToFile(tempWorkingDir + configFile,
-					"Remote access to config file is disabled!");
+					"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
+					"<meerkat-monitor>" +
+					" <info>Remote access to config file is disabled!</info>" +
+					"</meerkat-monitor>");
 		}
 
 		while (i.hasNext()) {
@@ -461,23 +462,30 @@ public class HttpServer {
 					responseStatus += "<strong>"
 							+ wApp.getlastStatus().toUpperCase(
 									Locale.getDefault())
-							+ "</strong></td>\n</tr>\n";
+									+ "</strong></td>\n</tr>\n";
 				} else {
 					responseStatus += "<a href=\""
 							+ wApp.getUrl()
 							+ "\" target=\"_blank\"><strong>"
 							+ wApp.getlastStatus().toUpperCase(
 									Locale.getDefault())
-							+ "</strong></td>\n</tr>\n";
+									+ "</strong></td>\n</tr>\n";
 				}
 			}
 		}
 
 		responseStatus += bottomContent;
 		responseStatus += "<a href=\""
-		+ wsdlUrl
-		+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n";
-		
+				+ wsdlUrl
+				+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n";
+
+		// If remote config (webapps.xml) access is enable create link for it
+		if(allowRemoteConfig){
+			responseStatus += "<a href=\""
+					+ configFile
+					+ "\"><img src=\"resources/tango-xml-config.png\" alt=\"App Config XML\" align=\"right\" style=\"border-style: none\"/></a> \n";
+		}
+
 		responseStatus += "<br>\n<div>\nUpdated: " + date.now() + " ["
 				+ wac.getNumberOfEventsInCollection() + " tests]" + "</div>\n";
 		responseStatus += footer;

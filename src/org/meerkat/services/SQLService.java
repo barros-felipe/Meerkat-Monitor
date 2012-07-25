@@ -110,7 +110,7 @@ public class SQLService extends WebApp {
 		if(mkm == null){
 			mkm = this.getMasterKeyManager();
 		}
-		
+
 		// Set the response at this point to empty in case of no response at all
 		setCurrentResponse("");
 
@@ -355,15 +355,10 @@ public class SQLService extends WebApp {
 
 	/**
 	 * getPassword
-	 * 
-	 * @return
+	 * @return Encrypted password
 	 */
 	public final String getPassword() {
-		if(mkm == null){ // If app loaded from xml
-			mkm = new MasterKeyManager();
-		}
-		
-		return mkm.getDecryptedPassword(password);
+		return password;
 	}
 
 	/**

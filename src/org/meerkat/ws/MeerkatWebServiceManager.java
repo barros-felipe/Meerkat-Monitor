@@ -19,22 +19,38 @@
 package org.meerkat.ws;
 
 import javax.jws.WebMethod;
+import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
+import javax.jws.soap.SOAPBinding.Use;
 
 //Service Endpoint Interface
-@WebService
-@SOAPBinding(style = Style.RPC)
-public interface MeerkatWebServiceManager{
+@WebService(endpointInterface = "org.meerkat.ws.MeerkatWebServiceManager", serviceName = "MeerkatMonitorWS", portName = "MeerkatMonitorPort")
+@SOAPBinding(style = Style.RPC, use = Use.LITERAL)
 
-	@WebMethod String getVersion();
+public interface MeerkatWebServiceManager{
 	
-	@WebMethod String changeMasterKey(String oldMasterKey, String newMasterKey);
+	@WebMethod(operationName = "getVersion")
+	String getVersion();
 	
-	@WebMethod String removeAppByName(String masterKey, String name);
+	@WebMethod(operationName = "changeMasterKey", action = "changeMasterKey")
+	String changeMasterKey(
+			@WebParam(name="currentMasterKey") String currentMasterKey, 
+			@WebParam(name="newMasterKey") String newMasterKey);
 	
-	@WebMethod String addSSH(String masterKey, String name, String user, String passwd, String host, String port, String expectedResponse, String cmdToExecute);
+	@WebMethod(operationName = "removeAppByName")
+	String removeAppByName(String masterKey, String name);
+	
+	@WebMethod(operationName = "addSSH", action = "addSSH")
+	String addSSH(@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="name") String name, 
+			@WebParam(name="user") String user, 
+			@WebParam(name="passwd") String passwd, 
+			@WebParam(name="host") String host, 
+			@WebParam(name="port") String port, 
+			@WebParam(name="expectedResponse") String expectedResponse, 
+			@WebParam(name="cmdToExecute") String cmdToExecute);
 	
 	
 }
