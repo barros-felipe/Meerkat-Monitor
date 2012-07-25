@@ -69,7 +69,7 @@ import org.meerkat.services.SQLService;
 import org.meerkat.services.SecureShellSSH;
 import org.meerkat.services.SocketService;
 import org.meerkat.services.WebApp;
-import org.meerkat.services.WebService;
+import org.meerkat.services.WebServiceApp;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppCollection;
 
@@ -427,7 +427,7 @@ public class MainWindow {
 								appListJpanelContainer.remove(sshOptionsPanel);
 
 								wsOptionsPanel = new OptionsPanelWebService(
-										(WebService) clickedWebAppLeaf,
+										(WebServiceApp) clickedWebAppLeaf,
 										webCollection, window);
 								appListJpanelContainer.add(wsOptionsPanel);
 								wsOptionsPanel.revalidate();
@@ -742,7 +742,7 @@ public class MainWindow {
 								.getName());
 						groupWebApps.add(dmtnApp);
 					} else if (selected.equalsIgnoreCase(appTypes[1])) {
-						WebService newWebApp = new WebService("Untitled" + r,
+						WebServiceApp newWebApp = new WebServiceApp("Untitled" + r,
 								"");
 						newWebApp.setActive(false);
 						newWebApp.setTempWorkingDir(wac.getTmpDir());

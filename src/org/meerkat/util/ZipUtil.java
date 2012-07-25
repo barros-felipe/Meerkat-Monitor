@@ -73,7 +73,7 @@ public class ZipUtil {
 		} catch (Exception e) {
 			log.error("Error creating file: " + zipFile, e);
 		}
-		log.info("File creation done!");
+
 	}
 
 	/**

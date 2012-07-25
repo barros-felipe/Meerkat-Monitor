@@ -35,10 +35,10 @@ import org.meerkat.util.XMLComparator;
 import org.meerkat.util.XmlFormatter;
 import org.meerkat.webapp.WebAppResponse;
 
-public class WebService extends WebApp {
+public class WebServiceApp extends WebApp {
 
 	private static final long serialVersionUID = 1L;
-	private static Logger log = Logger.getLogger(WebService.class);
+	private static Logger log = Logger.getLogger(WebServiceApp.class);
 	private String postXML = "";
 	private String responseXML = "";
 	private String soapAction = "";
@@ -49,7 +49,7 @@ public class WebService extends WebApp {
 	 * @param name
 	 * @param url
 	 */
-	public WebService(String name, String url) {
+	public WebServiceApp(String name, String url) {
 		super(name, url, "");
 		this.setTypeWebService();
 	}
@@ -59,12 +59,10 @@ public class WebService extends WebApp {
 	 * 
 	 * @param name
 	 * @param url
-	 * @param expectedString
 	 * @param executeOnOffline
 	 */
-	public WebService(String name, String url, String soapAction,
-			String expectedString, String executeOnOffline) {
-		super(name, url, expectedString, executeOnOffline);
+	public WebServiceApp(String name, String url, String soapAction, String executeOnOffline) {
+		super(name, url, "", executeOnOffline);
 		this.setTypeWebService();
 		this.setSOAPAction(soapAction);
 
@@ -73,7 +71,7 @@ public class WebService extends WebApp {
 	/**
 	 * WebService
 	 */
-	public WebService() {
+	public WebServiceApp() {
 		super();
 		this.setTypeWebService();
 	}
@@ -88,7 +86,7 @@ public class WebService extends WebApp {
 
 		// DefaultHttpClient httpClient = new DefaultHttpClient();
 		HttpClient httpClient = super.httpClientSSLAuth(); // Allow self signed
-															// certificates
+		// certificates
 
 		HttpResponse httpresponse = null;
 

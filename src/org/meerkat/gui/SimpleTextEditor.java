@@ -36,7 +36,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.log4j.Logger;
 import org.meerkat.services.WebApp;
-import org.meerkat.services.WebService;
+import org.meerkat.services.WebServiceApp;
 import org.meerkat.util.XmlFormatter;
 
 public class SimpleTextEditor extends JFrame {
@@ -123,9 +123,9 @@ public class SimpleTextEditor extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				String editorContents = editorPane.getText();
 				if (editWebServicePost) {
-					((WebService) wa).setPostXML(editorContents);
+					((WebServiceApp) wa).setPostXML(editorContents);
 				} else if (editWebServiceResponse) {
-					((WebService) wa).setResponseXML(editorContents);
+					((WebServiceApp) wa).setResponseXML(editorContents);
 				}
 
 				dispose();

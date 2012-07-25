@@ -276,6 +276,12 @@ public class WebAppCollection implements Serializable {
 	 * @return
 	 */
 	public boolean isWebAppByNamePresent(String name) {
+		
+		// To prevent empty names and webservices "?"
+		if(name.trim().equals("") || name.trim().equals("?")){
+			return true;
+		}
+		
 		List<WebApp> webAppsCollectionCopy = this.webAppsCollection;
 		Iterator<WebApp> it = webAppsCollectionCopy.iterator();
 

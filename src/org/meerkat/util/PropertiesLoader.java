@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -34,8 +35,9 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.meerkat.gui.SimplePopup;
 
-public class PropertiesLoader {
+public class PropertiesLoader implements Serializable{
 
+	private static final long serialVersionUID = 1008089266551755831L;
 	private static Logger log = Logger.getLogger(PropertiesLoader.class);
 	private String propertiesFile;
 

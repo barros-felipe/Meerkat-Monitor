@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
-import org.meerkat.services.WebService;
+import org.meerkat.services.WebServiceApp;
 import org.meerkat.util.XmlFormatter;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppResponse;
@@ -41,7 +41,7 @@ public class OptionsPanelWebService extends JPanel {
 
 	private static final long serialVersionUID = 797044938033930930L;
 
-	private WebService webApp;
+	private WebServiceApp webApp;
 	private WebAppCollection wAppCollection;
 	private MainWindow mainMAppWindow;
 	JButton button_save;
@@ -61,7 +61,7 @@ public class OptionsPanelWebService extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public OptionsPanelWebService(final WebService webService,
+	public OptionsPanelWebService(final WebServiceApp webService,
 			final WebAppCollection wapCollection, MainWindow mw) {
 		this.webApp = webService;
 		this.wAppCollection = wapCollection;

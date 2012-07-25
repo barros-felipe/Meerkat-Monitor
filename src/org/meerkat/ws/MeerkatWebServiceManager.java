@@ -30,20 +30,23 @@ import javax.jws.soap.SOAPBinding.Use;
 @SOAPBinding(style = Style.RPC, use = Use.LITERAL)
 
 public interface MeerkatWebServiceManager{
-	
+
 	@WebMethod(operationName = "getVersion")
 	String getVersion();
-	
+
 	@WebMethod(operationName = "changeMasterKey", action = "changeMasterKey")
 	String changeMasterKey(
 			@WebParam(name="currentMasterKey") String currentMasterKey, 
 			@WebParam(name="newMasterKey") String newMasterKey);
-	
-	@WebMethod(operationName = "removeAppByName")
-	String removeAppByName(String masterKey, String name);
-	
+
+	@WebMethod(operationName = "removeAppByName", action = "removeAppByName")
+	String removeAppByName(
+			@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="name") String name);
+
 	@WebMethod(operationName = "addSSH", action = "addSSH")
-	String addSSH(@WebParam(name="masterKey") String masterKey, 
+	String addSSH(
+			@WebParam(name="masterKey") String masterKey, 
 			@WebParam(name="name") String name, 
 			@WebParam(name="user") String user, 
 			@WebParam(name="passwd") String passwd, 
@@ -51,6 +54,46 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="port") String port, 
 			@WebParam(name="expectedResponse") String expectedResponse, 
 			@WebParam(name="cmdToExecute") String cmdToExecute);
-	
-	
+
+	@WebMethod(operationName = "addSocket", action = "addSocket")
+	String addSocket (
+			@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="name") String name, 
+			@WebParam(name="host") String host, 
+			@WebParam(name="port") String port,
+			@WebParam(name="sendString") String sendString, 
+			@WebParam(name="expectedString") String expectedString, 
+			@WebParam(name="executeOnOffline") String executeOnOffline);
+
+	@WebMethod(operationName = "addDB", action = "addDB")
+	String addDB(
+			@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="name") String name,
+			@WebParam(name="host") String host,
+			@WebParam(name="port") String port,
+			@WebParam(name="instanceName") String instanceName, 
+			@WebParam(name="username") String username,
+			@WebParam(name="password") String password,
+			@WebParam(name="dbType") String dbType,
+			@WebParam(name="query") String query, 
+			@WebParam(name="expectedResponse") String expectedResponse,
+			@WebParam(name="executeOnOffline") String executeOnOffline);
+
+	@WebMethod(operationName = "addWeb", action = "addWeb")
+	String addWeb(
+			@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="name") String name, 
+			@WebParam(name="url") String url, 
+			@WebParam(name="expectedString") String expectedString,
+			@WebParam(name="executeOnOffline") String executeOnOffline);
+
+	@WebMethod(operationName = "addWebService", action = "addWebService")
+	String addWebService(
+			@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="name") String name,
+			@WebParam(name="url") String url,
+			@WebParam(name="soapAction") String soapAction,
+			@WebParam(name="sendXML") String sendXML,
+			@WebParam(name="responseXML") String responseXML,
+			@WebParam(name="executeOnOffline") String executeOnOffline);
 }

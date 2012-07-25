@@ -23,7 +23,7 @@ import org.meerkat.services.SQLService;
 import org.meerkat.services.SecureShellSSH;
 import org.meerkat.services.SocketService;
 import org.meerkat.services.WebApp;
-import org.meerkat.services.WebService;
+import org.meerkat.services.WebServiceApp;
 import org.meerkat.webapp.WebAppCollection;
 
 import com.thoughtworks.xstream.XStream;
@@ -39,7 +39,7 @@ public class XStreamMeerkatConfig {
 		xstream.alias("socketservice", SocketService.class);
 		xstream.alias("ssh", SecureShellSSH.class);
 		xstream.alias("database", SQLService.class);
-		xstream.alias("webservice", WebService.class);
+		xstream.alias("webservice", WebServiceApp.class);
 
 		xstream.alias("meerkat-monitor", WebAppCollection.class);
 		xstream.addImplicitCollection(WebAppCollection.class, "webAppsCollection");
