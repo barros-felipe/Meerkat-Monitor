@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -131,11 +132,13 @@ public class MeerkatMonitor {
 		// Set up embedded jetty log
 		Properties systemProperties = System.getProperties();
 		systemProperties.setProperty("org.eclipse.jetty.LEVEL", "WARN");
+		
+		// Set up apache cxf log
+		java.util.logging.Logger jlog = java.util.logging.Logger.getLogger("org.apache.cxf");
+		jlog.setLevel(Level.WARNING);
 
 		// append stdout and stderr to log4j
-		// - This should be replaced with a real automatic bug submission tool 
-		//StdOutErrLog4j.appendSystemOutAndErrToLog();
-		//@TODO this should be replace with a automatic error submission mechanism
+		//@TODO this should be replaced with an automatic error submission mechanism
 		FileOutputStream fileOutputStream = null;
 		try {
 			fileOutputStream = new FileOutputStream("meerkat-inter-err.log");
