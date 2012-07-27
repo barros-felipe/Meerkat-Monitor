@@ -640,11 +640,15 @@ public class MeerkatMonitor {
 			// ConcurrentModificationException from the GUI
 			webAppListCopy = webAppsCollection.getCopyWebApps();
 			i = webAppListCopy.iterator();
-
+			int numberOfApps = webAppsCollection.getWebAppCollectionSize();
+			int percent = 0;
+			int roundCompletedApps = 0;
+			
 			while (i.hasNext()) {
+				percent = roundCompletedApps * 100 / numberOfApps;
 				currentWebApp = i.next();
-				currentWebApp.setMasterKeyManager(mkm);
-
+				log.info("["+roundCompletedApps+"/"+numberOfApps+" "+percent+"%]\t"+currentWebApp.getName());
+				
 				// check if the webApp is ready to monit or not - temp created in the gui
 				if (currentWebApp.isActive()) {
 					currentWebAppResponse = new WebAppResponse();
@@ -854,8 +858,14 @@ public class MeerkatMonitor {
 				// Refresh dashboard and app in every app cycle
 				webAppsCollection.writeWebAppCollectionDataFile();
 				httpWebServer.refreshIndex();
+				
+				// increase checked apps
+				roundCompletedApps++;
 			}
-
+			// reset percentage
+			percent = 0;
+			roundCompletedApps = 0;
+			
 			httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
 
 			// Get the time between rounds

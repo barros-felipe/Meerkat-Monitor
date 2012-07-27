@@ -751,7 +751,7 @@ public class MainWindow {
 								.getName());
 						groupWebServices.add(dmtnApp);
 					} else if (selected.equalsIgnoreCase(appTypes[2])) {
-						SQLService newWebApp = new SQLService(mkm, "Untitled" + r, "", "", "", "", "", "", "");
+						SQLService newWebApp = new SQLService("Untitled" + r, "", "", "", "", "", "", "");
 						newWebApp.setActive(false);
 						newWebApp.setTempWorkingDir(wac.getTmpDir());
 						wac.addWebApp(newWebApp);
@@ -768,7 +768,7 @@ public class MainWindow {
 								.getName());
 						groupSocketServices.add(dmtnApp);
 					} else if (selected.equalsIgnoreCase(appTypes[4])) {
-						SecureShellSSH newWebApp = new SecureShellSSH(mkm, "Untitled" + r, "", "", "", "", "", "");
+						SecureShellSSH newWebApp = new SecureShellSSH("Untitled" + r, "", "", "", "", "", "");
 						newWebApp.setActive(false);
 						newWebApp.setTempWorkingDir(wac.getTmpDir());
 						wac.addWebApp(newWebApp);

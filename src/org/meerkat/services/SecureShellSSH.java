@@ -24,7 +24,6 @@ import java.io.InputStream;
 
 import org.apache.log4j.Logger;
 import org.meerkat.util.Counter;
-import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.SecureShellSSHUserInfo;
 import org.meerkat.webapp.WebAppResponse;
 
@@ -32,7 +31,6 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 public class SecureShellSSH extends WebApp {
 
@@ -44,8 +42,6 @@ public class SecureShellSSH extends WebApp {
 	private String host;
 	private String port;
 	private String cmdToExecute;
-	@XStreamOmitField
-	MasterKeyManager mkm;
 
 	/**
 	 * SecureShellSSH
@@ -58,10 +54,9 @@ public class SecureShellSSH extends WebApp {
 	 * @param expectedResponse
 	 * @param cmdToExecute
 	 */
-	public SecureShellSSH(MasterKeyManager mkm, String name, String user, String passwd, String host,
+	public SecureShellSSH(String name, String user, String passwd, String host,
 			String port, String expectedResponse, String cmdToExecute) {
 		super(name, host, expectedResponse);
-		this.mkm = mkm;
 		this.user = user;
 		setPasswd(passwd);
 		this.host = host;
@@ -230,7 +225,7 @@ public class SecureShellSSH extends WebApp {
 	/**
 	 * @param passwd the passwd to set       
 	 */
-	public final void setPasswd(String passwd) {
+	public synchronized void setPasswd(String passwd) {
 		this.passwd = mkm.getEncryptedPassword(passwd);
 	}
 

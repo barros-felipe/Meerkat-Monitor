@@ -22,13 +22,13 @@ package org.meerkat.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 public class FileUtil implements Serializable {
@@ -120,20 +120,12 @@ public class FileUtil implements Serializable {
 	 */
 	public final void writeToFile(String filename, String contents) {
 		File outFile = new File(filename);
-		FileWriter out = null;
-				
 		try {
-			out = new FileWriter(outFile);
-			out.write(contents);
+			FileUtils.writeStringToFile(outFile, contents);
 		} catch (IOException e) {
-			log.error("IO Error writting file " + filename, e);
-		} finally {
-			try {
-				out.close();
-			} catch (IOException e) {
-				log.error("IO Error closing file " + filename, e);
-			}
+			log.error("IO Error writting file: " + filename, e);
 		}
+
 	}
 
 	/**
@@ -154,7 +146,7 @@ public class FileUtil implements Serializable {
 		return children;
 
 	}
-	
+
 	/**
 	 * getFiletypeFromDir
 	 * 

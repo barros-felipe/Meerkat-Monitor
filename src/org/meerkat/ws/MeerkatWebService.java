@@ -77,7 +77,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			return "Invalid or duplicated name!";
 		}
 
-		SecureShellSSH sshApp = new SecureShellSSH(mkm, name, user, passwd, host, port, expectedResponse, cmdToExecute);
+		SecureShellSSH sshApp = new SecureShellSSH(name, user, passwd, host, port, expectedResponse, cmdToExecute);
 		WebAppResponse currentStatus = sshApp.checkWebAppStatus();
 		String online = "OFFLINE";
 		if(currentStatus.isOnline()){
@@ -179,7 +179,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 					SQLService.TYPE_MSSQL;
 		}
 
-		SQLService sqlService = new SQLService(mkm, name, query, expectedResponse, host, port, instanceName, username, password);
+		SQLService sqlService = new SQLService(name, query, expectedResponse, host, port, instanceName, username, password);
 
 		// Set the correct database type
 		if(dbType.equals(SQLService.TYPE_MSSQL)){

@@ -27,8 +27,6 @@ import org.meerkat.util.Counter;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppResponse;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 public class SQLService extends WebApp {
 
 	private static Logger log = Logger.getLogger(SQLService.class);
@@ -43,8 +41,6 @@ public class SQLService extends WebApp {
 	private String password;
 	private String query;
 	private String dbType = "";
-	@XStreamOmitField
-	MasterKeyManager mkm;
 
 	/**
 	 * ORA SQLService
@@ -58,11 +54,10 @@ public class SQLService extends WebApp {
 	 * @param username
 	 * @param password
 	 */
-	public SQLService(MasterKeyManager mkm, String name, String query, String expectedResponse,
+	public SQLService(String name, String query, String expectedResponse,
 			String dbMachine, String port, String dbName, String username,
 			String password) {
 		super(name, dbMachine, expectedResponse);
-		this.mkm = mkm;
 		this.dbMachine = dbMachine;
 		this.query = query;
 		this.port = port;

@@ -100,7 +100,6 @@ public class MasterKeyManager implements Serializable{
 				app.setPassword(currPasswd);
 			}
 		}
-
 		wac.saveConfigXMLFile();
 	}
 

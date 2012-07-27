@@ -127,13 +127,13 @@ public class WebApp implements Serializable {
 	 *            WebApp expected string in the URL
 	 */
 	public WebApp(String name, String url, String expectedString) {
-		super();
 		this.name = name;
 		this.url = url;
 		this.expectedString = expectedString;
 		this.actionExecOutput = "";
 		events = new ArrayList<WebAppEvent>();
 		groups = new ArrayList<String>();
+		mkm = new MasterKeyManager();
 	}
 
 	/**
@@ -146,20 +146,20 @@ public class WebApp implements Serializable {
 	 */
 	public WebApp(String name, String url, String expectedString,
 			String executeOnOffline) {
-		super();
 		this.name = name;
 		this.url = url;
 		this.expectedString = expectedString;
 		this.executeOnOffline = executeOnOffline;
 		events = new ArrayList<WebAppEvent>();
 		groups = new ArrayList<String>();
+		mkm = new MasterKeyManager();
 	}
 
 	/**
 	 * WebApp
 	 */
 	public WebApp() {
-		super();
+		
 	}
 
 	/**
@@ -952,12 +952,13 @@ public class WebApp implements Serializable {
 	/**
 	 * initialize
 	 */
-	public final void initialize(String tempWorkingDir, String version) {
+	public void initialize(String tempWorkingDir, String version) {
 		events = new ArrayList<WebAppEvent>();
 		setlastStatus("NA");
 		setTempWorkingDir(tempWorkingDir);
 		setAppVersion(version);
 		filenameSuffix = ".html";
+		mkm = new MasterKeyManager();
 	}
 
 	/**
@@ -973,15 +974,6 @@ public class WebApp implements Serializable {
 	 */
 	public final void setActive(Boolean isActive) {
 		this.enabled = isActive;
-	}
-	
-	/**
-	 * setMasterKeyManager
-	 * Need because check of passwd based applications loaded from XML
-	 * @param mkm
-	 */
-	public final void setMasterKeyManager(MasterKeyManager mkm){
-		this.mkm = mkm;
 	}
 	
 	/**

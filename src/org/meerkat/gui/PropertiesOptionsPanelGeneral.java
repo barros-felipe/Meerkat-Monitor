@@ -32,12 +32,14 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.PropertiesLoader;
 
 public class PropertiesOptionsPanelGeneral extends JPanel {
 
+	private static Logger log = Logger.getLogger(PropertiesOptionsPanelGeneral.class);
 	private static final long serialVersionUID = -4770982518031397455L;
 
 	private Properties prop;
@@ -51,7 +53,6 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 	private boolean saveSessionExit;
 	private boolean loadSessionStart;
 	private boolean showGroupsGauge;
-
 	private HttpServer httpServer;
 
 	/**
@@ -98,8 +99,7 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		final JCheckBox checkBox_saveSessionExit = new JCheckBox("");
 		checkBox_saveSessionExit.setBounds(216, 59, 97, 23);
 
-		saveSessionExit = Boolean.parseBoolean(prop
-				.getProperty("meerkat.autosave.exit"));
+		saveSessionExit = Boolean.parseBoolean(prop.getProperty("meerkat.autosave.exit"));
 		if (saveSessionExit) {
 			checkBox_saveSessionExit.setSelected(true);
 		}
@@ -182,16 +182,20 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 				prop.setProperty("meerkat.autoload.start", String.valueOf(checkBox_loadSessionStart.isSelected()));
 				prop.setProperty("meerkat.dashboard.gauge", String.valueOf(checkBox_showGroupsGauge.isSelected()));
 				prop.setProperty("meerkat.webserver.rconfig", String.valueOf(checkBox_remoteconfig.isSelected()));
-				
+
 				// Password is managed by MasterKeyManager
 				//prop.setProperty("meerkat.password.master", String.valueOf(textField_masterPasswd.getPassword()));
-				
+
 				// Write properties file
 				pl.writePropertiesToFile(prop, propertiesFile);
-				
+
 				// Write master key
-				mkm.changeMasterKey(String.valueOf(textField_masterPasswd.getPassword()));
-				
+				try{
+					mkm.changeMasterKey(String.valueOf(textField_masterPasswd.getPassword()));
+				}catch(Exception e){
+					log.error("Error changing master key!", e);
+				}
+
 				httpServer.refreshIndex();
 				jfather.setAlwaysOnTop(false);
 
