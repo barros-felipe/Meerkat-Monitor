@@ -1,4 +1,4 @@
-# Misc
+# Misc Options
 bin/
 build/
 DOC/
@@ -16,9 +16,9 @@ ojdbc*.jar
 # Temp files
 *.*~
 
-# Eclipse
-.classpath
-.project
+# Eclipse Options
+# .classpath
+# .project
 .settings
 
 # ---- Mac OS X

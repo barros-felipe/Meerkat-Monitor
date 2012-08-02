@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/cxf/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/cxf-2.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/geronimo-activation_1.1_spec-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/geronimo-annotation_1.0_spec-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/jaxb-api-2.2.6.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/jaxb-impl-2.2.5.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/neethi-3.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/stax2-api-3.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/woodstox-core-asl-4.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/wsdl4j-1.6.2.jar"/>
+	<classpathentry kind="lib" path="lib/cxf/xmlschema-core-2.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/jdbc-driver/jtds-1.2.5.jar"/>
+	<classpathentry kind="lib" path="lib/jdbc-driver/mysql-connector-java-5.1.21-bin.jar"/>
+	<classpathentry kind="lib" path="lib/commons-email-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.2.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.2.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.2.jar"/>
+	<classpathentry kind="lib" path="lib/jasypt-1.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jsch-0.1.48.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="lib/mail-1.4.4.jar"/>
+	<classpathentry kind="lib" path="lib/servlet-api-3.0.jar"/>
+	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/xstream-1.4.2.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
