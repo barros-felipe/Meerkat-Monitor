@@ -1,34 +1,42 @@
 <?xml version="1.0" ?> 
-<project name="Meerkat-Monitor" default="dist">
+<project name="Meerkat-Monitor" default="dist" basedir=".">
 
 	<property name="mm.id" value="Meerkat-Monitor" />
 	<property name="mm.exe.file" value="${mm.id}.jar" />
 	<property name="launch4j.dir" location="external_tools/launch4j" />
-		
-	<path id="compile.classpath">
-		<fileset dir="lib">
-			<include name="**/*.jar"/>
-		</fileset>
-	</path>
-	
+	<property name="nsis.dir" location="${basedir}/external_tools/nsis" />
 	
 	<target name="init" depends="clean">
 		<tstamp>
 		    <format property="release.tag" pattern="yyyy-MM-dd" locale="pt,BR"/>
 		</tstamp>
-		
 		<mkdir dir="build/classes"/>
 		<mkdir dir="dist"/>
 		<mkdir dir="bundle"/>
+		<mkdir dir="temp"/>
 	</target>
 	
 	<target name="compile" depends="init" >
+		<!-- Copy misc files and libs -->
+		<copy file="COPYRIGHT" todir="bundle"/>
+		<copy file="LICENSE" todir="bundle"/>
+		<copy todir="bundle/lib">
+			<fileset dir="lib"/>
+		</copy>
+		
+		<!-- Classpath -->
+		<path id="compile.classpath">
+			<fileset dir="bundle/lib">
+			<include name="**/*.jar"/>
+			</fileset>
+		</path>
+		
 		<javac destdir="build/classes" debug="true" srcdir="src" includeantruntime="no">
 			<classpath refid="compile.classpath"/>
 		</javac>
 	</target>
 	
-	<target name="dist" depends="compile">
+	<target name="bundle" depends="compile">
 		<!-- Setup manifest classpath -->
 		<manifestclasspath property="jar.classpath" jarfile="bundle/${mm.exe.file}">
 			<classpath refid="compile.classpath"/>
@@ -40,35 +48,66 @@
 		</copy>
 		
 		<copy file="src/log4j.properties" todir="build/classes"/>
-				
-		<!-- app jar -->
+		
+		<!-- Create application jar -->
 		<jar destfile="bundle/${mm.exe.file}" basedir="build/classes">
 			<manifest>
-			    <attribute name="Built-By" value="pgnunes"/> 
+				<attribute name="Built-By" value="pgnunes"/> 
 				<attribute name="Build-JDK" value="${ant.java.version}"/>
 				<attribute name="Class-Path" value="${jar.classpath}"/>
 				<attribute name="Main-Class" value="org.meerkat.MeerkatMonitor"/>
 			</manifest>
 		</jar>
 		
+		<!-- Create base -->
+		<antcall target="zip_base" />
+		
+	</target>
+	
+	
+	<target name="zip_base">
+		<!-- create zip with all components -->
+		<!-- used as base for creation of installers -->
+		<zip destfile="temp/${mm.id}.zip" basedir="bundle" />
+	</target>
+	
+	<target name="clean_base">
+		<delete dir="bundle" />
+		<mkdir dir="bundle"/>
+		<unzip src="temp/${mm.id}.zip" dest="bundle"/>
+	</target>
+	
+	<target name="win-installer">
+		<!-- Get a clean base -->
+		<antcall target="clean_base"/>
+		
 		<!-- Create Win executable -->
 		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
 		<launch4j configFile="${launch4j.dir}/Meerkat-Monitor-l4j.xml" />
 		
-		<!-- create zip with all components -->
-		<zip destfile="dist/${mm.id}-${release.tag}.zip" basedir="bundle">
-			<zipfileset dir="lib" prefix="lib"/>
-			<zipfileset dir="Licenses" prefix="licenses"/>
-			<zipfileset dir="." includes="COPYRIGHT"/>
-			<zipfileset dir="." includes="LICENSE"/>
-		</zip>
+		<!-- remove the jar -->
+		<delete file="bundle/${mm.exe.file}"/>
 		
-	</target>
+		<!-- Installer -->
+		<exec executable="${nsis.dir}/makensis.exe">
+			<arg value="/V0"/>
+			<arg value="${nsis.dir}/Meerkat-Monitor-NSIS.nsi"/>
+		</exec>
+		
+		<!-- Move the installer to dist dir -->
+		<move file="${nsis.dir}/Meerkat-Monitor-Installer.exe" todir="dist"/>
+		
+	</target>		
 		
 	<target name="clean">
 		<delete dir="dist" />
 		<delete dir="build" />
 		<delete dir="bundle" />
+		<delete dir="temp" />
+	</target>
+	
+	<target name="dist" depends="bundle">
+		<antcall target="win-installer" />
 	</target>
 	
 	
