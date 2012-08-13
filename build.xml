@@ -39,7 +39,7 @@
 		</copy>
 		
 		<copy file="src/log4j.properties" todir="build/classes"/>
-		
+				
 		<!-- app jar -->
 		<jar destfile="bundle/${mm.exe.file}" basedir="build/classes">
 			<manifest>
@@ -54,6 +54,8 @@
 		<zip destfile="dist/${mm.id}-${release.tag}.zip" basedir="bundle">
 			<zipfileset dir="lib" prefix="lib"/>
 			<zipfileset dir="Licenses" prefix="licenses"/>
+			<zipfileset dir="." includes="COPYRIGHT"/>
+			<zipfileset dir="." includes="LICENSE"/>
 		</zip>
 		
 	</target>
