@@ -1,0 +1,69 @@
+<?xml version="1.0" ?> 
+<project name="Meerkat-Monitor" default="dist">
+
+	<property name="mm.id" value="Meerkat-Monitor" />
+	<property name="mm.exe.file" value="${mm.id}.jar" />
+		
+	<path id="compile.classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	
+	<target name="init" depends="clean">
+		<tstamp>
+		    <format property="release.tag" pattern="yyyy-MM-dd" locale="pt,BR"/>
+		</tstamp>
+		
+		<mkdir dir="build/classes"/>
+		<mkdir dir="dist"/>
+		<mkdir dir="bundle"/>
+	</target>
+	
+	<target name="compile" depends="init" >
+		<javac destdir="build/classes" debug="true" srcdir="src" includeantruntime="no">
+			<classpath refid="compile.classpath"/>
+		</javac>
+	</target>
+	
+	<target name="dist" depends="compile">
+		<!-- Setup manifest classpath -->
+		<manifestclasspath property="jar.classpath" jarfile="bundle/${mm.exe.file}">
+			<classpath refid="compile.classpath"/>
+		</manifestclasspath>
+		
+		<!-- Copy resources and misc. -->
+		<copy todir="build/classes/resources">
+			<fileset dir="src/resources" />
+		</copy>
+		
+		<copy file="src/log4j.properties" todir="build/classes"/>
+		
+		<!-- app jar -->
+		<jar destfile="bundle/${mm.exe.file}" basedir="build/classes">
+			<manifest>
+			    <attribute name="Built-By" value="pgnunes"/> 
+				<attribute name="Build-JDK" value="${ant.java.version}"/>
+				<attribute name="Class-Path" value="${jar.classpath}"/>
+				<attribute name="Main-Class" value="org.meerkat.MeerkatMonitor"/>
+			</manifest>
+		</jar>
+		
+		<!-- create zip with all components -->
+		<zip destfile="dist/${mm.id}-${release.tag}.zip" basedir="bundle">
+			<zipfileset dir="lib" prefix="lib"/>
+			<zipfileset dir="Licenses" prefix="licenses"/>
+		</zip>
+		
+	</target>
+		
+	<target name="clean">
+		<delete dir="dist" />
+		<delete dir="build" />
+		<delete dir="bundle" />
+	</target>
+	
+	
+	
+</project>

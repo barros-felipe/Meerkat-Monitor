@@ -1,6 +1,8 @@
 # Misc Options
 bin/
 build/
+bundle/
+dist/
 DOC/
 INSTALLER/
 setup/

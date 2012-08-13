@@ -53,6 +53,7 @@ import org.meerkat.httpServer.HttpServer;
 import org.meerkat.network.Mail;
 import org.meerkat.network.NetworkUtil;
 import org.meerkat.network.RSS;
+import org.meerkat.sampleData.SampleData;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
@@ -138,7 +139,7 @@ public class MeerkatMonitor {
 		jlog.setLevel(Level.WARNING);
 
 		// append stdout and stderr to log4j
-		//@TODO this should be replaced with an automatic error submission mechanism
+		//TODO this should be replaced with an automatic error submission mechanism
 		FileOutputStream fileOutputStream = null;
 		try {
 			fileOutputStream = new FileOutputStream("meerkat-inter-err.log");
@@ -188,8 +189,7 @@ public class MeerkatMonitor {
 		}
 
 		// Create the RSS Feed
-		rssFeed = new RSS("Meerkat Monitor", "Meerkat Monitor RSS Alerts", "",
-				tmp.getAbsolutePath());
+		rssFeed = new RSS("Meerkat Monitor", "Meerkat Monitor RSS Alerts", "", tmp.getAbsolutePath());
 
 		// Set httpclient log to error only
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
@@ -236,9 +236,8 @@ public class MeerkatMonitor {
 
 		File prop = new File(propertiesFile);
 		if (!prop.exists()) {
-			log.fatal("Cannot find properties file meerkat.properties!");
-			SimplePopup sp = new SimplePopup("Properties file not found.\nA default one has been created.");
-			sp.show();
+			log.warn("Properties file not present!");
+			// Create a new empty one
 			pL.generateDefaultPropertiesFile(propertiesFile);
 		}
 
@@ -276,10 +275,14 @@ public class MeerkatMonitor {
 			log.warn("Unable to load applications from config xml!");
 			log.warn("Considering that is empty.");
 			webAppsCollection = new WebAppCollection();
+			
+			// Add Meerkat Monitor self test WSDL demo
+			webAppsCollection.addWebApp(SampleData.getSampleWebApp());			
 		}
-
+		
 		webAppsCollection.setConfigFile(configFile);
 		webAppsCollection.initialize(version, tempWorkingDir, configFile);
+		webAppsCollection.saveConfigXMLFile();
 
 		Iterator<WebApp> waI = webAppsCollection.getWebAppCollectionIterator();
 		WebApp wapp;
