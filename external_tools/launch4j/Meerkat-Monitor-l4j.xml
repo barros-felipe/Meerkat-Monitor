@@ -1,0 +1,12 @@
+<launch4jConfig>
+  <headerType>gui</headerType>
+  <jar>../../bundle/Meerkat-Monitor.jar</jar>
+  <outfile>../../bundle/Meerkat-Monitor.exe</outfile>
+  <errTitle>Meerkat Monitor</errTitle>
+  <chdir>.</chdir>
+  <customProcName>true</customProcName>
+  <icon>../../src/resources/images/meerkat.ico</icon>
+  <jre>
+    <minVersion>1.6.0</minVersion>
+  </jre>
+</launch4jConfig>

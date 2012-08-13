@@ -3,6 +3,7 @@
 
 	<property name="mm.id" value="Meerkat-Monitor" />
 	<property name="mm.exe.file" value="${mm.id}.jar" />
+	<property name="launch4j.dir" location="external_tools/launch4j" />
 		
 	<path id="compile.classpath">
 		<fileset dir="lib">
@@ -49,6 +50,10 @@
 				<attribute name="Main-Class" value="org.meerkat.MeerkatMonitor"/>
 			</manifest>
 		</jar>
+		
+		<!-- Create Win executable -->
+		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
+		<launch4j configFile="${launch4j.dir}/Meerkat-Monitor-l4j.xml" />
 		
 		<!-- create zip with all components -->
 		<zip destfile="dist/${mm.id}-${release.tag}.zip" basedir="bundle">
