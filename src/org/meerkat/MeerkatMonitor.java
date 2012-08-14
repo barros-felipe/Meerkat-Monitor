@@ -122,13 +122,9 @@ public class MeerkatMonitor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
 		// Show splash screen
 		Thread threadSplash = new Thread(new SplashScreen(version));
 		threadSplash.start();
-
-		// SimplePopup sp = new SimplePopup("Test notification popup!");
-		// sp.showGnomeNotification();
 
 		// Set up embedded jetty log
 		Properties systemProperties = System.getProperties();
@@ -142,13 +138,14 @@ public class MeerkatMonitor {
 		//TODO this should be replaced with an automatic error submission mechanism
 		FileOutputStream fileOutputStream = null;
 		try {
-			fileOutputStream = new FileOutputStream("meerkat-inter-err.log");
+			File logDir = new File("log");
+			logDir.mkdir();
+			fileOutputStream = new FileOutputStream("log/meerkat-inter-err.log");
 		} catch (FileNotFoundException e) {
-			log.error("Faile to write internal application errors file.");
+			log.error("Failed to write internal application errors file.");
 		}
 		PrintStream printStream = new PrintStream(fileOutputStream);
-		System.setErr(printStream);
-		//System.setOut(printStream); //for redirecting stdout
+		System.setErr(printStream); //for redirecting stdout
 
 		// Register required properties
 		// NOTE: The same are reflected in method generateDefaultPropertiesFile

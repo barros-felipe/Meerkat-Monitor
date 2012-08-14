@@ -7,15 +7,13 @@
 	<property name="nsis.dir" location="${basedir}/external_tools/nsis" />
 	
 	<target name="init" depends="clean">
-		<tstamp>
-		    <format property="release.tag" pattern="yyyy-MM-dd" locale="pt,BR"/>
-		</tstamp>
 		<mkdir dir="build/classes"/>
 		<mkdir dir="dist"/>
 		<mkdir dir="bundle"/>
 		<mkdir dir="temp"/>
 	</target>
 	
+	<!-- COMPILE -->
 	<target name="compile" depends="init" >
 		<!-- Copy misc files and libs -->
 		<copy file="COPYRIGHT" todir="bundle"/>
@@ -36,6 +34,7 @@
 		</javac>
 	</target>
 	
+	<!-- CREATE BUNDLE -->
 	<target name="bundle" depends="compile">
 		<!-- Setup manifest classpath -->
 		<manifestclasspath property="jar.classpath" jarfile="bundle/${mm.exe.file}">
@@ -59,24 +58,29 @@
 			</manifest>
 		</jar>
 		
+		<!-- Create misc dir -->
+		<mkdir dir="bundle/log"/>
+		
 		<!-- Create base -->
 		<antcall target="zip_base" />
 		
 	</target>
 	
-	
+	<!-- ZIP BASE -->
 	<target name="zip_base">
 		<!-- create zip with all components -->
 		<!-- used as base for creation of installers -->
 		<zip destfile="temp/${mm.id}.zip" basedir="bundle" />
 	</target>
 	
+	<!-- CLEAN BASE -->
 	<target name="clean_base">
 		<delete dir="bundle" />
 		<mkdir dir="bundle"/>
 		<unzip src="temp/${mm.id}.zip" dest="bundle"/>
 	</target>
 	
+	<!-- CREATE WIN INSTALLER -->
 	<target name="win-installer">
 		<!-- Get a clean base -->
 		<antcall target="clean_base"/>
@@ -90,7 +94,8 @@
 		
 		<!-- Installer -->
 		<exec executable="${nsis.dir}/makensis.exe">
-			<arg value="/V0"/>
+			<arg value="/V2"/>
+			<arg value="/XSetCompressor /FINAL /SOLID lzma"/>
 			<arg value="${nsis.dir}/Meerkat-Monitor-NSIS.nsi"/>
 		</exec>
 		
@@ -99,6 +104,7 @@
 		
 	</target>		
 		
+	<!-- CLEAN -->
 	<target name="clean">
 		<delete dir="dist" />
 		<delete dir="build" />
@@ -106,10 +112,13 @@
 		<delete dir="temp" />
 	</target>
 	
+	<!-- CREATE DIST -->
 	<target name="dist" depends="bundle">
 		<antcall target="win-installer" />
+		
+		<delete dir="build" />
+		<delete dir="temp" />
 	</target>
-	
 	
 	
 </project>

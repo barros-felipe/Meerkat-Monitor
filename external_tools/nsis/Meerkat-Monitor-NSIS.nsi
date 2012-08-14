@@ -1,19 +1,32 @@
 ; Meerkat Monitor NSIS
 
+!include "MUI2.nsh"
+!define MUI_ABORTWARNING
+!define MUI_ICON "../../src/resources/installer.ico"
+!define MUI_UNICON "../../src/resources/installer.ico"
+!define MUI_SPECIALBITMAP "../../src/resources/meerkat-small.png"
+
 ;--------------------------------
+; Settings
 Name "Meerkat-Monitor"
 OutFile "Meerkat-Monitor-Installer.exe"
 InstallDir $PROGRAMFILES\Meerkat-Monitor
+RequestExecutionLevel user
 ;--------------------------------
 
-; Pages
-Page components
-Page directory
-Page instfiles
+;--------------------------------
+; Pages 
+!insertmacro MUI_PAGE_LICENSE "../../COPYRIGHT"
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
 
-UninstPage uninstConfirm
-UninstPage instfiles
-
+;--------------------------------
+; Languages 
+!insertmacro MUI_LANGUAGE "English"
+ 
 ;--------------------------------
 ; The stuff to install
 Section "Application Files (required)"
@@ -47,7 +60,6 @@ Section "Start Menu Shortcuts"
 SectionEnd
 
 ;--------------------------------
-
 ; Uninstaller
 Section "Uninstall"
   
