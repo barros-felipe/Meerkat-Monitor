@@ -111,11 +111,7 @@ public class MeerkatMonitor {
 	private static AppGroupCollection appGroupCollection = new AppGroupCollection();
 	private static String[] expectedProperties = new String[19];
 	private static MasterKeyManager mkm;
-
-	public MeerkatMonitor() {
-
-	}
-
+	
 	/**
 	 * main
 	 * 
@@ -125,7 +121,7 @@ public class MeerkatMonitor {
 		// Show splash screen
 		Thread threadSplash = new Thread(new SplashScreen(version));
 		threadSplash.start();
-
+		
 		// Set up embedded jetty log
 		Properties systemProperties = System.getProperties();
 		systemProperties.setProperty("org.eclipse.jetty.LEVEL", "WARN");
@@ -642,7 +638,7 @@ public class MeerkatMonitor {
 			i = webAppListCopy.iterator();
 			int numberOfApps = webAppsCollection.getWebAppCollectionSize();
 			int percent = 0;
-			int roundCompletedApps = 0;
+			int roundCompletedApps = 1;
 			
 			while (i.hasNext()) {
 				percent = roundCompletedApps * 100 / numberOfApps;

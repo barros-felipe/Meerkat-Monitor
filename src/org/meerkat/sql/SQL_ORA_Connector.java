@@ -19,12 +19,18 @@
 
 package org.meerkat.sql;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 public class SQL_ORA_Connector {
@@ -55,12 +61,26 @@ public class SQL_ORA_Connector {
 		this.username = username;
 		this.password = password;
 
-		try {
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-		} catch (ClassNotFoundException e) {
-			log.error("Cannot find Oracle JDBC", e);
-		}
+		// Get the jar name inside the dir
+		String odir = "lib/jdbc-driver/oracle/";
+		File ora_dir = new File(odir);
+		String[] ext = new String[] { "jar" };
+		List<File> files = (List<File>) FileUtils.listFiles(ora_dir, ext, true);
 
+		if(files.size() == 0){
+			log.error("Oracle JDBC driver jar not available.");
+		}else{
+			try{
+				File fdriver = files.get(0);
+				URL u = new URL("jar:file:"+odir+fdriver.getName()+"!/");
+				String classname = "oracle.jdbc.driver.OracleDriver";
+				URLClassLoader ucl = new URLClassLoader(new URL[] { u });
+				Driver d = (Driver)Class.forName(classname, true, ucl).newInstance();
+				DriverManager.registerDriver(new DriverJarLoader(d));
+			}catch(Exception e){
+				log.error("Oracle JDBC driver jar not available.");
+			}
+		}
 	}
 
 	/**
@@ -100,9 +120,9 @@ public class SQL_ORA_Connector {
 				try {
 					rs.close();
 				} catch (SQLException ignore) { /*
-												 * Propagate the original
-												 * exception instead of this
-												 */
+				 * Propagate the original
+				 * exception instead of this
+				 */
 				}
 			}
 		} catch (SQLException e) {
@@ -114,9 +134,9 @@ public class SQL_ORA_Connector {
 			try {
 				stmt.close();
 			} catch (SQLException ignore) { /*
-											 * Propagate the original exception
-											 * instead of this
-											 */
+			 * Propagate the original exception
+			 * instead of this
+			 */
 			}
 		}
 

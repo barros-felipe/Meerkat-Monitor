@@ -13,8 +13,6 @@
 	<classpathentry kind="lib" path="lib/cxf/woodstox-core-asl-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/cxf/wsdl4j-1.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/cxf/xmlschema-core-2.0.2.jar"/>
-	<classpathentry kind="lib" path="lib/jdbc-driver/jtds-1.2.5.jar"/>
-	<classpathentry kind="lib" path="lib/jdbc-driver/mysql-connector-java-5.1.21-bin.jar"/>
 	<classpathentry kind="lib" path="lib/commons-email-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>

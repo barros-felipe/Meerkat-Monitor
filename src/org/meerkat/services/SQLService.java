@@ -141,6 +141,7 @@ public class SQLService extends WebApp {
 			} else if (this.getDBType().equals(TYPE_MSSQL)) {
 				setCurrentResponse(((SQL_MSSQL_Connector) connector).executeQuery(this.getQuery()));
 			}
+
 		} catch (Exception e) {
 			log.error("Cannot execute query! " + this.getName(), e);
 		}
@@ -154,6 +155,12 @@ public class SQLService extends WebApp {
 		if (getCurrentResponse() == null) {
 			log.warn("Received null response from SQL query: " + this.getName());
 			setCurrentResponse("null");
+		}
+
+		// Check for unavailable driver situation
+		if(this.getCurrentResponse().contains("Exception") || 
+				this.getCurrentResponse().contains("No suitable driver found")){
+			response.setContainsSQLServiceExpectedResponse(false);
 		}
 
 		// Stop the counter

@@ -25,7 +25,10 @@
 		<!-- Classpath -->
 		<path id="compile.classpath">
 			<fileset dir="bundle/lib">
-			<include name="**/*.jar"/>
+				<include name="**/*.jar"/>
+			</fileset>
+			<fileset dir="bundle/lib/jdbc-driver">
+				<include name="**/*.jar"/>
 			</fileset>
 		</path>
 		
