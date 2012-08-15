@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Meerkat Monitor.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.meerkat.sql;
+package org.meerkat.util.sql;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -24,10 +24,10 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DriverJarLoader implements Driver  {
+public class SQLDriverJar implements Driver  {
 	private Driver driver;
 	
-	DriverJarLoader(Driver d) {
+	SQLDriverJar(Driver d) {
 		this.driver = d;
 	}
 	

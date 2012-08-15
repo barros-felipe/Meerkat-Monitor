@@ -62,6 +62,7 @@ import org.meerkat.util.PropertiesLoader;
 import org.meerkat.util.ResourceManager;
 import org.meerkat.util.XStreamMeerkatConfig;
 import org.meerkat.util.ZipUtil;
+import org.meerkat.util.sql.SQLDriverLoader;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
 import org.meerkat.webapp.WebAppResponse;
@@ -111,7 +112,7 @@ public class MeerkatMonitor {
 	private static AppGroupCollection appGroupCollection = new AppGroupCollection();
 	private static String[] expectedProperties = new String[19];
 	private static MasterKeyManager mkm;
-	
+
 	/**
 	 * main
 	 * 
@@ -121,11 +122,11 @@ public class MeerkatMonitor {
 		// Show splash screen
 		Thread threadSplash = new Thread(new SplashScreen(version));
 		threadSplash.start();
-		
+
 		// Set up embedded jetty log
 		Properties systemProperties = System.getProperties();
 		systemProperties.setProperty("org.eclipse.jetty.LEVEL", "WARN");
-		
+
 		// Set up apache cxf log
 		java.util.logging.Logger jlog = java.util.logging.Logger.getLogger("org.apache.cxf");
 		jlog.setLevel(Level.WARNING);
@@ -142,6 +143,12 @@ public class MeerkatMonitor {
 		}
 		PrintStream printStream = new PrintStream(fileOutputStream);
 		System.setErr(printStream); //for redirecting stdout
+
+		// Load SQL Drivers
+		log.info("Loading SQL Drivers...");
+		SQLDriverLoader sqlDL = new SQLDriverLoader();
+		sqlDL.loadDrivers();
+
 
 		// Register required properties
 		// NOTE: The same are reflected in method generateDefaultPropertiesFile
@@ -268,14 +275,13 @@ public class MeerkatMonitor {
 			log.warn("Unable to load applications from config xml!");
 			log.warn("Considering that is empty.");
 			webAppsCollection = new WebAppCollection();
-			
+
 			// Add Meerkat Monitor self test WSDL demo
 			webAppsCollection.addWebApp(SampleData.getSampleWebApp());			
 		}
-		
+
 		webAppsCollection.setConfigFile(configFile);
 		webAppsCollection.initialize(version, tempWorkingDir, configFile);
-		webAppsCollection.saveConfigXMLFile();
 
 		Iterator<WebApp> waI = webAppsCollection.getWebAppCollectionIterator();
 		WebApp wapp;
@@ -285,7 +291,7 @@ public class MeerkatMonitor {
 			log.info("Added: " + wapp.getName());
 			wapp.initialize(tempWorkingDir, version);
 		}
-
+		//webAppsCollection.saveConfigXMLFile();
 	}
 
 	/**
@@ -639,12 +645,12 @@ public class MeerkatMonitor {
 			int numberOfApps = webAppsCollection.getWebAppCollectionSize();
 			int percent = 0;
 			int roundCompletedApps = 1;
-			
+
 			while (i.hasNext()) {
 				percent = roundCompletedApps * 100 / numberOfApps;
 				currentWebApp = i.next();
 				log.info("["+roundCompletedApps+"/"+numberOfApps+" "+percent+"%]\t"+currentWebApp.getName());
-				
+
 				// check if the webApp is ready to monit or not - temp created in the gui
 				if (currentWebApp.isActive()) {
 					currentWebAppResponse = new WebAppResponse();
@@ -854,21 +860,21 @@ public class MeerkatMonitor {
 				// Refresh dashboard and app in every app cycle
 				webAppsCollection.writeWebAppCollectionDataFile();
 				httpWebServer.refreshIndex();
-				
+
 				// increase checked apps
 				roundCompletedApps++;
 			}
 			// reset percentage
 			percent = 0;
 			roundCompletedApps = 0;
-			
+
 			httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
 
 			// Get the time between rounds
 			properties = pL.getPropetiesFromFile(propertiesFile);
 			testPause = Integer.parseInt(properties.getProperty("meerkat.monit.test.time"));
 			pauseTime = TimeUnit.MINUTES.toMillis(testPause);
-			
+
 			log.info("Next round in: " + testPause + " minute(s) [" + pauseTime+ "ms]");
 			log.info("");
 			try {

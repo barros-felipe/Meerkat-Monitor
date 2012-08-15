@@ -382,7 +382,6 @@ public class WebAppCollection implements Serializable {
 	 * saveConfigXMLFile Save configuration file
 	 */
 	public synchronized void saveConfigXMLFile() {
-		//System.gc();
 		XStreamMeerkatConfig xstreamConfig = new XStreamMeerkatConfig();
 		XStream xstream = xstreamConfig.getXstream();
 

@@ -1,12 +1,78 @@
 <launch4jConfig>
   <headerType>gui</headerType>
-  <jar>../../bundle/Meerkat-Monitor.jar</jar>
   <outfile>../../bundle/Meerkat-Monitor.exe</outfile>
-  <errTitle>Meerkat Monitor</errTitle>
+  <jar>../../bundle/Meerkat-Monitor.jar</jar>
+  <dontWrapJar>false</dontWrapJar>
+  <errTitle>Meerkat Monitor - Error</errTitle>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl>http://meerkat-monitor.org/documentation/</supportUrl>
+  <!-- <cmdLine>text</cmdLine> -->
   <chdir>.</chdir>
+  <priority>normal</priority>
   <customProcName>true</customProcName>
+  <!-- <stayAlive>false</stayAlive> -->
   <icon>../../src/resources/images/meerkat.ico</icon>
+  
+  <!--
+  <obj>header object file</obj>
+  <lib>w32api lib</lib>
+  <var>var=text</var>
+  -->
+  
+  <!--
+  <classPath>
+    <mainClass>main class</mainClass>
+    <cp>classpath</cp>
+  </classPath>
+  -->
+  
+  <singleInstance>
+    <mutexName>Meerkat-Monitor</mutexName>
+    <windowTitle>Meerkat-Monitor</windowTitle>
+  </singleInstance> 
+  
   <jre>
+    <!-- <path>bundled JRE path</path> -->
     <minVersion>1.6.0</minVersion>
+    <!-- <maxVersion>x.x.x[_xx]</maxVersion> -->
+    <!-- <jdkPreference>jreOnly|preferJre|preferJdk|jdkOnly</jdkPreference> -->
+    <initialHeapSize>128</initialHeapSize> <!-- MB -->
+    <initialHeapPercent>50</initialHeapPercent> <!-- percent -->
+    <maxHeapSize>512</maxHeapSize> -->
+    <maxHeapPercent>100</maxHeapPercent>
+    <!-- <opt>text</opt> -->
   </jre>
+  
+  <!--
+  <splash>
+    <file>file</file>
+    <waitForWindow>true|false</waitForWindow>
+    <timeout>seconds [60]</timeout>
+    <timeoutErr>true|false</timeoutErr>
+  </splash>
+  -->
+  
+  <versionInfo>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>Version 1.0</txtFileVersion>
+    <fileDescription>Meerkat-Monitor Network Monitor Tool</fileDescription>
+    <copyright>Meerkat-Monitor.org</copyright>
+    <productVersion>0.0.0.1</productVersion>
+    <txtProductVersion>Version 0.1</txtProductVersion>
+    <productName>Meerkat-Monitor</productName>
+    <companyName>meerkat-monitor.org</companyName>
+    <internalName>Meerkat-Monitor</internalName>
+    <originalFilename>Meerkat-Monitor.exe</originalFilename>
+  </versionInfo>
+
+  
+  <!--
+  <messages>
+    <startupErr>text</startupErr>
+    <bundledJreErr>text</bundledJreErr>
+    <jreVersionErr>text</jreVersionErr>
+    <launcherErr>text</launcherErr>
+  </messages>
+  -->
+  
 </launch4jConfig>

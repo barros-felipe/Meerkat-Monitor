@@ -19,18 +19,12 @@
 
 package org.meerkat.sql;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 public class SQL_MSSQL_Connector {
@@ -61,26 +55,6 @@ public class SQL_MSSQL_Connector {
 		this.username = username;
 		this.password = password;
 
-		// Get the jar name inside the dir
-		String ddir = "lib/jdbc-driver/mssql/";
-		File sqld_dir = new File(ddir);
-		String[] ext = new String[] { "jar" };
-		List<File> files = (List<File>) FileUtils.listFiles(sqld_dir, ext, true);
-
-		if(files.size() == 0){
-			log.error("MSSQL JDBC driver jar not available.");
-		}else{
-			try{
-				File fdriver = files.get(0);
-				URL u = new URL("jar:file:"+ddir+fdriver.getName()+"!/");
-				String classname = "net.sourceforge.jtds.jdbc.Driver";
-				URLClassLoader ucl = new URLClassLoader(new URL[] { u });
-				Driver d = (Driver)Class.forName(classname, true, ucl).newInstance();
-				DriverManager.registerDriver(new DriverJarLoader(d));
-			}catch(Exception e){
-				log.error("MSSQL JDBC driver jar not available.");
-			}
-		}
 	}
 
 	/**
