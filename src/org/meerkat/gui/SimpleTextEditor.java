@@ -37,7 +37,7 @@ import javax.swing.border.EmptyBorder;
 import org.apache.log4j.Logger;
 import org.meerkat.services.WebApp;
 import org.meerkat.services.WebServiceApp;
-import org.meerkat.util.XmlFormatter;
+import org.meerkat.util.xml.XmlFormatter;
 
 public class SimpleTextEditor extends JFrame {
 

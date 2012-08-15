@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
-import org.meerkat.util.XmlFormatter;
+import org.meerkat.util.xml.XmlFormatter;
 
 public class WebAppEvent implements Serializable {
 

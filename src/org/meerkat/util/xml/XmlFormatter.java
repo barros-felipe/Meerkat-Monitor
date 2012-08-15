@@ -17,7 +17,7 @@
  * along with Meerkat Monitor.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.meerkat.util;
+package org.meerkat.util.xml;
 
 import java.io.IOException;
 import java.io.Serializable;

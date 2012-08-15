@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HTMLComponents;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.FileUtil;
-import org.meerkat.util.XStreamMeerkatConfig;
+import org.meerkat.util.xml.XStreamMeerkatConfig;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;

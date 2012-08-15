@@ -31,8 +31,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.meerkat.util.Counter;
-import org.meerkat.util.XMLComparator;
-import org.meerkat.util.XmlFormatter;
+import org.meerkat.util.xml.XMLComparator;
+import org.meerkat.util.xml.XmlFormatter;
 import org.meerkat.webapp.WebAppResponse;
 
 public class WebServiceApp extends WebApp {

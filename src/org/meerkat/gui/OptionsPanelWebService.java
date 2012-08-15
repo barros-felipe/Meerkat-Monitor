@@ -33,7 +33,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
 import org.meerkat.services.WebServiceApp;
-import org.meerkat.util.XmlFormatter;
+import org.meerkat.util.xml.XmlFormatter;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppResponse;
 
