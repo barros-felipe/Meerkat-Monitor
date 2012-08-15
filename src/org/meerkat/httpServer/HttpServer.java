@@ -326,41 +326,43 @@ public class HttpServer {
 		while (i.hasNext()) {
 			wApp = i.next();
 			if (wApp.isActive()) {
-				if (wApp.getType().equalsIgnoreCase("webapp")) {
+				// using CSS grade so we can later set a grade for each application type
+				if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_WEBAPP)) {
 					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
 							+ "<a href=\"" + "http://" + hostname + ":"
 							+ webServerPort + "/" + wApp.getDataFileName()
 							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
-				} else if (wApp.getType().equalsIgnoreCase("sql")) {
-					responseStatus += "\n<tr class=\"gradeB\">\n" + "<td>\n"
+				
+				} else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SQL)) {
+					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
 							+ "<a href=\"" + "http://" + hostname + ":"
 							+ webServerPort + "/" + wApp.getDataFileName()
 							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
 				}
 
-				else if (wApp.getType().equalsIgnoreCase("webservice")) {
-					responseStatus += "\n<tr class=\"gradeC\">\n" + "<td>\n"
+				else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_WEBSERVICE)) {
+					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
 							+ "<a href=\"" + "http://" + hostname + ":"
 							+ webServerPort + "/" + wApp.getDataFileName()
 							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
 				}
 
-				else if (wApp.getType().equalsIgnoreCase("socketservice")) {
-					responseStatus += "\n<tr class=\"gradeD\">\n" + "<td>\n"
+				else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SOCKET)) {
+					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
 							+ "<a href=\"" + "http://" + hostname + ":"
 							+ webServerPort + "/" + wApp.getDataFileName()
 							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
 				}
 
-				else if (wApp.getType().equalsIgnoreCase("ssh")) {
-					responseStatus += "\n<tr class=\"gradeD\">\n" + "<td>\n"
+				else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SSH)) {
+					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
 							+ "<a href=\"" + "http://" + hostname + ":"
 							+ webServerPort + "/" + wApp.getDataFileName()
 							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
 				}
 
 				else {
-					responseStatus += "\n<tr class=\"gradeE\">\n" + "<td>\n"
+					responseStatus += "\n<tr class=\"gradeC\">\n" + "<td>\n"
 							+ "<a href=\"" + "http://" + hostname + ":"
 							+ webServerPort + "/" + wApp.getDataFileName()
 							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
