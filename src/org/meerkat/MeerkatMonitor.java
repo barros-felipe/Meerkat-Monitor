@@ -137,7 +137,7 @@ public class MeerkatMonitor {
 		try {
 			File logDir = new File("log");
 			logDir.mkdir();
-			fileOutputStream = new FileOutputStream("log/meerkat-inter-err.log");
+			fileOutputStream = new FileOutputStream("log/meerkat-internal.log");
 		} catch (FileNotFoundException e) {
 			log.error("Failed to write internal application errors file.");
 		}
@@ -276,8 +276,10 @@ public class MeerkatMonitor {
 			log.warn("Considering that is empty.");
 			webAppsCollection = new WebAppCollection();
 
-			// Add Meerkat Monitor self test WSDL demo
-			webAppsCollection.addWebApp(SampleData.getSampleWebApp());
+			// Add Meerkat Monitor self test demo data
+			webAppsCollection.addWebApp(SampleData.getSampleWebApp_SelfTestWSDL());
+			webAppsCollection.addWebApp(SampleData.getSampleWebService_SelfWSgetVersion(version));
+			webAppsCollection.addWebApp(SampleData.getSampleSocketService_SelfHTTP_Port());
 		}
 
 		webAppsCollection.setConfigFile(configFile);

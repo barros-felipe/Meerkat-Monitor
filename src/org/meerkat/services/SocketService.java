@@ -95,7 +95,7 @@ public class SocketService extends WebApp {
 			response.setPageLoadTime(c.getDurationSeconds());
 			return response;
 		} catch (IOException e) {
-			log.error("IOException connecting to " + server, e);
+			log.error("IOException connecting to "+ server +" port "+port);
 			response.setHttpTextResponse(e.toString());
 			response.setPageLoadTime("N/A");
 			setCurrentResponse(e.toString());

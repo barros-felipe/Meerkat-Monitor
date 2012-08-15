@@ -31,7 +31,7 @@ import javax.jws.soap.SOAPBinding.Use;
 
 public interface MeerkatWebServiceManager{
 
-	@WebMethod(operationName = "getVersion")
+	@WebMethod(operationName = "getVersion", action = "getversion")
 	String getVersion();
 
 	@WebMethod(operationName = "changeMasterKey", action = "changeMasterKey")

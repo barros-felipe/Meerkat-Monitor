@@ -227,7 +227,7 @@ public class WebServiceApp extends WebApp {
 				response.setContainsWebServiceExpectedResponse(true);
 			}
 		} catch (Exception e) {
-			log.error("Error parsing XML for comparison!", e);
+			log.error("Error parsing XML for comparison!");
 		}
 
 		return response;
