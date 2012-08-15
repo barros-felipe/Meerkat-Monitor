@@ -259,7 +259,7 @@ public class MeerkatMonitor {
 		// Create empty config file if not present
 		File config = new File(configFile);
 		if (!config.exists()) {
-			fu.createEmptyFile(configFile);
+			fu.createEmptyXMLConfigFile(configFile);
 		}
 
 		try {
@@ -277,7 +277,7 @@ public class MeerkatMonitor {
 			webAppsCollection = new WebAppCollection();
 
 			// Add Meerkat Monitor self test WSDL demo
-			webAppsCollection.addWebApp(SampleData.getSampleWebApp());			
+			webAppsCollection.addWebApp(SampleData.getSampleWebApp());
 		}
 
 		webAppsCollection.setConfigFile(configFile);
@@ -291,7 +291,6 @@ public class MeerkatMonitor {
 			log.info("Added: " + wapp.getName());
 			wapp.initialize(tempWorkingDir, version);
 		}
-		//webAppsCollection.saveConfigXMLFile();
 	}
 
 	/**
@@ -420,6 +419,8 @@ public class MeerkatMonitor {
 							saveSession();
 							log.info("Session saved\n");
 						}
+						// Save XML Config File
+						webAppsCollection.saveConfigXMLFile();
 						System.exit(0);
 					}
 				};
@@ -534,8 +535,7 @@ public class MeerkatMonitor {
 		// Refresh webapp's TimeLine
 		webAppsCollection.writeWebAppCollectionDataFile();
 		systray.addSystrayIcon();
-		log.info("Save Session: saved "
-				+ webAppsCollection.getWebAppCollectionSize() + " objects");
+		log.info("Save Session: saved "+ webAppsCollection.getWebAppCollectionSize() + " objects");
 	}
 
 	/**
@@ -607,6 +607,7 @@ public class MeerkatMonitor {
 	 * startMonitor
 	 */
 	private static void startMonitor() {
+		webAppsCollection.saveConfigXMLFile();
 		httpWebServer.refreshIndex();
 
 		log.info("");

@@ -212,5 +212,27 @@ public class FileUtil implements Serializable {
 		}
 
 	}
+	
+	/**
+	 * createEmptyXMLConfigFile
+	 * @param file
+	 */
+	public final void createEmptyXMLConfigFile(String file) {
+		String contents = "<meerkat-monitor></meerkat-monitor>";
+		File f = new File(file);
+		if (f.exists() && f.canWrite()) {
+			f.delete();
+		}
+
+		FileOutputStream out;
+		try {
+			out = new FileOutputStream(file);
+			out.write(contents.getBytes(), 0, contents.getBytes().length);
+		} catch (Exception e) {
+			log.error("Failed to create file: " + file);
+		}
+
+	}
+	
 
 }
