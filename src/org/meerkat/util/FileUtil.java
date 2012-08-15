@@ -21,14 +21,16 @@ package org.meerkat.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 public class FileUtil implements Serializable {
@@ -118,12 +120,47 @@ public class FileUtil implements Serializable {
 	 * @param contents
 	 * @throws IOException
 	 */
+	/**
+	 * On Windows platforms may occur error the error: 
+	 * "The requested operation cannot be performed on a file with a user-mapped section open"
+	 *
+	 * This is a known bug: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
+	 * (should be used the implementation below...) 
+	
 	public final void writeToFile(String filename, String contents) {
 		File outFile = new File(filename);
 		try {
 			FileUtils.writeStringToFile(outFile, contents);
 		} catch (IOException e) {
-			log.error("IO Error writting file: " + filename, e);
+			log.error("IO Error writing file: " + filename +"("+e.getMessage()+")");
+		}
+	}
+	*/
+
+	/**
+	 * writeToFileNIO
+	 * @param filename
+	 * @param contents
+	 */
+	public final void writeToFile(String filename, String contents){
+		RandomAccessFile destFile = null;
+		try {
+			destFile = new RandomAccessFile (filename, "rw");
+		} catch (FileNotFoundException e) {
+			log.error("Error accessing file: "+filename+" ("+e.getMessage()+")");
+		}
+
+		ByteBuffer buf = ByteBuffer.allocate(contents.length());
+		FileChannel outChannel = destFile.getChannel();
+		
+		buf.put(contents.getBytes());
+		buf.flip(); //buffer set for read
+		
+		try {
+			outChannel.write(buf);
+			destFile.close();
+		} catch (IOException e) {
+			log.error("Error writing to file "+filename+" ("+e.getMessage()+")");
 		}
 
 	}
@@ -212,7 +249,7 @@ public class FileUtil implements Serializable {
 		}
 
 	}
-	
+
 	/**
 	 * createEmptyXMLConfigFile
 	 * @param file
@@ -233,6 +270,6 @@ public class FileUtil implements Serializable {
 		}
 
 	}
-	
+
 
 }
