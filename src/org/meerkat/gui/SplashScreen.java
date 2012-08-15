@@ -49,8 +49,7 @@ public class SplashScreen extends JWindow implements Runnable {
 
 		JLabel meerkatLogo = new JLabel("");
 		meerkatLogo.setBounds(52, 33, 260, 30);
-		meerkatLogo.setIcon(new ImageIcon(MainWindow.class
-				.getResource("/resources/meerkat.png")));
+		meerkatLogo.setIcon(new ImageIcon(MainWindow.class.getResource("/resources/meerkat.png")));
 		container.add(meerkatLogo);
 
 		JLabel meerkatIco = new JLabel("");
