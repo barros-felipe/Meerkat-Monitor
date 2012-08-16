@@ -393,7 +393,6 @@ public class MeerkatMonitor {
 								"Load Session",
 								"Please wait. It may take several minutes to load data...\nYou'll be notified when finished.");
 						MeerkatMonitor.loadSession();
-						httpWebServer.refreshIndex(); // Update dashboard
 						systray.showMessage(
 								"Load Session",
 								"Loaded session successfully: "
@@ -567,8 +566,7 @@ public class MeerkatMonitor {
 		}
 
 		// Refresh values in the WebApps
-		Iterator<WebApp> refreshT = webAppsCollection
-				.getWebAppCollectionIterator();
+		Iterator<WebApp> refreshT = webAppsCollection.getWebAppCollectionIterator();
 		WebApp wa;
 		while (refreshT.hasNext()) {
 			wa = refreshT.next();
@@ -582,8 +580,10 @@ public class MeerkatMonitor {
 		// Generate groups
 		appGroupCollection = new AppGroupCollection();
 		generateGroups();
-
-		httpWebServer.refreshIndex();
+		
+		// Update references
+		httpWebServer.setDataSources(webAppsCollection, appGroupCollection); 
+		httpWebServer.refreshIndex(); // Update dashboard
 
 		systray.addSystrayIcon();
 		log.info("Load Session: loaded "+ webAppsCollection.getWebAppCollectionSize() + " objects");
