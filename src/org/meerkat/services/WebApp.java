@@ -77,7 +77,7 @@ public class WebApp implements Serializable {
 	@XStreamOmitField
 	public static String TYPE_WEBSERVICE = "WEBSERVICE";
 	@XStreamOmitField
-	public static String TYPE_SQL = "SQL";
+	public static String TYPE_DATABASE = "DATABASE";
 	@XStreamOmitField
 	public static String TYPE_SOCKET = "SOCKET";
 	@XStreamOmitField
@@ -662,7 +662,7 @@ public class WebApp implements Serializable {
 	 * setTypeSQL
 	 */
 	public final void setTypeSQL() {
-		this.type = TYPE_SQL;
+		this.type = TYPE_DATABASE;
 	}
 
 	/**

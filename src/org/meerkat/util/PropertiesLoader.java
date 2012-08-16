@@ -169,6 +169,7 @@ public class PropertiesLoader implements Serializable{
 		prop.put("meerkat.webserver.rconfig", "true");
 		prop.put("meerkat.password.master", "changeMe");
 		prop.put("meerkat.webserver.logaccess", "true");
+		prop.put("meerkat.webserver.showapptype", "true");
 
 		Properties defaultProperties = new Properties();
 		defaultProperties.putAll(prop);

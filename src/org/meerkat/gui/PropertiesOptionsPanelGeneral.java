@@ -136,7 +136,7 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		add(checkBox_showGroupsGauge);
 
 		// Allow remote access config
-		JLabel lblAllowRemoteAccess = new JLabel("Allow remote access config");
+		JLabel lblAllowRemoteAccess = new JLabel("Allow remote access to config");
 		lblAllowRemoteAccess.setBounds(10, 138, 200, 14);
 		add(lblAllowRemoteAccess);
 
@@ -150,13 +150,28 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		}
 		add(checkBox_remoteconfig);
 
+		// Show application type on dashboard
+		JLabel lblAppTypeDashboard = new JLabel("Show application type");
+		lblAppTypeDashboard.setBounds(10, 163, 200, 14);
+		add(lblAppTypeDashboard);
+
+		final JCheckBox checkBox_showAppType = new JCheckBox();
+		checkBox_showAppType.setBounds(216, 159, 97, 23);
+		add(checkBox_showAppType);
+
+		boolean showAppType = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.showapptype"));
+		if (showAppType) {
+			checkBox_showAppType.setSelected(true);
+		}
+		add(checkBox_showAppType);
+
 		// Allow web access to log
 		JLabel lblAllowWebAccessLog = new JLabel("Allow web access log");
-		lblAllowWebAccessLog.setBounds(10, 163, 200, 14);
+		lblAllowWebAccessLog.setBounds(10, 188, 200, 14);
 		add(lblAllowWebAccessLog);
 
 		final JCheckBox checkBox_weblog = new JCheckBox();
-		checkBox_weblog.setBounds(216, 159, 97, 23);
+		checkBox_weblog.setBounds(216, 184, 97, 23);
 		add(checkBox_weblog);
 
 		boolean webLog = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.logaccess"));
@@ -167,17 +182,16 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 
 		// Master Key (encrypt passwords)
 		JLabel lblMasterPasswordencrypt = new JLabel("Master Key (encrypt passwords)");
-		lblMasterPasswordencrypt.setBounds(10, 191, 200, 14);
+		lblMasterPasswordencrypt.setBounds(10, 213, 200, 14);
 		add(lblMasterPasswordencrypt);
 
-		//textField_masterPasswd = new JPasswordField(prop.getProperty("meerkat.password.master"));
 		textField_masterPasswd = new JPasswordField(mkm.getMasterKey());
-		textField_masterPasswd.setBounds(220, 188, 86, 20);
+		textField_masterPasswd.setBounds(220, 210, 86, 20);
 		add(textField_masterPasswd);
 		textField_masterPasswd.setColumns(10);
 
 		JLabel lblNewLabel_1 = new JLabel("(Visible in meerkat.properties)");
-		lblNewLabel_1.setBounds(316, 191, 159, 14);
+		lblNewLabel_1.setBounds(316, 213, 159, 14);
 		add(lblNewLabel_1);
 
 		final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
@@ -186,7 +200,6 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		final JButton btnSave = new JButton("Save");
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-
 				btnSave.setEnabled(false);
 				setCursor(WAIT_CURSOR);
 
@@ -198,8 +211,9 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 				prop.setProperty("meerkat.dashboard.gauge", String.valueOf(checkBox_showGroupsGauge.isSelected()));
 				prop.setProperty("meerkat.webserver.rconfig", String.valueOf(checkBox_remoteconfig.isSelected()));
 				prop.setProperty("meerkat.webserver.logaccess", String.valueOf(checkBox_weblog.isSelected()));
+				prop.setProperty("meerkat.webserver.showapptype", String.valueOf(checkBox_showAppType.isSelected()));
 
-				// Password is managed by MasterKeyManager
+				// Password is managed by MasterKeyManager - not set directly
 				//prop.setProperty("meerkat.password.master", String.valueOf(textField_masterPasswd.getPassword()));
 
 				// Write properties file

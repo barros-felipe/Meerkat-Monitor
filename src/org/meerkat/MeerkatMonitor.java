@@ -110,7 +110,7 @@ public class MeerkatMonitor {
 	private static String tempWorkingDir = System.getProperty("java.io.tmpdir")	+ System.getProperty("file.separator") + "meerkat/";
 	private static WebAppCollection webAppsCollection = new WebAppCollection();
 	private static AppGroupCollection appGroupCollection = new AppGroupCollection();
-	private static String[] expectedProperties = new String[20];
+	private static String[] expectedProperties = new String[21];
 	private static MasterKeyManager mkm;
 
 	/**
@@ -173,6 +173,7 @@ public class MeerkatMonitor {
 		expectedProperties[17] = "meerkat.webserver.rconfig";
 		expectedProperties[18] = "meerkat.password.master";
 		expectedProperties[19] = "meerkat.webserver.logaccess";
+		expectedProperties[20] = "meerkat.webserver.showapptype";
 
 		// Prepare temporary working directory
 		log.info("Setting temp dir: " + tempWorkingDir);

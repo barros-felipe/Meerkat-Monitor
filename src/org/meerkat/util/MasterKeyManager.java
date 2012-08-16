@@ -93,7 +93,7 @@ public class MasterKeyManager implements Serializable{
 				currPasswd = oldTextEncrypt.decrypt(passwd);
 				app.setPasswd(currPasswd);
 
-			}else if(type.equals(WebApp.TYPE_SQL)){ // If SQL we need to update the encrypted password
+			}else if(type.equals(WebApp.TYPE_DATABASE)){ // If SQL we need to update the encrypted password
 				SQLService app = (SQLService)curr;
 				passwd = app.getPassword();
 				currPasswd = oldTextEncrypt.decrypt(passwd);

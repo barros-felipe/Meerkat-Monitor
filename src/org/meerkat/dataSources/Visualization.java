@@ -139,7 +139,7 @@ public class Visualization {
 				+ "<th>Availability (%)</th>\n"
 				+ "<th>Latency (ms)</th>\n" + "<th>Load Time (s)</th>\n";
 
-		if (!webApp.getType().equals(WebApp.TYPE_SQL)
+		if (!webApp.getType().equals(WebApp.TYPE_DATABASE)
 				&& !webApp.getType().equals(WebApp.TYPE_SOCKET)
 				&& !webApp.getType().equals(WebApp.TYPE_SSH)) {
 			dataTableBegin += "<th>HTTP Status</th>\n";
@@ -177,7 +177,7 @@ public class Visualization {
 					+ "<td class=\"center\">" + webAppEvent.getPageLoadTime()
 					+ "</td>\n";
 
-			if (!webApp.getType().equals(WebApp.TYPE_SQL)
+			if (!webApp.getType().equals(WebApp.TYPE_DATABASE)
 					&& !webApp.getType().equals(WebApp.TYPE_SOCKET)
 					&& !webApp.getType().equals(WebApp.TYPE_SSH)) {
 				dataTableData += "<td class=\"center\">"

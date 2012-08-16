@@ -329,7 +329,7 @@ public class MainWindow {
 				groupWebApps.add(webApp);
 			} else if (currentWebApp.getType().equals(WebApp.TYPE_WEBSERVICE)) {
 				groupWebServices.add(webApp);
-			} else if (currentWebApp.getType().equals(WebApp.TYPE_SQL)) {
+			} else if (currentWebApp.getType().equals(WebApp.TYPE_DATABASE)) {
 				groupDatabases.add(webApp);
 			} else if (currentWebApp.getType().equals(WebApp.TYPE_SOCKET)) {
 				groupSocketServices.add(webApp);
@@ -414,7 +414,7 @@ public class MainWindow {
 								appListJpanelContainer.add(wsOptionsPanel);
 								wsOptionsPanel.revalidate();
 								wsOptionsPanel.repaint();
-							} else if (clickedWebAppLeaf.getType().equalsIgnoreCase(WebApp.TYPE_SQL)) {
+							} else if (clickedWebAppLeaf.getType().equalsIgnoreCase(WebApp.TYPE_DATABASE)) {
 								appListJpanelContainer.remove(appOptionsPanel);
 								appListJpanelContainer.remove(wsOptionsPanel);
 								appListJpanelContainer.remove(sqlOptionsPanel);

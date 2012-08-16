@@ -119,76 +119,7 @@ public class HttpServer {
 	 * 
 	 * @return
 	 */
-	private String getTopContent() {
-		String topContent = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
-				+ "<html><head>\n"
-				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
-				+ "<meta http-equiv=\"refresh\" content=\"30\" />\n"
-				+ "<title>Meerkat Monitor</title>\n"
-				+ "<link rel=\"icon\"  href=\"favicon.ico\"  type=\"image/x-icon\" />\n"
-				+ "<link rel=\"alternate\" type=\"application/rss+xml\"  href=\""
-				+ rssResource
-				+ "\"> \n"
-				+ "<style type=\"text/css\" title=\"currentStyle\">\n"
-				+ "	@import \"resources/demo_page.css\";\n"
-				+ "	@import \"resources/demo_table_jui.css\";\n"
-				+ "	@import \"resources/jquery-ui-1.8.4.custom.css\";\n"
-				+ "</style>\n"
-
-				+ "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.js\"></script>\n"
-				+ "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.dataTables.js\"></script>\n"
-
-				+ "\n<script type=\"text/javascript\" charset=\"utf-8\">\n"
-				+ "$(document).ready(function() {\n"
-				+ "	oTable = $('#example').dataTable({\n"
-				+ "		\"bJQueryUI\": true,\n"
-				+ "		\"sPaginationType\": \"full_numbers\",\n"
-				+ "		\"bStateSave\": true\n"
-				+ "});\n"
-				+ "} );\n"
-				+ "</script>\n"
-
-				+ "</head>\n"
-				+ "<body id=\"dt_example\">\n"
-				+ "<div id=\"container\">\n"
-
-				+ "<div class=\"full_width big\">\n"
-				+ "<a href=\"http://meerkat-monitor.org/\" style=\"text-decoration:none\" target=\"_blank\">\n"
-				+ "<img src=\"resources/meerkat-small.png\" alt=\"Meerkat Monitor Logo\" border=\"0\" align=\"absmiddle\" />"
-				+ "<img src=\"resources/meerkat.png\" alt=\"Meerkat Monitor\" border=\"0\" align=\"absmiddle\" /></a>\n"
-				+ "</div>\n"
-
-				+ "<div class=\"full_width big\">\n"
-				+ "<a href=\""
-				+ timeLineFile
-				+ "\"><img src=\"resources/tango_timeline.png\" alt=\"Timeline\" align=\"right\" style=\"border-style: none\"/></a>\n"
-				+ "<a href=\""
-				+ rssResource
-				+ "\"><img src=\"resources/tango_rss.png\" alt=\"RSS\" align=\"right\" style=\"border-style: none\"/></a> \n"
-				+ "</div>\n"
-
-				+ "<div class=\"demo_jui\">\n"
-				+ "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"display\" id=\"example\">\n"
-				+ "<thead>\n"
-
-				+ "<tr>\n"
-				+ "	<th>Web Application</th>\n"
-				+ "	<th>Availability (%)</th>\n"
-				+ "	<th>Crit. Events</th>\n"
-				+ "	<th>Av. Latency (ms)</th>\n"
-				+ "	<th>Av. Load Time (s)</th>\n"
-				+ "	<th>Status</th>\n"
-				+ "</tr>\n" + "</thead>\n" + "<tbody>\n";
-
-		return topContent;
-	}
-
-	/**
-	 * getTopContent
-	 * 
-	 * @return
-	 */
-	private String getTopContentWithGauge(AppGroupCollection agc) {
+	private String getTopContent(AppGroupCollection agc, boolean showGauge, boolean showAppType) {
 		String topContent = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 				+ "<html><head>\n"
 				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
@@ -202,11 +133,12 @@ public class HttpServer {
 				+ "	@import \"resources/demo_page.css\";\n"
 				+ "	@import \"resources/demo_table_jui.css\";\n"
 				+ "	@import \"resources/jquery-ui-1.8.4.custom.css\";\n"
-				+ "</style>\n"
+				+ "</style>\n";
 
-				// Gauge
-				+ "<script type='text/javascript' src='http://www.google.com/jsapi'></script>\n"
-				+ "<script type=\"text/javascript\">google.load('visualization', '1', {packages: ['gauge']});</script>\n"
+		// Gauge		
+		if(showGauge){
+			topContent += "<script type='text/javascript' src='http://www.google.com/jsapi'></script>\n"
+					+ "<script type=\"text/javascript\">google.load('visualization', '1', {packages: ['gauge']});</script>\n"
 
 				+ "<script type=\"text/javascript\">\n"
 				+ "function drawVisualization() {\n"
@@ -221,10 +153,10 @@ public class HttpServer {
 				+ "draw(data, options);\n"
 				+ " }\n"
 				+ "google.setOnLoadCallback(drawVisualization);\n"
-				+ "</script>\n"
-				// Gauge end
+				+ "</script>\n";
+		}
 
-				+ "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.js\"></script>\n"
+		topContent += "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.js\"></script>\n"
 				+ "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.dataTables.js\"></script>\n"
 
 				+ "\n<script type=\"text/javascript\" charset=\"utf-8\">\n"
@@ -245,13 +177,14 @@ public class HttpServer {
 				+ "<a href=\"http://meerkat-monitor.org/\" style=\"text-decoration:none\" target=\"_blank\">\n"
 				+ "<img src=\"resources/meerkat-small.png\" alt=\"Meerkat Monitor Logo\" border=\"0\" align=\"absmiddle\" />"
 				+ "<img src=\"resources/meerkat.png\" alt=\"Meerkat Monitor\" border=\"0\" align=\"absmiddle\" /></a>\n"
-				+ "</div>\n"
+				+ "</div>\n";
 
-				// Gauge
-				+ "<div id=\"visualization\"></div>\n"
-				// Gauge end
+		// Gauge
+		if(showGauge){
+			topContent += "<div id=\"visualization\"></div>\n";
+		}
 
-				+ "<div class=\"full_width big\">\n"
+		topContent += "<div class=\"full_width big\">\n"
 				+ "<a href=\""
 				+ timeLineFile
 				+ "\"><img src=\"resources/tango_timeline.png\" alt=\"Timeline\" align=\"right\" style=\"border-style: none\"/></a>\n"
@@ -265,8 +198,14 @@ public class HttpServer {
 				+ "<thead>\n"
 
 				+ "<tr>\n"
-				+ "	<th>Web Application</th>\n"
-				+ "	<th>Availability (%)</th>\n"
+				+ "	<th>Web Application</th>\n";
+
+		// Show Application type if active
+		if(showAppType){
+			topContent += "	<th>Type</th>\n";
+		}
+
+		topContent += "	<th>Availability (%)</th>\n"
 				+ "	<th>Crit. Events</th>\n"
 				+ "	<th>Av. Latency (ms)</th>\n"
 				+ "	<th>Av. Load Time (s)</th>\n"
@@ -295,18 +234,23 @@ public class HttpServer {
 		// Refresh the index
 		Iterator<WebApp> i = wac.getWebAppCollectionIterator();
 		WebApp wApp;
+		
+		// Get properties
+		PropertiesLoader pl = new PropertiesLoader();
+		prop = pl.getPropetiesFromFile(propertiesFile);
+		
+		// Check if application type before name is activated
+		boolean appTypePrefixEnabled = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.showapptype"));
+		String appPrefix = "";
 
 		// Check if we should enable home groups gauge
 		String responseStatus;
 
-		PropertiesLoader pl = new PropertiesLoader();
-		prop = pl.getPropetiesFromFile(propertiesFile);
-
 		displayGroupGauge = Boolean.parseBoolean(prop.getProperty("meerkat.dashboard.gauge"));
 		if (displayGroupGauge) {
-			responseStatus = getTopContentWithGauge(agc);
+			responseStatus = getTopContent(agc, displayGroupGauge, appTypePrefixEnabled);
 		} else {
-			responseStatus = getTopContent();
+			responseStatus = getTopContent(agc, false, appTypePrefixEnabled);
 		}
 
 		// Check if remote access to config is allowed
@@ -348,7 +292,7 @@ public class HttpServer {
 							+ webServerPort + "/" + wApp.getDataFileName()
 							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
 
-				} else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SQL)) {
+				} else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_DATABASE)) {
 					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
 							+ "<a href=\"" + "http://" + hostname + ":"
 							+ webServerPort + "/" + wApp.getDataFileName()
@@ -384,10 +328,19 @@ public class HttpServer {
 				}
 
 				/**
+				 * Show Application type if active
+				 */
+				if(appTypePrefixEnabled){
+					appPrefix = "<small>"+wApp.getType()+"</small>";
+					responseStatus += "<td class=\"center\">" + appPrefix;
+					responseStatus += "</td>\n";
+				}
+
+				/**
 				 * Availability
 				 */
-				responseStatus += "<td class=\"center\">"
-						+ wApp.getAvailability();
+				responseStatus += "<td class=\"center\">" + wApp.getAvailability();
+
 				// trend
 				if (wApp.getNumberOfTests() > 1) {
 					if (wApp.getAvailabilityTrend() > 0) {
