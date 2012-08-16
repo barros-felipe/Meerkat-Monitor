@@ -210,7 +210,8 @@ public class Visualization {
 		FileUtil fu = new FileUtil();
 		HTMLComponents htmlc = new HTMLComponents(appVersion);
 
-		String htmlFileContentsTop = "<html>\n"
+		String htmlFileContentsTop = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
+				+"<html>\n"
 				+ "<head>\n"
 				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n"
 				+ "<title>Meerkat - "
