@@ -104,18 +104,13 @@ public class Visualization {
 
 		if (webApp.getlastStatus().equalsIgnoreCase("ONLINE")) {
 			iconStatus = "<img src=\"resources/tango_blue.gif\" alt=\"Online\" align=\"absmiddle\" />&nbsp;"
-					+ webApp.getName() + "</h1>\n";
+					+ webApp.getName() + "\n";
 		} else {
 			iconStatus = "<img src=\"resources/tango_red_anime.gif\" alt=\"Offline\" align=\"absmiddle\" />&nbsp;"
-					+ webApp.getName() + "</h1>\n";
+					+ webApp.getName() + "\n";
 		}
 
-		String dataTableBegin = "<style type=\"text/css\" title=\"currentStyle\">\n"
-				+ "@import \"resources/demo_page.css\";\n"
-				+ "@import \"resources/demo_table_jui.css\";\n"
-				+ "@import \"resources/jquery-ui-1.8.4.custom.css\";\n"
-				+ "</style>\n"
-				+ "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.js\"></script>\n"
+		String dataTableBegin = "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.js\"></script>\n"
 				+ "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.dataTables.js\"></script>\n"
 				+ "<script type=\"text/javascript\" charset=\"utf-8\">\n"
 				+ "$(document).ready(function() {\n"
@@ -127,11 +122,12 @@ public class Visualization {
 				+ "} );\n"
 				+ "</script>\n"
 				+ "</head>\n"
-				+ "<body>"
-				+ "<div>\n"
+				+ "<body id=\"dt_example\">"
+				+ "<div id=\"container\">\n"
+				+ "<a href=\"javascript:history.go(-1)\"><img src=\"resources/tango-previous.png\" border=\"0\"></a>\n"
 				+ "<h1>"
 				+ iconStatus
-				+ "</h1></div>"
+				+ "</h1>"
 				+ "<div id=\"chart_div\" style=\"width: 900px; height: 300px;\"></div>\n"
 				+ "\n"
 				+ "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"display\" id=\"example\">\n"
@@ -143,8 +139,9 @@ public class Visualization {
 				+ "<th>Availability (%)</th>\n"
 				+ "<th>Latency (ms)</th>\n" + "<th>Load Time (s)</th>\n";
 
-		if (!webApp.getType().equals("sql")
-				&& !webApp.getType().equals("socketservice")) {
+		if (!webApp.getType().equals(WebApp.TYPE_SQL)
+				&& !webApp.getType().equals(WebApp.TYPE_SOCKET)
+				&& !webApp.getType().equals(WebApp.TYPE_SSH)) {
 			dataTableBegin += "<th>HTTP Status</th>\n";
 		}
 
@@ -180,8 +177,9 @@ public class Visualization {
 					+ "<td class=\"center\">" + webAppEvent.getPageLoadTime()
 					+ "</td>\n";
 
-			if (!webApp.getType().equals("sql")
-					&& !webApp.getType().equals("socketservice")) {
+			if (!webApp.getType().equals(WebApp.TYPE_SQL)
+					&& !webApp.getType().equals(WebApp.TYPE_SOCKET)
+					&& !webApp.getType().equals(WebApp.TYPE_SSH)) {
 				dataTableData += "<td class=\"center\">"
 						+ webAppEvent.getHttpStatusCode() + "</td>\n";
 			}
@@ -217,8 +215,14 @@ public class Visualization {
 				+ "<title>Meerkat - "
 				+ webApp.getName()
 				+ "</title>\n"
-				+ "<link rel=\"icon\"  href=\"/favicon.ico\"  type=\"image/x-icon\"></link>\n"
+				+ "<link rel=\"icon\"  href=\"/favicon.ico\"  type=\"image/x-icon\" />\n"
 				+ "<script type='text/javascript' src='http://www.google.com/jsapi'></script>\n"
+
+				+ "<style type=\"text/css\" title=\"currentStyle\">\n"
+				+ "	@import \"resources/demo_page.css\";\n"
+				+ "	@import \"resources/demo_table_jui.css\";\n"
+				+ "	@import \"resources/jquery-ui-1.8.4.custom.css\";\n"
+				+ "</style>\n"
 
 				+ "<script language=\"javascript\" type=\"text/javascript\">\n"
 				+ "function popitup(url) {\n"
@@ -239,9 +243,7 @@ public class Visualization {
 				+ "	margin: 10px auto;\n"
 				+ "	padding: 0;\n"
 				+ "}\n"
-				+ "</style>\n"
-				+ "<div id=\"container\">"
-				+ "<a href=\"javascript:history.go(-1)\"><img src=\"resources/tango-previous.png\" border=\"0\"></a>\n";
+				+ "</style>\n";
 
 		String htmlFileContentsEnd = "\n" + htmlc.getFooter()
 				+ "</div></body>\n" + "</html>\n";

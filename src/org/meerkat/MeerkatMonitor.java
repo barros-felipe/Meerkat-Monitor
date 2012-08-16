@@ -580,7 +580,7 @@ public class MeerkatMonitor {
 		// Generate groups
 		appGroupCollection = new AppGroupCollection();
 		generateGroups();
-		
+
 		// Update references
 		httpWebServer.setDataSources(webAppsCollection, appGroupCollection); 
 		httpWebServer.refreshIndex(); // Update dashboard

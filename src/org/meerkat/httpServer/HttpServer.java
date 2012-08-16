@@ -122,10 +122,10 @@ public class HttpServer {
 	private String getTopContent() {
 		String topContent = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 				+ "<html><head>\n"
-				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"
-				+ "<meta http-equiv=\"refresh\" content=\"30\"></meta>\n"
+				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
+				+ "<meta http-equiv=\"refresh\" content=\"30\" />\n"
 				+ "<title>Meerkat Monitor</title>\n"
-				+ "<link rel=\"icon\"  href=\"favicon.ico\"  type=\"image/x-icon\"></link>\n"
+				+ "<link rel=\"icon\"  href=\"favicon.ico\"  type=\"image/x-icon\" />\n"
 				+ "<link rel=\"alternate\" type=\"application/rss+xml\"  href=\""
 				+ rssResource
 				+ "\"> \n"
@@ -153,7 +153,7 @@ public class HttpServer {
 				+ "<div id=\"container\">\n"
 
 				+ "<div class=\"full_width big\">\n"
-				+ "<a href=\"http://meerkat-monitor.org/?utm_sourceWebAppDashboard&utm_medium=WebApp&utm_content=Link&utm_campaign=WebAppDashboard\" style=\"text-decoration:none\" target=\"_blank\">\n"
+				+ "<a href=\"http://meerkat-monitor.org/\" style=\"text-decoration:none\" target=\"_blank\">\n"
 				+ "<img src=\"resources/meerkat-small.png\" alt=\"Meerkat Monitor Logo\" border=\"0\" align=\"absmiddle\" />"
 				+ "<img src=\"resources/meerkat.png\" alt=\"Meerkat Monitor\" border=\"0\" align=\"absmiddle\" /></a>\n"
 				+ "</div>\n"
@@ -191,10 +191,10 @@ public class HttpServer {
 	private String getTopContentWithGauge(AppGroupCollection agc) {
 		String topContent = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 				+ "<html><head>\n"
-				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"
-				+ "<meta http-equiv=\"refresh\" content=\"30\"></meta>\n"
+				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
+				+ "<meta http-equiv=\"refresh\" content=\"30\" />\n"
 				+ "<title>Meerkat Monitor</title>\n"
-				+ "<link rel=\"icon\"  href=\"/resources/favicon.ico\"  type=\"image/x-icon\"></link>\n"
+				+ "<link rel=\"icon\"  href=\"/resources/favicon.ico\"  type=\"image/x-icon\" />\n"
 				+ "<link rel=\"alternate\" type=\"application/rss+xml\"  href=\""
 				+ rssResource
 				+ "\"> \n"
@@ -242,7 +242,7 @@ public class HttpServer {
 				+ "<div id=\"container\">\n"
 
 				+ "<div class=\"full_width big\">\n"
-				+ "<a href=\"http://meerkat-monitor.org/?utm_sourceWebAppDashboard&utm_medium=WebApp&utm_content=Link&utm_campaign=WebAppDashboard\" style=\"text-decoration:none\" target=\"_blank\">\n"
+				+ "<a href=\"http://meerkat-monitor.org/\" style=\"text-decoration:none\" target=\"_blank\">\n"
 				+ "<img src=\"resources/meerkat-small.png\" alt=\"Meerkat Monitor Logo\" border=\"0\" align=\"absmiddle\" />"
 				+ "<img src=\"resources/meerkat.png\" alt=\"Meerkat Monitor\" border=\"0\" align=\"absmiddle\" /></a>\n"
 				+ "</div>\n"
@@ -304,7 +304,7 @@ public class HttpServer {
 
 		displayGroupGauge = Boolean.parseBoolean(prop.getProperty("meerkat.dashboard.gauge"));
 		if (displayGroupGauge) {
-			responseStatus = this.getTopContentWithGauge(agc);
+			responseStatus = getTopContentWithGauge(agc);
 		} else {
 			responseStatus = getTopContent();
 		}
@@ -399,8 +399,6 @@ public class HttpServer {
 					}
 				}
 
-				responseStatus += "</td>\n";
-
 				// Link to events
 				responseStatus += "<td class=\"center\">";
 				if (wApp.getNumberOfEvents() > 0) {
@@ -474,8 +472,8 @@ public class HttpServer {
 					responseStatus += "<td class=\"center\" style=\"background-color: #949494;\">\n";
 				}
 
-				// If SQL Service URL doesn't apply
-				if (wApp.getType().equalsIgnoreCase("sql")) {
+				// Link to URL only makes sense on Web pages
+				if (!wApp.getType().equals(WebApp.TYPE_WEBAPP)) {
 					responseStatus += "<strong>"
 							+ wApp.getlastStatus().toUpperCase(
 									Locale.getDefault())
@@ -486,7 +484,7 @@ public class HttpServer {
 							+ "\" target=\"_blank\"><strong>"
 							+ wApp.getlastStatus().toUpperCase(
 									Locale.getDefault())
-									+ "</strong></td>\n</tr>\n";
+									+ "</strong></a></td>\n</tr>\n";
 				}
 			}
 		}
@@ -513,6 +511,7 @@ public class HttpServer {
 
 		responseStatus += "<br>\n<div>\nUpdated: " + date.now() + " ["
 				+ wac.getNumberOfEventsInCollection() + " tests]" + "</div>\n";
+		responseStatus += "</div>"; // Close div
 		responseStatus += footer;
 		responseStatus += bodyEnd;
 

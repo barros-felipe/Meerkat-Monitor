@@ -238,9 +238,9 @@ public class WebAppCollection implements Serializable {
 				+ "<script type='text/javascript' src='http://www.google.com/jsapi'></script>\n"
 
 				+ "<style type=\"text/css\" title=\"currentStyle\">\n"
-				+ "@import \"resources/demo_page.css\";\n"
-				+ "@import \"resources/demo_table_jui.css\";\n"
-				+ "@import \"resources/jquery-ui-1.8.4.custom.css\";\n"
+				+ "	@import \"resources/demo_page.css\";\n"
+				+ "	@import \"resources/demo_table_jui.css\";\n"
+				+ "	@import \"resources/jquery-ui-1.8.4.custom.css\";\n"
 				+ "</style>\n"
 
 				+ "<style type=\"text/css\">\n" + "#container {\n"
@@ -248,7 +248,7 @@ public class WebAppCollection implements Serializable {
 				+ "	padding: 0;\n" + "}\n" + "</style>\n";
 
 		String htmlFileContentsEnd = "</head>\n"
-				+ "<body>\n"
+				+ "<body id=\"dt_example\">\n"
 				+ "<div id=\"container\">\n"
 				+ "<a href=\"javascript:history.go(-1)\"><img src=\"resources/tango-previous.png\" border=\"0\"></a>\n"
 				+ "<h1>Annotated Time Line</h1>"
@@ -277,12 +277,12 @@ public class WebAppCollection implements Serializable {
 	 * @return
 	 */
 	public boolean isWebAppByNamePresent(String name) {
-		
+
 		// To prevent empty names and webservices "?"
 		if(name.trim().equals("") || name.trim().equals("?")){
 			return true;
 		}
-		
+
 		List<WebApp> webAppsCollectionCopy = this.webAppsCollection;
 		Iterator<WebApp> it = webAppsCollectionCopy.iterator();
 
@@ -404,8 +404,8 @@ public class WebAppCollection implements Serializable {
 		setConfigFile(configFile);
 		dataFileName = "TimeLine.html";
 	}
-	
-	
+
+
 	/**
 	 * printContainingAppsInfo
 	 */
@@ -416,7 +416,7 @@ public class WebAppCollection implements Serializable {
 			curr = it.next();
 			log.info("Name: "+curr.getName()+" \t|\t Type: "+curr.getType());
 		}
-		
+
 	}
 
 }
