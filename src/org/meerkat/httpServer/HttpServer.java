@@ -54,8 +54,10 @@ public class HttpServer {
 	private Properties prop;
 	boolean displayGroupGauge;
 
-	private static Boolean allowRemoteConfig;
+	private static Boolean allowRemoteConfig, allowWebLogAccess;
 	private static String configFile = "meerkat.webapps.xml";
+	private static String logFile = "log/meerkat.log";
+	private static String webLogFile = "log.txt";
 	private String rssResource = "/rss.xml";
 	private String wsdlUrl = "";
 	private String timeLineFile = "TimeLine.html";
@@ -318,9 +320,22 @@ public class HttpServer {
 			FileUtil fu = new FileUtil();
 			fu.writeToFile(tempWorkingDir + configFile,
 					"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
-					"<meerkat-monitor>" +
-					" <info>Remote access to config file is disabled!</info>" +
+							"<meerkat-monitor>" +
+							" <info>Remote access to config file is disabled!</info>" +
 					"</meerkat-monitor>");
+		}
+
+		// Check if web log access is allowed
+		allowWebLogAccess = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.logaccess"));
+
+		if (allowWebLogAccess) {
+			FileUtil fu = new FileUtil();
+			String logFileContents = fu.readFileContents(logFile);
+			fu.writeToFile(tempWorkingDir + webLogFile, logFileContents);
+		} else {
+			FileUtil fu = new FileUtil();
+			fu.writeToFile(tempWorkingDir + webLogFile,
+					"Web access to log file is disabled!");
 		}
 
 		while (i.hasNext()) {
@@ -332,7 +347,7 @@ public class HttpServer {
 							+ "<a href=\"" + "http://" + hostname + ":"
 							+ webServerPort + "/" + wApp.getDataFileName()
 							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
-				
+
 				} else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SQL)) {
 					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
 							+ "<a href=\"" + "http://" + hostname + ":"
@@ -487,6 +502,14 @@ public class HttpServer {
 					+ configFile
 					+ "\"><img src=\"resources/tango-xml-config.png\" alt=\"App Config XML\" align=\"right\" style=\"border-style: none\"/></a> \n";
 		}
+
+		// If log file access is enable create link for it
+		if(allowWebLogAccess){
+			responseStatus += "<a href=\""
+					+ webLogFile
+					+ "\"><img src=\"resources/tango-find-log.png\" alt=\"Log\" align=\"right\" style=\"border-style: none\"/></a> \n";
+		}
+
 
 		responseStatus += "<br>\n<div>\nUpdated: " + date.now() + " ["
 				+ wac.getNumberOfEventsInCollection() + " tests]" + "</div>\n";

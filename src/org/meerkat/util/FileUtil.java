@@ -126,7 +126,7 @@ public class FileUtil implements Serializable {
 	 *
 	 * This is a known bug: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
 	 * (should be used the implementation below...) 
-	
+
 	public final void writeToFile(String filename, String contents) {
 		File outFile = new File(filename);
 		try {
@@ -135,16 +135,21 @@ public class FileUtil implements Serializable {
 			log.error("IO Error writing file: " + filename +"("+e.getMessage()+")");
 		}
 	}
-	*/
+	 */
 
 	/**
-	 * writeToFileNIO
+	 * writeToFile
 	 * @param filename
 	 * @param contents
 	 */
 	public final void writeToFile(String filename, String contents){
 		RandomAccessFile destFile = null;
 		try {
+			File tmpFile = new File(filename);
+			if(tmpFile.exists()){
+				tmpFile.delete();
+			}
+
 			destFile = new RandomAccessFile (filename, "rw");
 		} catch (FileNotFoundException e) {
 			log.error("Error accessing file: "+filename+" ("+e.getMessage()+")");
@@ -152,10 +157,10 @@ public class FileUtil implements Serializable {
 
 		ByteBuffer buf = ByteBuffer.allocate(contents.length());
 		FileChannel outChannel = destFile.getChannel();
-		
+
 		buf.put(contents.getBytes());
 		buf.flip(); //buffer set for read
-		
+
 		try {
 			outChannel.write(buf);
 			destFile.close();

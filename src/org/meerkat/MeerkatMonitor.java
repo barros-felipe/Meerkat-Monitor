@@ -110,7 +110,7 @@ public class MeerkatMonitor {
 	private static String tempWorkingDir = System.getProperty("java.io.tmpdir")	+ System.getProperty("file.separator") + "meerkat/";
 	private static WebAppCollection webAppsCollection = new WebAppCollection();
 	private static AppGroupCollection appGroupCollection = new AppGroupCollection();
-	private static String[] expectedProperties = new String[19];
+	private static String[] expectedProperties = new String[20];
 	private static MasterKeyManager mkm;
 
 	/**
@@ -172,6 +172,7 @@ public class MeerkatMonitor {
 		expectedProperties[16] = "meerkat.dashboard.gauge";
 		expectedProperties[17] = "meerkat.webserver.rconfig";
 		expectedProperties[18] = "meerkat.password.master";
+		expectedProperties[19] = "meerkat.webserver.logaccess";
 
 		// Prepare temporary working directory
 		log.info("Setting temp dir: " + tempWorkingDir);
@@ -392,6 +393,7 @@ public class MeerkatMonitor {
 								"Load Session",
 								"Please wait. It may take several minutes to load data...\nYou'll be notified when finished.");
 						MeerkatMonitor.loadSession();
+						httpWebServer.refreshIndex(); // Update dashboard
 						systray.showMessage(
 								"Load Session",
 								"Loaded session successfully: "
@@ -885,7 +887,7 @@ public class MeerkatMonitor {
 		}
 
 		// Register resources
-		String[] resources = new String[22];
+		String[] resources = new String[23];
 		resources[0] = "resources/demo_page.css";
 		resources[1] = "resources/demo_table_jui.css";
 		resources[2] = "resources/jquery-ui-1.8.4.custom.css";
@@ -908,6 +910,7 @@ public class MeerkatMonitor {
 		resources[19] = "resources/404_meerkat.png";
 		resources[20] = "resources/tango_wsdl.png";
 		resources[21] = "resources/tango-xml-config.png";
+		resources[22] = "resources/tango-find-log.png";
 
 		String[] resourcesImages = new String[13];
 		resourcesImages[0] = "resources/images/ui-bg_flat_0_aaaaaa_40x100.png";
@@ -927,7 +930,6 @@ public class MeerkatMonitor {
 		ResourceManager rm;
 		// Extract resources
 		for (int i = 0; i < resources.length; i++) {
-
 			rm = new ResourceManager(resources[i], tempWorkingDir);
 			rm.getResource();
 			// move the favicon to the dir root

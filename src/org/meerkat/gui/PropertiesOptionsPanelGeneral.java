@@ -150,19 +150,34 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 		}
 		add(checkBox_remoteconfig);
 
+		// Allow web access to log
+		JLabel lblAllowWebAccessLog = new JLabel("Allow web access log");
+		lblAllowWebAccessLog.setBounds(10, 163, 200, 14);
+		add(lblAllowWebAccessLog);
+
+		final JCheckBox checkBox_weblog = new JCheckBox();
+		checkBox_weblog.setBounds(216, 159, 97, 23);
+		add(checkBox_weblog);
+
+		boolean webLog = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.logaccess"));
+		if (webLog) {
+			checkBox_weblog.setSelected(true);
+		}
+		add(checkBox_weblog);
+
 		// Master Key (encrypt passwords)
 		JLabel lblMasterPasswordencrypt = new JLabel("Master Key (encrypt passwords)");
-		lblMasterPasswordencrypt.setBounds(10, 163, 200, 14);
+		lblMasterPasswordencrypt.setBounds(10, 191, 200, 14);
 		add(lblMasterPasswordencrypt);
 
 		//textField_masterPasswd = new JPasswordField(prop.getProperty("meerkat.password.master"));
 		textField_masterPasswd = new JPasswordField(mkm.getMasterKey());
-		textField_masterPasswd.setBounds(220, 160, 86, 20);
+		textField_masterPasswd.setBounds(220, 188, 86, 20);
 		add(textField_masterPasswd);
 		textField_masterPasswd.setColumns(10);
 
 		JLabel lblNewLabel_1 = new JLabel("(Visible in meerkat.properties)");
-		lblNewLabel_1.setBounds(316, 163, 159, 14);
+		lblNewLabel_1.setBounds(316, 191, 159, 14);
 		add(lblNewLabel_1);
 
 		final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
@@ -182,6 +197,7 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 				prop.setProperty("meerkat.autoload.start", String.valueOf(checkBox_loadSessionStart.isSelected()));
 				prop.setProperty("meerkat.dashboard.gauge", String.valueOf(checkBox_showGroupsGauge.isSelected()));
 				prop.setProperty("meerkat.webserver.rconfig", String.valueOf(checkBox_remoteconfig.isSelected()));
+				prop.setProperty("meerkat.webserver.logaccess", String.valueOf(checkBox_weblog.isSelected()));
 
 				// Password is managed by MasterKeyManager
 				//prop.setProperty("meerkat.password.master", String.valueOf(textField_masterPasswd.getPassword()));
