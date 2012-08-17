@@ -1,6 +1,6 @@
 /**
  * Meerkat Monitor - Network Monitor Tool
- * Copyright (C) 2011 Merkat-Monitor
+ * Copyright (C) 2012 Merkat-Monitor
  * mailto: contact AT meerkat-monitor DOT org
  * 
  * Meerkat Monitor is free software: you can redistribute it and/or modify
@@ -40,15 +40,54 @@ public class PropertiesLoader implements Serializable{
 	private static final long serialVersionUID = 1008089266551755831L;
 	private static Logger log = Logger.getLogger(PropertiesLoader.class);
 	private String propertiesFile;
-
+	private String[] expectedProperties;
+	
+	/**
+	 * PropertiesLoader
+	 */
+	public PropertiesLoader(String propertiesFile){
+		this.propertiesFile = propertiesFile;
+		
+		// NOTE: all properties are also referenced in 
+		//		 in function generateDefaultPropertiesFile()
+		expectedProperties = new String[21];
+		expectedProperties[0] = "meerkat.email.send.emails";
+		expectedProperties[1] = "meerkat.email.smtp.server";
+		expectedProperties[2] = "meerkat.email.smtp.security";
+		expectedProperties[3] = "meerkat.email.smtp.port";
+		expectedProperties[4] = "meerkat.email.smtp.user";
+		expectedProperties[5] = "meerkat.email.smtp.password";
+		expectedProperties[6] = "meerkat.email.to";
+		expectedProperties[7] = "meerkat.email.from";
+		expectedProperties[8] = "meerkat.email.subjectPrefix";
+		expectedProperties[9] = "meerkat.email.sending.test";
+		expectedProperties[10] = "meerkat.monit.test.time";
+		expectedProperties[11] = "meerkat.webserver.port";
+		expectedProperties[12] = "meerkat.autosave.exit";
+		expectedProperties[13] = "meerkat.autoload.start";
+		expectedProperties[14] = "meerkat.ssl.keystore";
+		expectedProperties[15] = "meerkat.ssl.password";
+		expectedProperties[16] = "meerkat.dashboard.gauge";
+		expectedProperties[17] = "meerkat.webserver.rconfig";
+		expectedProperties[18] = "meerkat.password.master";
+		expectedProperties[19] = "meerkat.webserver.logaccess";
+		expectedProperties[20] = "meerkat.webserver.showapptype";
+		
+		File tmpPropFile = new File(propertiesFile);
+		if(!tmpPropFile.exists()){
+			log.warn("- Properties not found. Generating a default one...");
+			generateDefaultPropertiesFile(propertiesFile);
+		}
+	}
+	
+	
 	/**
 	 * Load properties from file
 	 * 
 	 * @param propertiesFile
 	 * @return properties
 	 */
-	public synchronized Properties getPropetiesFromFile(String propertiesFile) {
-		this.propertiesFile = propertiesFile;
+	public synchronized Properties getPropetiesFromFile() {
 		// Read properties file.
 		Properties properties;
 		properties = new Properties();
@@ -78,7 +117,7 @@ public class PropertiesLoader implements Serializable{
 	 * 
 	 * @param propertiesList
 	 */
-	public final void propertiesValidator(String[] propertiesList) {
+	public final void validateProperties() {
 		FileInputStream stream = null;
 		String propertiesFileContents = "";
 		try {
@@ -103,12 +142,12 @@ public class PropertiesLoader implements Serializable{
 			}
 		}
 
-		// Check existance of properties inside the properties file
+		// Check existence of properties inside the properties file
 		String missingProperties = "Following properties are missing in properties file:";
 		int numberOfMissingProperties = 0;
-		for (int i = 0; i < propertiesList.length; i++) {
-			if (!propertiesFileContents.contains(propertiesList[i])) {
-				missingProperties += "\n - " + propertiesList[i];
+		for (int i = 0; i < expectedProperties.length; i++) {
+			if (!propertiesFileContents.contains(expectedProperties[i])) {
+				missingProperties += "\n - " + expectedProperties[i];
 				numberOfMissingProperties++;
 			}
 		}
@@ -139,7 +178,7 @@ public class PropertiesLoader implements Serializable{
 			log.error("Failed to write properties file!", e);
 		}
 	}
-
+	
 	/**
 	 * generateDefaultPropertiesFile
 	 * 
@@ -157,7 +196,7 @@ public class PropertiesLoader implements Serializable{
 		prop.put("meerkat.email.smtp.password", "not_defined");
 		prop.put("meerkat.email.to", "not_defined@domain");
 		prop.put("meerkat.email.from", "not_defined@domain");
-		prop.put("meerkat.email.subjectPrefix", "not_defined");
+		prop.put("meerkat.email.subjectPrefix", "Meerkat-Monitor");
 		prop.put("meerkat.email.sending.test", "false");
 		prop.put("meerkat.monit.test.time", "5");
 		prop.put("meerkat.webserver.port", "6777");
@@ -176,6 +215,14 @@ public class PropertiesLoader implements Serializable{
 
 		writePropertiesToFile(defaultProperties, file);
 
+	}
+	
+	/**
+	 * getPropertiesFile
+	 * @return propertiesFile
+	 */
+	public final String getPropertiesFile(){
+		return propertiesFile;
 	}
 
 }

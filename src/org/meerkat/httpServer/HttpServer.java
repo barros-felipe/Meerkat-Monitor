@@ -236,8 +236,8 @@ public class HttpServer {
 		WebApp wApp;
 		
 		// Get properties
-		PropertiesLoader pl = new PropertiesLoader();
-		prop = pl.getPropetiesFromFile(propertiesFile);
+		PropertiesLoader pl = new PropertiesLoader(propertiesFile);
+		prop = pl.getPropetiesFromFile();
 		
 		// Check if application type before name is activated
 		boolean appTypePrefixEnabled = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.showapptype"));
@@ -510,6 +510,14 @@ public class HttpServer {
 	 */
 	public final String getServerUrl() {
 		return "http://" + hostname + ":" + webServerPort + "/";
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int getPort(){
+		return webServerPort;
 	}
 
 }

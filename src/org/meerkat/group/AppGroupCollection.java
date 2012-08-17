@@ -91,25 +91,16 @@ public class AppGroupCollection implements Serializable {
 	}
 
 	/**
-	 * logCollectionMembers
+	 * printLogGroupMembers
 	 */
-	public final void logCollectionMembers() {
+	public final void printLogGroupMembers() {
 		Iterator<AppGroup> it = getAppGroupCollectionIterator();
 		AppGroup temp;
-		int i = 0;
-		log.info("-- Groups --");
+		log.info("Present Groups:");
 
 		while (it.hasNext()) {
 			temp = it.next();
-			i++;
-			log.info(i + "- Group: " + temp.getGroupName());
-
-			WebApp tempWApp;
-			Iterator<WebApp> itW = temp.getGroupAppsIterator();
-			while (itW.hasNext()) {
-				tempWApp = itW.next();
-				log.info("\t - " + tempWApp.getName());
-			}
+			log.info("\t" + temp.getGroupName());
 		}
 	}
 

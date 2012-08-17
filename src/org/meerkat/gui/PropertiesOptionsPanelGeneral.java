@@ -60,8 +60,8 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 	 */
 	public PropertiesOptionsPanelGeneral(final MasterKeyManager mkm, final JFrame jfather, final HttpServer hserver) {
 		this.httpServer = hserver;
-		final PropertiesLoader pl = new PropertiesLoader();
-		prop = pl.getPropetiesFromFile(propertiesFile);
+		final PropertiesLoader pl = new PropertiesLoader(propertiesFile);
+		prop = pl.getPropetiesFromFile();
 
 		setBounds(10, 11, 594, 396);
 		setLayout(null);

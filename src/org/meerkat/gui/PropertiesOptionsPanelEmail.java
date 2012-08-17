@@ -65,8 +65,8 @@ public class PropertiesOptionsPanelEmail extends JPanel {
 	 * Create the panel.
 	 */
 	public PropertiesOptionsPanelEmail(final JFrame jfather) {
-		final PropertiesLoader pl = new PropertiesLoader();
-		prop = pl.getPropetiesFromFile(propertiesFile);
+		final PropertiesLoader pl = new PropertiesLoader(propertiesFile);
+		prop = pl.getPropetiesFromFile();
 
 		setBounds(10, 11, 594, 396);
 		setLayout(null);

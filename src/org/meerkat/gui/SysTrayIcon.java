@@ -34,6 +34,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
+import javax.swing.SwingUtilities;
+
 import org.apache.log4j.Logger;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.httpServer.HttpServer;
@@ -57,12 +59,21 @@ public class SysTrayIcon {
 	private AppGroupCollection groupsCollection;
 	private HttpServer httpServer;
 	private MasterKeyManager mkm;
+	private String version;
 
 	/**
 	 * SysTrayIcon
 	 */
-	public SysTrayIcon(final MasterKeyManager mKm) {
+	public SysTrayIcon(final MasterKeyManager mKm, final HttpServer httpServer,	
+			final WebAppCollection webAppsCollection, final AppGroupCollection groupsCollection) {
 		this.mkm = mKm;
+		this.httpServer = httpServer;
+		this.webserverPort = httpServer.getPort();
+
+		this.webAppsCollection = webAppsCollection;
+		this.groupsCollection = groupsCollection;
+		this.version = webAppsCollection.getAppVersion();
+
 		InetAddress netAddr;
 		try {
 			netAddr = InetAddress.getLocalHost();
@@ -125,6 +136,102 @@ public class SysTrayIcon {
 	}
 
 	/**
+	 * createSystrayIcon
+	 */
+	public final void createSystrayIcon(){
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				setWebServerPort(webserverPort);
+				setWebAppCollection(webAppsCollection);
+				setGroupsCollection(groupsCollection);
+				setHttpServer(httpServer);
+
+				Menu sessionOperations = new Menu("Save/Load Session");
+				// Add save session button
+				ActionListener saveSession = new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						/**
+						showMessage(
+								"Saving Session",
+								"Please wait. It may take several minutes to save data...\nYou'll be notified when finished.");
+						MeerkatMonitor.saveSession();
+						showMessage("Save Session", "Session saved: "
+								+ webAppsCollection.getWebAppCollectionSize()
+								+ " apps.");
+						 */
+						showMessage("TODO","SAVE NOT IMPLEMENTED!!");
+					}
+				};
+
+				// Add load session button
+				ActionListener loadSession = new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						/**
+						showMessage(
+								"Load Session",
+								"Please wait. It may take several minutes to load data...\nYou'll be notified when finished.");
+						MeerkatMonitor.loadSession();
+						showMessage(
+								"Load Session",
+								"Loaded session successfully: "
+										+ webAppsCollection
+										.getWebAppCollectionSize()
+										+ " apps.");
+						 */
+						showMessage("TODO","LOAD NOT IMPLEMENTED!!");
+					}
+				};
+
+				// Exit
+				ActionListener exitListener = new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						// Save session if enable in properties
+						/**
+						autosaveOnExit = Boolean.parseBoolean(properties.getProperty("meerkat.autosave.exit"));
+						if (autosaveOnExit) {
+							log.info("Auto save on exit enable.");
+							saveSession();
+							log.info("Session saved\n");
+						}
+						// Save XML Config File
+						webAppsCollection.saveConfigXMLFile();
+						 */
+						System.exit(0);
+					}
+				};
+
+				// About button
+				ActionListener aboutListener = new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						AboutDialog ab = new AboutDialog(version);
+						ab.showUp();
+					}
+				};
+
+				MenuItem save = new MenuItem("Save Session");
+				save.addActionListener(saveSession);
+
+				MenuItem load = new MenuItem("Load Session");
+				load.addActionListener(loadSession);
+
+				MenuItem aboutm = new MenuItem("About");
+				aboutm.addActionListener(aboutListener);
+
+				sessionOperations.add(save);
+				sessionOperations.add(load);
+				// systray.addSeparator();
+				// systray.addMenuItem("Reload Configuration",
+				// reloadConfigListener);
+				addMenu(sessionOperations);
+				addSeparator();
+				addMenuItem("About", aboutListener);
+				addSeparator();
+				addMenuItem("Exit", exitListener);
+			}
+		});
+	}
+
+	/**
 	 * setTooltip
 	 * 
 	 * @param tooltip
@@ -147,9 +254,7 @@ public class SysTrayIcon {
 
 	/**
 	 * addMenu
-	 * 
-	 * @param m
-	 *            Menu
+	 * @param m Menu
 	 */
 	public final void addMenu(Menu m) {
 		menu.addSeparator();

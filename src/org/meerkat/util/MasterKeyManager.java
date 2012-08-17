@@ -58,8 +58,8 @@ public class MasterKeyManager implements Serializable{
 	 * @return
 	 */
 	public final String getMasterKey(){
-		pl = new PropertiesLoader();
-		Properties prop = pl.getPropetiesFromFile(propertiesFile);
+		pl = new PropertiesLoader(propertiesFile);
+		Properties prop = pl.getPropetiesFromFile();
 		return prop.getProperty("meerkat.password.master");
 	}
 
@@ -71,8 +71,8 @@ public class MasterKeyManager implements Serializable{
 		String currMasterPasswd = getMasterKey();
 
 		// Change value in properties file first
-		pl = new PropertiesLoader();
-		Properties prop = pl.getPropetiesFromFile(propertiesFile);
+		pl = new PropertiesLoader(propertiesFile);
+		Properties prop = pl.getPropetiesFromFile();
 		prop.setProperty("meerkat.password.master", newMasterKey);
 		pl.writePropertiesToFile(prop, propertiesFile);
 

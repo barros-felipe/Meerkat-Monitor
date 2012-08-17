@@ -71,7 +71,7 @@ public class WebApp implements Serializable {
 	private String url;
 	private String expectedString;
 	private String executeOnOffline = "";
-	
+
 	@XStreamOmitField
 	public static String TYPE_WEBAPP = "WEBAPP";
 	@XStreamOmitField
@@ -82,10 +82,10 @@ public class WebApp implements Serializable {
 	public static String TYPE_SOCKET = "SOCKET";
 	@XStreamOmitField
 	public static String TYPE_SSH = "SSH";
-	
+
 	@XStreamOmitField
 	MasterKeyManager mkm;
-	
+
 	@XStreamOmitField
 	private String lastStatus = "NA"; // It may be online or offline - NA in the first run
 	@XStreamOmitField
@@ -104,18 +104,14 @@ public class WebApp implements Serializable {
 	@XStreamOmitField
 	private String lastResponse = "";
 	@XStreamOmitField
-	private Double prevAvailability = 0.0;
-	@XStreamOmitField
 	private String prevLatency = "0.0";
-	@XStreamOmitField
-	private String prevLoad = "0.0";
 	@XStreamOmitField
 	private String appVersion;
 	@XStreamOmitField
 	private String configXMLFile = "";
 	private String type = TYPE_WEBAPP; // Default or set to webservice, ssh, etc.
 	private boolean enabled = true;
-	
+
 	/**
 	 * WebApp
 	 * 
@@ -159,7 +155,7 @@ public class WebApp implements Serializable {
 	 * WebApp
 	 */
 	public WebApp() {
-		
+
 	}
 
 	/**
@@ -204,7 +200,6 @@ public class WebApp implements Serializable {
 
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());
-			prevLoad = c.getDurationSeconds();
 
 			httpclient.getConnectionManager().shutdown();
 
@@ -220,13 +215,12 @@ public class WebApp implements Serializable {
 
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());
-			prevLoad = c.getDurationSeconds();
 
 			httpclient.getConnectionManager().shutdown();
 
 			return response;
 		}
-		prevLoad = c.getDurationSeconds();
+
 		response.setHttpStatus(statusCode);
 
 		// Consume the response body
@@ -540,7 +534,6 @@ public class WebApp implements Serializable {
 	public final void addEvent(WebAppEvent event) {
 		events.add(event);
 		this.writeWebAppVisualizationDataFile();
-
 	}
 
 	/**
@@ -706,34 +699,27 @@ public class WebApp implements Serializable {
 		return lastResponse;
 	}
 
+	/**
+	 * setTempWorkingDir
+	 * @param tempWorkingDir
+	 */
 	public final void setTempWorkingDir(String tempWorkingDir) {
 		this.tempWorkingDir = tempWorkingDir;
 	}
 
-	public final Double getPrevAvailability() {
-		return prevAvailability;
-	}
 
-	public final void setPrevAvailability(Double prevAvailability) {
-		this.prevAvailability = prevAvailability;
-	}
-
+	/**
+	 * setPrevAvailability
+	 * @return prevLatency
+	 */
 	public final String getPrevLatency() {
 		return prevLatency;
 	}
 
-	// public void setPrevLatency(String prevLatency) {
-	// this.prevLatency = prevLatency;
-	// }
-
-	public final String getPrevLoad() {
-		return prevLoad;
-	}
-
-	// public void setPrevLoad(String prevLoad) {
-	// this.prevLoad = prevLoad;
-	// }
-
+	/**
+	 * setConfigXMLFile
+	 * @param configXMLFile
+	 */
 	public final void setConfigXMLFile(String configXMLFile) {
 		this.configXMLFile = configXMLFile;
 	}
@@ -975,7 +961,7 @@ public class WebApp implements Serializable {
 	public final void setActive(Boolean isActive) {
 		this.enabled = isActive;
 	}
-	
+
 	/**
 	 * getMasterKeyManager
 	 */

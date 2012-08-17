@@ -245,7 +245,7 @@ public class WebAppEvent implements Serializable {
 		tempContentsFile = new File(path + fileExtension);
 		tempContentsFile.deleteOnExit();
 
-		// Try to format (idented output) if file is XML
+		// Try to format if file is XML
 		if (currentResponse.contains("<?xml")) {
 			XmlFormatter xf = new XmlFormatter();
 			response = xf.format(currentResponse);
