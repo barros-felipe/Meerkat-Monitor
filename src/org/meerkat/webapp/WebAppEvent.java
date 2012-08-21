@@ -19,25 +19,24 @@
 
 package org.meerkat.webapp;
 
-import java.io.File;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Iterator;
-import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.meerkat.services.WebApp;
+import org.meerkat.db.EmbeddedDB;
 import org.meerkat.util.DateUtil;
-import org.meerkat.util.FileUtil;
-import org.meerkat.util.xml.XmlFormatter;
 
 public class WebAppEvent implements Serializable {
 
 	private static Logger log = Logger.getLogger(WebAppEvent.class);
 	private static final long serialVersionUID = 1L;
 	private String date;
-	private String status;
+	private String status; // 0 represents offline, 100 online
 	private String availability;
 	private String description;
 	private String pageLoadTime;
@@ -45,11 +44,8 @@ public class WebAppEvent implements Serializable {
 	private boolean critical;
 	private int httpStatusCode;
 	private String noValueString = "undefined";
-	private UUID id;
-	private File tempContentsFile;
-	private FileUtil fu;
-	private String fileExtension = ".txt";
-	private String tempDir;
+	private String currentResponse;
+	private int id;
 
 	/**
 	 * WebAppEvent
@@ -59,17 +55,13 @@ public class WebAppEvent implements Serializable {
 	 */
 	public WebAppEvent(final boolean critical, final String date,
 			final String status, final String availability,
-			final int httpStatusCode, final String description,
-			final String tempWorkingDir) {
+			final int httpStatusCode, final String description) {
 		this.setCritical(critical);
 		this.date = date;
 		this.status = status;
 		this.availability = availability;
 		this.httpStatusCode = httpStatusCode;
 		this.description = description;
-		this.tempDir = tempWorkingDir;
-		id = UUID.randomUUID();
-
 	}
 
 	/**
@@ -79,6 +71,21 @@ public class WebAppEvent implements Serializable {
 	 */
 	public final String getDescription() {
 		return description;
+	}
+
+	/**
+	 * setID
+	 * @param id
+	 */
+	public final void setID(int id){
+		this.id = id;
+	}
+
+	/**
+	 * getID
+	 */
+	public final int getID(){
+		return id;
 	}
 
 	/**
@@ -106,16 +113,8 @@ public class WebAppEvent implements Serializable {
 	 */
 	public final String getDateFormatedGWT() {
 		DateUtil d = new DateUtil();
-		return d.getFormatedDateGWT(date);
-	}
 
-	/**
-	 * setDate
-	 * 
-	 * @param date
-	 */
-	public final void setDate(final String date) {
-		this.date = date;
+		return d.getFormatedDateGWT(getDate());
 	}
 
 	/**
@@ -237,87 +236,66 @@ public class WebAppEvent implements Serializable {
 	 * 
 	 * @param setCurrentResponse
 	 */
-	private final void setCurrentResponse(String currentResponse) {
-		String response = currentResponse;
-		fu = new FileUtil();
-		String path = tempDir + id.toString();
-		path = path.replace("\\", "/");
-		tempContentsFile = new File(path + fileExtension);
-		tempContentsFile.deleteOnExit();
-
-		// Try to format if file is XML
-		if (currentResponse.contains("<?xml")) {
-			XmlFormatter xf = new XmlFormatter();
-			response = xf.format(currentResponse);
-		}
-
-		fu.writeToFile(tempContentsFile.getAbsolutePath(), response);
-	}
-
-	/**
-	 * setCurrentResponseGlobal
-	 * 
-	 * @param setCurrentResponse
-	 */
-	public final void setCurrentResponseGlobal(String currentResponse,
-			WebApp wApp) {
-		String response = currentResponse;
-		if (currentResponse == null) {
-			response = "";
-		}
-
-		// Find if the webapp already has an identical response
-		// If so use it and avoid creating a new one
-		Iterator<WebAppEvent> it = wApp.getEventListIterator();
-		WebAppEvent ev;
-		boolean equalsExistsAndSet = false;
-		while (it.hasNext()) {
-			ev = it.next();
-			// If exist event with equal response, set the response to that one
-			try {
-				if (currentResponse.equals(ev.getCurrentResponseString())) {
-					String path = tempDir + ev.getWebAppResponseId().toString();
-					path = path.replace("\\", "/");
-					tempContentsFile = new File(path + fileExtension);
-					equalsExistsAndSet = true;
-					break;
-				}
-			} catch (Exception e) {
-				log.warn("Failed to search for equal responses. Considered none.");
-			}
-		}
-
-		if (!equalsExistsAndSet) {
-			this.setCurrentResponse(response);
-		}
-
+	public final void setCurrentResponse(String currentResponse) {
+		this.currentResponse = currentResponse;
 	}
 
 	/**
 	 * getCurrentError
 	 * 
 	 */
-	public final String getCurrentResponseFile() {
-		return tempContentsFile.getName().toString();
+	public final String getCurrentResponse() {
+		return currentResponse;
 	}
 
 	/**
-	 * getCurrentResponseString
-	 * 
-	 * @return
+	 * getEventByID
+	 * @param id
+	 * @return event
 	 */
-	private final String getCurrentResponseString() {
-		fu = new FileUtil();
-		return fu.readFileContents(tempContentsFile.getAbsolutePath());
+	public final static WebAppEvent getEventByID(int id){
+		EmbeddedDB embDB = new EmbeddedDB();
+		Connection conn = embDB.getConn();
+
+		WebAppEvent currEv = null;
+		boolean critical;
+		String date;
+		String status;
+		String availability;
+		String loadTime;
+		String latency;
+		int httStatusCode;
+		String description;
+		String response;
+
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT * FROM MEERKAT.EVENTS WHERE ID = "+id);
+			rs = ps.executeQuery();
+
+			rs.next();
+			critical = rs.getBoolean(3);
+			date = rs.getTimestamp(4).toString();
+			status = rs.getString(5);
+			availability = String.valueOf(rs.getDouble(6));
+			loadTime = String.valueOf(rs.getDouble(7));
+			latency = String.valueOf(rs.getDouble(8));
+			httStatusCode = rs.getInt(9);
+			description = rs.getString(10);
+			response = rs.getString(11);
+
+			currEv = new WebAppEvent(critical, date, status, availability, httStatusCode, description);
+			currEv.setID(rs.getInt(1));
+			currEv.setPageLoadTime(loadTime);
+			currEv.setLatency(latency);
+			currEv.setCurrentResponse(response);
+		} catch (SQLException e) {
+			log.error("Failed query event id "+id+". (Exists?)");
+		}
+		return currEv;
 	}
 
-	/**
-	 * getWebAppResponseId
-	 * 
-	 * @return
-	 */
-	public final UUID getWebAppResponseId() {
-		return id;
-	}
+
 
 }

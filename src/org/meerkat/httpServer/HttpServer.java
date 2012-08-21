@@ -20,6 +20,7 @@
 package org.meerkat.httpServer;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
@@ -234,11 +235,11 @@ public class HttpServer {
 		// Refresh the index
 		Iterator<WebApp> i = wac.getWebAppCollectionIterator();
 		WebApp wApp;
-		
+
 		// Get properties
 		PropertiesLoader pl = new PropertiesLoader(propertiesFile);
 		prop = pl.getPropetiesFromFile();
-		
+
 		// Check if application type before name is activated
 		boolean appTypePrefixEnabled = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.showapptype"));
 		String appPrefix = "";
@@ -341,11 +342,11 @@ public class HttpServer {
 				 */
 				responseStatus += "<td class=\"center\">" + wApp.getAvailability();
 
-				// trend
+				// Trend
 				if (wApp.getNumberOfTests() > 1) {
-					if (wApp.getAvailabilityTrend() > 0) {
+					if (wApp.getAvailabilityIndicator() > 0) {
 						responseStatus += "<img src=\"resources/up-green.png\" alt=\"increase\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else if (wApp.getAvailabilityTrend() < 0) {
+					} else if (wApp.getAvailabilityIndicator() < 0) {
 						responseStatus += "<img src=\"resources/down-red.png\" alt=\"decrease\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
 						responseStatus += "</td>\n";
@@ -368,34 +369,18 @@ public class HttpServer {
 				 * Latency
 				 */
 				responseStatus += "<td class=\"center\">\n";
-				responseStatus += wApp.getLatencyAverage();
+				BigDecimal bd = new BigDecimal(wApp.getLatencyAverage());
+				bd = bd.setScale(2, BigDecimal.ROUND_DOWN);
+				responseStatus += bd.doubleValue();
 				// trend
-				String latAvg = wApp.getLatencyAverage();
-
-				boolean isLatAvgNumeric = true;
-				for (int z = 0; z < latAvg.length(); z++) {
-					if (!Character.isDigit(latAvg.charAt(z))) {
-						isLatAvgNumeric = false;
-						break;
-					}
-				}
-				if (!isLatAvgNumeric) {
-					latAvg = "0.0";
-				}
-
 				if (wApp.getNumberOfTests() > 1) {
 					// check for "undefined" values
-					if (!String.valueOf(wApp.getPrevLatency()).equals(
-							"undefined")) {
-						if (wApp.getLatencyTrend() > 0) {
-							responseStatus += "<img src=\"resources/up-red.png\" alt=\"increase\" width=\"10\" height=\"10\"/>\n</td>\n";
-						} else if (wApp.getLatencyTrend() < 0) {
-							responseStatus += "<img src=\"resources/down-green.png\" alt=\"decrease\" width=\"10\" height=\"10\"/>\n</td>\n";
-						} else {
-							responseStatus += "</td>\n";
-						}
+					if (wApp.getLatencyIndicator() > 0) {
+						responseStatus += "<img src=\"resources/up-red.png\" alt=\"increase\" width=\"10\" height=\"10\"/>\n</td>\n";
+					} else if (wApp.getLatencyIndicator() < 0) {
+						responseStatus += "<img src=\"resources/down-green.png\" alt=\"decrease\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
-						responseStatus += "\n</td>\n";
+						responseStatus += "</td>\n";
 					}
 				}
 
@@ -403,13 +388,15 @@ public class HttpServer {
 				 * Load Time
 				 */
 				responseStatus += "<td class=\"center\">\n";
-				responseStatus += wApp.getLoadsAverage();
+				BigDecimal bd1 = new BigDecimal(wApp.getLoadsAverage());
+				bd1 = bd1.setScale(3, BigDecimal.ROUND_DOWN);
+				responseStatus += bd1.doubleValue();
 
 				// trend
 				if (wApp.getNumberOfTests() > 1) {
-					if (wApp.getLoadTimeTrend() > 0) {
+					if (wApp.getLoadTimeIndicator() > 0) {
 						responseStatus += "<img src=\"resources/up-red.png\" alt=\"increase\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else if (wApp.getLoadTimeTrend() < 0) {
+					} else if (wApp.getLoadTimeIndicator() < 0) {
 						responseStatus += "<img src=\"resources/down-green.png\" alt=\"decrease\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
 						responseStatus += "</td>\n";
@@ -511,7 +498,7 @@ public class HttpServer {
 	public final String getServerUrl() {
 		return "http://" + hostname + ":" + webServerPort + "/";
 	}
-	
+
 	/**
 	 * 
 	 * @return

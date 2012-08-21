@@ -188,10 +188,10 @@ public class Visualization {
 					+ webAppEvent.getDescription()
 					+ "</td>\n"
 					+ "<td class=\"center\">"
-					+ "<a href=\""
-					+ webAppEvent.getCurrentResponseFile()
-					+ "\" onclick=\"return popitup('"
-					+ webAppEvent.getCurrentResponseFile()
+					+ "<a href=\"event-id-"
+					+ webAppEvent.getID()
+					+ "\" onclick=\"return popitup('event-id-"
+					+ webAppEvent.getID()
 					+ "')\"><img src=\"resources/tango_edit-find.png\" border=\"0\" alt=\"\" /></a>"
 					+ "</td>\n" + "</tr>\n";
 

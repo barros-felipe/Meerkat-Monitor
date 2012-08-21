@@ -19,8 +19,7 @@
 
 package org.meerkat.network;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import java.math.BigDecimal;
 import java.util.Iterator;
 
 import org.meerkat.services.WebApp;
@@ -41,6 +40,7 @@ public class LoadTime {
 
 		double pageLoadSum = 0.0;
 		double average = 0.0;
+		int decimalPlaces = 2;
 
 		Iterator<WebAppEvent> it = webApp.getEventListIterator();
 		WebAppEvent ev;
@@ -50,10 +50,13 @@ public class LoadTime {
 		}
 
 		average = Double.valueOf(pageLoadSum / webApp.getNumberOfEvents());
-
-		NumberFormat nf = new DecimalFormat("#.###");
-
-		return nf.format(average);
+		BigDecimal bd = new BigDecimal(average);
+		bd = bd.setScale(decimalPlaces, BigDecimal.ROUND_DOWN);
+		average = bd.doubleValue();
+		
+		return String.valueOf(average);
 	}
+	
+	
 
 }

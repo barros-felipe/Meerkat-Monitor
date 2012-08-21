@@ -23,14 +23,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Iterator;
 
 import org.apache.log4j.Logger;
-import org.meerkat.services.WebApp;
 import org.meerkat.util.Counter;
-import org.meerkat.webapp.WebAppEvent;
 
 public class Latency implements Serializable {
 
@@ -112,34 +107,4 @@ public class Latency implements Serializable {
 		return result;
 	}
 
-	/**
-	 * getLatencyAverage
-	 * 
-	 * @param webApp
-	 * @return WebApp Latency Average
-	 */
-	public final String getLatencyAverage(WebApp webApp) {
-		double latencySum = 0.0;
-		double average = 0.0;
-		int numberOfWebAppEvents = 0;
-
-		Iterator<WebAppEvent> it = webApp.getEventListIterator();
-		WebAppEvent ev;
-
-		while (it.hasNext()) {
-			ev = it.next();
-			// check for string "undefined" - ignore
-			if (!String.valueOf(ev.getLatency()).equals("undefined")) {
-				if (Double.valueOf(ev.getLatency()) >= 0.0) {
-					latencySum += Double.valueOf(ev.getLatency());
-					numberOfWebAppEvents++;
-				}
-			}
-		}
-		average = Double.valueOf(latencySum / numberOfWebAppEvents);
-		NumberFormat nf = new DecimalFormat("#");
-
-		return nf.format(average);
-
-	}
 }

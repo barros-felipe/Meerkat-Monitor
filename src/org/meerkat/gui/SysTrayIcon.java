@@ -397,5 +397,5 @@ public class SysTrayIcon {
 			log.error("Error adding icon to tray!", e);
 		}
 	}
-
+	
 }

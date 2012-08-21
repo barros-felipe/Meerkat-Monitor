@@ -28,6 +28,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.xml.ws.Endpoint;
 
 import org.apache.log4j.Logger;
+import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.gui.SplashScreen;
 import org.meerkat.gui.SysTrayIcon;
@@ -154,17 +155,22 @@ public class MeerkatMonitor {
 		rssFeed.refreshRSSFeed();
 		rssFeed.setServerPort(webserverPort);
 
+		// Extract needed resources
+		log.info("Extracting resources...");
+		mgo.extractWebResourcesResources();
+
+		// Setup embedded Database
+		log.info("Setting up embedded database...");
+		EmbeddedDB ebd = new EmbeddedDB();
+		ebd.initializeDB();
+
 		// Creating systray icon
 		log.info("Creating systray...");
 		systray = new SysTrayIcon(mkm, httpWebServer, webAppsCollection, appGroupCollection);
 		systray.createSystrayIcon();
 
-		// Extract needed resources
-		log.info("Extracting resources...");
-		mgo.extractWebResourcesResources();
-
 		log.info("");
-		Monitor monitor = new Monitor(webAppsCollection, appGroupCollection, httpWebServer, systray, rssFeed, propertiesFile);
+		Monitor monitor = new Monitor(ebd, webAppsCollection, appGroupCollection, httpWebServer, systray, rssFeed, propertiesFile);
 		monitor.startMonitor();
 
 

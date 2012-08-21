@@ -43,6 +43,9 @@ public class LogSettings {
 		Properties systemProperties = System.getProperties();
 		systemProperties.setProperty("org.eclipse.jetty.LEVEL", "WARN");
 
+		// Setup DerbyBD log settings
+		systemProperties.setProperty("derby.stream.error.file", "log/meerkat-derby.log");
+		
 		// Append stdout and stderr to log4j
 		FileOutputStream fileOutputStream = null;
 		try {

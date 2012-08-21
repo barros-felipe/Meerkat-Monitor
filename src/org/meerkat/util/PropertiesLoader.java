@@ -50,7 +50,7 @@ public class PropertiesLoader implements Serializable{
 		
 		// NOTE: all properties are also referenced in 
 		//		 in function generateDefaultPropertiesFile()
-		expectedProperties = new String[21];
+		expectedProperties = new String[24];
 		expectedProperties[0] = "meerkat.email.send.emails";
 		expectedProperties[1] = "meerkat.email.smtp.server";
 		expectedProperties[2] = "meerkat.email.smtp.security";
@@ -72,6 +72,9 @@ public class PropertiesLoader implements Serializable{
 		expectedProperties[18] = "meerkat.password.master";
 		expectedProperties[19] = "meerkat.webserver.logaccess";
 		expectedProperties[20] = "meerkat.webserver.showapptype";
+		expectedProperties[21] = "meerkat.embeddeddb.user";
+		expectedProperties[22] = "meerkat.embeddeddb.passwd";
+		expectedProperties[23] = "meerkat.embeddeddb.dbname";
 		
 		File tmpPropFile = new File(propertiesFile);
 		if(!tmpPropFile.exists()){
@@ -209,6 +212,9 @@ public class PropertiesLoader implements Serializable{
 		prop.put("meerkat.password.master", "changeMe");
 		prop.put("meerkat.webserver.logaccess", "true");
 		prop.put("meerkat.webserver.showapptype", "true");
+		prop.put("meerkat.embeddeddb.user", "meerkat");
+		prop.put("meerkat.embeddeddb.passwd", "meerkatmonitor");
+		prop.put("meerkat.embeddeddb.dbname", "db");
 
 		Properties defaultProperties = new Properties();
 		defaultProperties.putAll(prop);

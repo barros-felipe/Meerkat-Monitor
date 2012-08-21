@@ -54,7 +54,7 @@ public class DateUtil {
 
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
 		try {
-			date = sdf.parse(year + "-" + month + "-" + day + " " + hour + ":"
+			date = sdf.parse(year + "-" + month + "-" + day + " " + hour + ":" 
 					+ minute + ":" + second);
 		} catch (ParseException e) {
 			log.error("Parsing date ", e);
@@ -79,8 +79,7 @@ public class DateUtil {
 		try {
 			converted = df.parse(date);
 		} catch (ParseException e) {
-			log.error("Parsing date ", e);
-
+			log.error("Parsing date "+date, e);
 		}
 
 		// String convertedDateGWT = converted.toString();
@@ -125,7 +124,6 @@ public class DateUtil {
 	 */
 	public final String getFormatedDateRSS() {
 		// RSS data in format: "Tue, 11 May 2010 14:32:23 -0500"
-
 		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT_RSS_ITEM,
 				Locale.getDefault());
 		String newDate = formatter.format(new Date());

@@ -23,12 +23,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,9 +54,9 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 import org.meerkat.dataSources.Visualization;
+import org.meerkat.db.EmbeddedDB;
 import org.meerkat.network.Availability;
 import org.meerkat.network.Latency;
-import org.meerkat.network.LoadTime;
 import org.meerkat.util.Counter;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.StringUtil;
@@ -89,10 +94,6 @@ public class WebApp implements Serializable {
 	@XStreamOmitField
 	private String lastStatus = "NA"; // It may be online or offline - NA in the first run
 	@XStreamOmitField
-	private int numberOfTests = 0;
-	@XStreamOmitField
-	private int numberOfOfflines = 0;
-	@XStreamOmitField
 	private String actionExecOutput = "";
 	@XStreamOmitField
 	private List<WebAppEvent> events;
@@ -104,13 +105,15 @@ public class WebApp implements Serializable {
 	@XStreamOmitField
 	private String lastResponse = "";
 	@XStreamOmitField
-	private String prevLatency = "0.0";
-	@XStreamOmitField
 	private String appVersion;
 	@XStreamOmitField
 	private String configXMLFile = "";
 	private String type = TYPE_WEBAPP; // Default or set to webservice, ssh, etc.
 	private boolean enabled = true;
+	@XStreamOmitField
+	EmbeddedDB embDB;
+	@XStreamOmitField
+	Connection conn = null;
 
 	/**
 	 * WebApp
@@ -352,7 +355,6 @@ public class WebApp implements Serializable {
 		}
 
 		Latency l = new Latency(hostToCheck);
-		prevLatency = l.getLatency();
 
 		return l.getLatency();
 	}
@@ -400,7 +402,7 @@ public class WebApp implements Serializable {
 	 * @return NumberOfOfflines
 	 */
 	public final int getNumberOfOfflines() {
-		return numberOfOfflines;
+		return getNumberOfCriticalEvents();
 	}
 
 	/**
@@ -409,7 +411,7 @@ public class WebApp implements Serializable {
 	 * @return NumberOfTests
 	 */
 	public final int getNumberOfTests() {
-		return numberOfTests;
+		return getNumberOfEvents();
 	}
 
 	/**
@@ -419,24 +421,6 @@ public class WebApp implements Serializable {
 	 */
 	public final String getUrl() {
 		return url;
-	}
-
-	/**
-	 * setNumberOfOfflines
-	 * 
-	 * @param numberOfOfflines
-	 */
-	public final void increaseNumberOfOfflines() {
-		numberOfOfflines++;
-	}
-
-	/**
-	 * setNumberOfTests
-	 * 
-	 * @param numberOfTests
-	 */
-	public final void increaseNumberOfTests() {
-		numberOfTests++;
 	}
 
 	/**
@@ -527,12 +511,42 @@ public class WebApp implements Serializable {
 	}
 
 	/**
+	 * addEmbeddedDB
+	 * @param conn
+	 */
+	public final void addEmbeddedDB(Connection conn){
+		this.conn = conn;
+	}
+
+	/**
 	 * addEvent
 	 * 
 	 * @param event
 	 */
-	public final void addEvent(WebAppEvent event) {
-		events.add(event);
+	public final void addEvent(WebAppEvent ev) {
+		PreparedStatement statement;
+		String queryInsert = "INSERT INTO MEERKAT.EVENTS(APPNAME, CRITICAL, DATEEV, STATUS, AVAILABILITY, LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE) VALUES(";
+
+		String queryValues = "'"+ this.getName() +"', "+ev.isCritical()+", '"+ev.getDate()+"', '"+
+				ev.getStatus()+"', "+Double.valueOf(this.getAvailability())+", "+
+				Double.valueOf(ev.getPageLoadTime())+", "+Double.valueOf(ev.getLatency())+", "+
+				Integer.valueOf(ev.getHttpStatusCode())+", '"+ev.getDescription()+"', ?";
+
+		if(ev.getCurrentResponse().length() > 20000){
+			// truncate the size of response
+			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, 20000));
+			log.warn("Response of "+this.getName()+" bigger than 20000 (truncated!).");
+		}
+
+		try {
+			statement = conn.prepareStatement(queryInsert+queryValues+")");
+			statement.setString(1, ev.getCurrentResponse());
+			statement.execute();
+			conn.commit();
+		} catch (SQLException e) {
+			log.error("Failed to insert event into DB! - "+e.getMessage());
+		}
+
 		this.writeWebAppVisualizationDataFile();
 	}
 
@@ -542,8 +556,65 @@ public class WebApp implements Serializable {
 	 * @return EventList
 	 */
 	public final Iterator<WebAppEvent> getEventListIterator() {
+		events = getEvents();
 		return events.iterator();
 	}
+
+	/**
+	 * getEvents
+	 * @return events list
+	 */
+	private List<WebAppEvent> getEvents(){
+		if(conn == null){
+			embDB = new EmbeddedDB();
+			conn = embDB.getConn();
+		}
+
+		events = new ArrayList<WebAppEvent>();
+
+		boolean critical;
+		String date;
+		String status;
+		String availability;
+		String loadTime;
+		String latency;
+		int httStatusCode;
+		String description;
+		String response;
+
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT * FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
+			rs = ps.executeQuery();
+
+			while(rs.next()) {
+				critical = rs.getBoolean(3);
+				date = rs.getTimestamp(4).toString();
+				status = rs.getString(5);
+				availability = String.valueOf(rs.getDouble(6));
+				loadTime = String.valueOf(rs.getDouble(7));
+				latency = String.valueOf(rs.getDouble(8));
+				httStatusCode = rs.getInt(9);
+				description = rs.getString(10);
+				response = rs.getString(11);
+
+				WebAppEvent currEv = new WebAppEvent(critical, date, status, availability, httStatusCode, description);
+				currEv.setID(rs.getInt(1));
+				currEv.setPageLoadTime(loadTime);
+				currEv.setLatency(latency);
+				currEv.setCurrentResponse(response);
+
+				events.add(currEv);
+			}
+
+		} catch (SQLException e) {
+			log.error("Failed query events from application "+this.getName());
+			log.error("", e);
+		}
+		return events;
+	}
+
 
 	/**
 	 * getNumberOfEvents
@@ -551,6 +622,7 @@ public class WebApp implements Serializable {
 	 * @return NumberOfEvents
 	 */
 	public final int getNumberOfEvents() {
+		events = getEvents();
 		return events.size();
 	}
 
@@ -560,18 +632,23 @@ public class WebApp implements Serializable {
 	 * @return NumberOfCriticalEvents
 	 */
 	public final int getNumberOfCriticalEvents() {
-		int i = 0;
-		Iterator<WebAppEvent> it = this.getEventListIterator();
-		WebAppEvent ev;
-		while (it.hasNext()) {
-			ev = it.next();
-			if (ev.isCritical()) {
-				i++;
-			}
-		}
+		int numberOfCriticalEvents = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' AND CRITICAL");
+			rs = ps.executeQuery();
 
-		return i;
+			rs.next();
+			numberOfCriticalEvents = rs.getInt(1);
+
+		} catch (SQLException e) {
+			log.error("Failed query number of critical events from application "+this.getName());
+			log.error("", e);
+		}
+		return numberOfCriticalEvents;
 	}
+
 
 	/**
 	 * getPageLoadsAverage
@@ -579,8 +656,21 @@ public class WebApp implements Serializable {
 	 * @return PageLoadsAverage
 	 */
 	public final String getLoadsAverage() {
-		LoadTime plt = new LoadTime();
-		return plt.getLoadsAverage(this);
+		double loadTimeAvg = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT AVG(LOADTIME) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
+			rs = ps.executeQuery();
+
+			rs.next();
+			loadTimeAvg = rs.getDouble(1);
+
+		} catch (SQLException e) {
+			log.error("Failed query average load time from application "+this.getName());
+			log.error("", e);
+		}
+		return String.valueOf(loadTimeAvg);
 	}
 
 	/**
@@ -588,11 +678,56 @@ public class WebApp implements Serializable {
 	 * 
 	 * @return Latency average
 	 */
-	public final String getLatencyAverage() {
-		Latency ltc = new Latency();
-		return ltc.getLatencyAverage(this);
+	public final double getLatencyAverage() {
+		double latencyAvg = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT AVG(LATENCY) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
+			rs = ps.executeQuery();
+
+			rs.next();
+			latencyAvg = rs.getDouble(1);
+
+		} catch (SQLException e) {
+			log.error("Failed query average load time from application "+this.getName());
+			log.error("", e);
+		}
+		return latencyAvg;
 	}
 
+	/**
+	 * getLatencyAverage
+	 * 
+	 * @return Latency average
+	 */
+	private final double getAvailabilityAverage() {
+		double availAvg = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT AVG(AVAILABILITY) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
+			rs = ps.executeQuery();
+
+			rs.next();
+			availAvg = rs.getDouble(1);
+
+		} catch (SQLException e) {
+			log.error("Failed query average availability from application "+this.getName());
+			log.error("", e);
+		}
+
+		BigDecimal bd = new BigDecimal(availAvg);
+		bd = bd.setScale(2, BigDecimal.ROUND_DOWN);
+		availAvg = bd.doubleValue();
+
+		return availAvg;
+	}
+
+	/**
+	 * getDataFileName
+	 * @return
+	 */
 	public final String getDataFileName() {
 		return this.name.replace(" ", "-") + filenameSuffix;
 	}
@@ -623,11 +758,9 @@ public class WebApp implements Serializable {
 	 * writeWebAppDataFile
 	 */
 	public final void writeWebAppVisualizationDataFile() {
-		if (this.getTempDir() != null) {
-			Visualization gv = new Visualization();
-			gv.setAppVersion(appVersion);
-			gv.writeWebAppVisualizationDataFile(this);
-		}
+		Visualization gv = new Visualization();
+		gv.setAppVersion(appVersion);
+		gv.writeWebAppVisualizationDataFile(this);
 	}
 
 	/**
@@ -705,15 +838,6 @@ public class WebApp implements Serializable {
 	 */
 	public final void setTempWorkingDir(String tempWorkingDir) {
 		this.tempWorkingDir = tempWorkingDir;
-	}
-
-
-	/**
-	 * setPrevAvailability
-	 * @return prevLatency
-	 */
-	public final String getPrevLatency() {
-		return prevLatency;
 	}
 
 	/**
@@ -813,7 +937,6 @@ public class WebApp implements Serializable {
 		}
 
 		// Remove the last ,
-		// int lastPos = groupsString.lastIndexOf(",");
 		int lastPos = groupsString.lastIndexOf(',');
 		groupsString = groupsString.substring(0, lastPos);
 
@@ -821,118 +944,150 @@ public class WebApp implements Serializable {
 	}
 
 	/**
-	 * getLatencyTrend Slope coefficient
+	 * 
+	 * getLatencyIndicator
+	 * @return 	1 if last latency higher than latency average
+	 * 			-1 if last latency lower than latency average
+	 * 			0 if they are equal
+	 * 			(No decimal plates considered)
 	 */
-	public double getLatencyTrend() {
+	public double getLatencyIndicator() {
+		double doubleLatencyAverage = getLatencyAverage();
+		BigDecimal bd = new BigDecimal(doubleLatencyAverage);
+		bd = bd.setScale(0, BigDecimal.ROUND_DOWN);
+		double latencyAverage = bd.doubleValue();
 
-		// Clean events with latency = 'undefined'
-		Iterator<WebAppEvent> it = events.iterator();
-		List<WebAppEvent> notUndefLatencyEvents = new ArrayList<WebAppEvent>();
-		WebAppEvent currEv;
+		// get the value of last event
+		double lastLatency = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
 
-		while (it.hasNext()) {
-			currEv = it.next();
-			if (!currEv.getLatency().equalsIgnoreCase("undefined")) {
-				notUndefLatencyEvents.add(currEv);
-			}
+		try {
+			ps = conn.prepareStatement("SELECT * FROM ( "+
+					"SELECT ID, LATENCY FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' "+
+					") AS TMP "+
+					"WHERE ID = ( "+
+					"SELECT MAX(ID) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' "+
+					") ");
+
+			rs = ps.executeQuery();
+
+			rs.next();
+			lastLatency = rs.getDouble(2);
+
+		} catch (SQLException e) {
+			log.error("Failed query average availability from application "+this.getName());
+			log.error("", e);
 		}
 
-		int numberOfEvents = notUndefLatencyEvents.size();
+		BigDecimal bd1 = new BigDecimal(lastLatency);
+		bd1 = bd1.setScale(0, BigDecimal.ROUND_DOWN);
+		lastLatency = bd1.doubleValue();
 
-		int pos = 1;
-		double sX = 0;
-		double sY = 0;
-		double sXX = 0;
-		double sXY = 0;
-
-		for (int i = 0; i < numberOfEvents; i++) {
-			sX = sX + pos;
-			sY = sY
-					+ Double.valueOf(notUndefLatencyEvents.get(pos - 1)
-							.getLatency());
-			sXX = sXX + pos * pos;
-			sXY = sXY
-					+ pos
-					* Double.valueOf(notUndefLatencyEvents.get(pos - 1)
-							.getLatency());
-			pos++;
+		if(lastLatency > latencyAverage){
+			return 1;
+		}else if(lastLatency < latencyAverage){
+			return -1;
 		}
 
-		// slope coefficient
-		double sc = ((sX * sY) - (numberOfEvents * sXY))
-				/ ((sX * sX) - (numberOfEvents * sXX));
+		return 0;
+	}
 
-		notUndefLatencyEvents = null;
-		if (sc == -0.0 || sc == 0.0) {
-			return 0;
-		} else {
-			return sc;
+
+	/**
+	 * getAvailabilityIndicator
+	 * @return 	1 if last availability higher than availability average
+	 * 			-1 if last avail. lower than avail. average
+	 * 			0 if they are equal
+	 * 			(No decimal plates considered)
+	 */
+	public double getAvailabilityIndicator() {
+		double doubleAvailAverage = getAvailabilityAverage();
+		BigDecimal bd = new BigDecimal(doubleAvailAverage);
+		bd = bd.setScale(0, BigDecimal.ROUND_DOWN);
+		double availAverage = bd.doubleValue();
+		
+		// get the value of last event
+		double lastAvailability = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT * FROM ( "+
+					"SELECT ID, AVAILABILITY FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.getName()+"' "+
+					") AS TMP "+
+					"WHERE ID = ( "+
+					"SELECT MAX(ID) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.getName()+"' "+
+					") ");
+					
+			rs = ps.executeQuery();
+
+			rs.next();
+			lastAvailability = rs.getDouble(2);
+
+		} catch (SQLException e) {
+			log.error("Failed query average availability from application "+this.getName());
+			log.error("", e);
 		}
+
+		BigDecimal bd1 = new BigDecimal(lastAvailability);
+		bd1 = bd1.setScale(0, BigDecimal.ROUND_DOWN);
+		lastAvailability = bd1.doubleValue();
+
+		if(lastAvailability > availAverage){
+			return 1;
+		}else if(lastAvailability < availAverage){
+			return -1;
+		}
+
+		return 0;
 	}
 
 	/**
-	 * getAvailabilityTrend Slope coefficient
+	 * getLoadTimeIndicator
+	 * @return 	1 if last load time higher than load time average
+	 * 			-1 if last load time lower than load time average
+	 * 			0 if they are equal
+	 * 			(No decimal plates considered)
 	 */
-	public double getAvailabilityTrend() {
-		int numberOfEvents = events.size();
+	public double getLoadTimeIndicator() {
+		double doubleLoadTimeAverage = getAvailabilityAverage();
+		BigDecimal bd = new BigDecimal(doubleLoadTimeAverage);
+		bd = bd.setScale(0, BigDecimal.ROUND_DOWN);
+		double loadTimeAverage = bd.doubleValue();
 
-		int pos = 1;
-		double sX = 0;
-		double sY = 0;
-		double sXX = 0;
-		double sXY = 0;
+		// get the value of last event
+		double lastLoadTime = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT * FROM ( "+
+					"SELECT ID, LOADTIME FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' "+
+					") AS TMP "+
+					"WHERE ID = ( "+
+					"SELECT MAX(ID) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' "+
+					") ");
 
-		for (int i = 0; i < numberOfEvents; i++) {
-			sX = sX + pos;
-			sY = sY + Double.valueOf(events.get(pos - 1).getAvailability());
-			sXX = sXX + pos * pos;
-			sXY = sXY + pos
-					* Double.valueOf(events.get(pos - 1).getAvailability());
-			pos++;
+			rs = ps.executeQuery();
+
+			rs.next();
+			lastLoadTime = rs.getDouble(2);
+
+		} catch (SQLException e) {
+			log.error("Failed query average load time from application "+this.getName());
+			log.error("", e);
 		}
 
-		// slope coefficient
-		double sc = ((sX * sY) - (numberOfEvents * sXY))
-				/ ((sX * sX) - (numberOfEvents * sXX));
+		BigDecimal bd1 = new BigDecimal(lastLoadTime);
+		bd1 = bd1.setScale(0, BigDecimal.ROUND_DOWN);
+		lastLoadTime = bd1.doubleValue();
 
-		if (sc == -0.0 || sc == 0.0) {
-			return 0;
-		} else {
-			return sc;
-		}
-	}
-
-	/**
-	 * getLoadTimeTrend Slope coefficient
-	 */
-	public double getLoadTimeTrend() {
-		int numberOfEvents = events.size();
-
-		int pos = 1;
-		double sX = 0;
-		double sY = 0;
-		double sXX = 0;
-		double sXY = 0;
-
-		for (int i = 0; i < numberOfEvents; i++) {
-			sX = sX + pos;
-			sY = sY + Double.valueOf(events.get(pos - 1).getPageLoadTime());
-			sXX = sXX + pos * pos;
-			sXY = sXY + pos
-					* Double.valueOf(events.get(pos - 1).getPageLoadTime());
-			pos++;
+		if(lastLoadTime > loadTimeAverage){
+			return 1;
+		}else if(lastLoadTime < loadTimeAverage){
+			return -1;
 		}
 
-		// slope coefficient
-		double sc = ((sX * sY) - (numberOfEvents * sXY))
-				/ ((sX * sX) - (numberOfEvents * sXX));
-
-		if (sc == -0.0 || sc == 0.0) {
-			return 0;
-		} else {
-			return sc;
-		}
-
+		return 0;
 	}
 
 	/**

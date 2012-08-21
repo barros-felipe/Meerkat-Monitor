@@ -69,7 +69,7 @@ public class SplashScreen extends JWindow implements Runnable {
 		setVisible(true);
 
 		try {
-			Thread.sleep(3000);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			log.error("SplashScreen thread sleep error!");
 		}

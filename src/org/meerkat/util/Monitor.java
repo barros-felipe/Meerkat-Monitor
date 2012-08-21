@@ -19,12 +19,14 @@
 
 package org.meerkat.util;
 
+import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
+import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.gui.SysTrayIcon;
 import org.meerkat.httpServer.HttpServer;
@@ -37,6 +39,7 @@ import org.meerkat.webapp.WebAppResponse;
 
 public class Monitor {
 	private static Logger log = Logger.getLogger(Monitor.class);
+	EmbeddedDB ebd;
 	WebAppCollection webAppsCollection;
 	AppGroupCollection appGroupCollection;
 	HttpServer httpWebServer;
@@ -58,10 +61,12 @@ public class Monitor {
 	String eventBackOnline = "Back Online";
 	int testPause;
 	long pauseTime;
+	Connection conn;
 
 
-	public Monitor(WebAppCollection webAppsCollection, AppGroupCollection appGroupCollection, 
+	public Monitor(EmbeddedDB ebd, WebAppCollection webAppsCollection, AppGroupCollection appGroupCollection, 
 			HttpServer httpWebServer, SysTrayIcon systray, RSS rssFeed, String propertiesFile){
+		this.ebd = ebd;
 		this.webAppsCollection = webAppsCollection;
 		this.appGroupCollection = appGroupCollection;
 		this.httpWebServer = httpWebServer;
@@ -70,6 +75,9 @@ public class Monitor {
 		dateUtil = new DateUtil();
 		tempWorkingDir = webAppsCollection.getTmpDir();
 		pL = new PropertiesLoader(propertiesFile);
+
+		conn = ebd.getConn();
+
 	}
 
 	/**
@@ -79,22 +87,13 @@ public class Monitor {
 		webAppsCollection.saveConfigXMLFile();
 		httpWebServer.refreshIndex();
 
-		// Autoload last session if enabled in properties
-		/**
-		autoLoadOnStart = Boolean.parseBoolean(properties.getProperty("meerkat.autoload.start"));
-		if (autoLoadOnStart) {
-			log.info("Autoload on start enable. Loading last session..");
-			loadSession();
-			log.info("Session loaded!");
-		}
-		 */
-
 		List<WebApp> webAppListCopy = webAppsCollection.getCopyWebApps();
 		Iterator<WebApp> i = webAppListCopy.iterator();
 
 		// Prevent dashboard link from giving 404 at first round
 		while (i.hasNext()) {
 			currentWebApp = i.next();
+			currentWebApp.setTempWorkingDir(tempWorkingDir);
 			currentWebApp.writeWebAppVisualizationDataFile(); 
 		}
 
@@ -123,6 +122,9 @@ public class Monitor {
 				currentWebApp = i.next();
 				log.info("["+roundCompletedApps+"/"+numberOfApps+" "+percent+"%]\t"+currentWebApp.getName());
 
+				// Add the DB connection to application
+				currentWebApp.addEmbeddedDB(conn);
+
 				// check if the webApp is ready to monit or not - temp created in the gui
 				if (currentWebApp.isActive()) {
 					currentWebAppResponse = new WebAppResponse();
@@ -134,7 +136,6 @@ public class Monitor {
 					if (currentWebAppResponse.isOnline()
 							&& currentWebApp.getlastStatus().equalsIgnoreCase("NA")) {
 						currentWebApp.setlastStatus("online");
-						currentWebApp.increaseNumberOfTests();
 
 						// Add event
 						String now = dateUtil.now();
@@ -144,13 +145,13 @@ public class Monitor {
 								"100",
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
-								eventNewMonitoringStart, tempWorkingDir);
+								eventNewMonitoringStart);
 						// Save load time and latency
 						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(), currentWebApp);
+						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
 
 					} else if (!currentWebAppResponse.isOnline()
@@ -158,8 +159,6 @@ public class Monitor {
 						currentWebApp.setlastStatus("offline");
 
 						log.warn("OFFLINE\t| " + currentWebApp.getName()+ "\t | " + currentWebApp.getUrl());
-						currentWebApp.increaseNumberOfTests();
-						currentWebApp.increaseNumberOfOfflines();
 
 						if (sendEmails) {
 							mailManager.sendEmail(subject + " - "+ currentWebApp.getName() + " is OFFLINE", 
@@ -175,13 +174,13 @@ public class Monitor {
 								"0",
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
-								eventNewMonitoringStart, tempWorkingDir);
+								eventNewMonitoringStart);
 						// Save load time and latency
 						ev.setLatency(currentWebApp.getLatency());
 						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(), currentWebApp);
+						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
 						// httpWebServer.addEventResponse(currentWebApp);
 
@@ -198,7 +197,6 @@ public class Monitor {
 					// If last status was online
 					else if (currentWebAppResponse.isOnline() && currentWebApp.getlastStatus().equalsIgnoreCase("online")) {
 						currentWebApp.setlastStatus("online");
-						currentWebApp.increaseNumberOfTests();
 
 						// Add event
 						String now = dateUtil.now();
@@ -208,13 +206,13 @@ public class Monitor {
 								"100",
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
-								eventStandard, tempWorkingDir);
+								eventStandard);
 						// Save load time and latency
 						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(), currentWebApp);
+						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
 
 					} else if (!currentWebAppResponse.isOnline()
@@ -222,8 +220,6 @@ public class Monitor {
 						currentWebApp.setlastStatus("offline");
 
 						log.warn("OFFLINE\t| " + currentWebApp.getName()+ "\t | " + currentWebApp.getUrl());
-						currentWebApp.increaseNumberOfTests();
-						currentWebApp.increaseNumberOfOfflines();
 
 						if (sendEmails) {
 							mailManager.sendEmail(subject + " - "+ currentWebApp.getName() + " is OFFLINE", 
@@ -239,13 +235,13 @@ public class Monitor {
 								"0",
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
-								eventGoOffline, tempWorkingDir);
+								eventGoOffline);
 						// Save load time and latency
 						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(),currentWebApp);
+						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
 
 						// Add RSS item
@@ -261,7 +257,6 @@ public class Monitor {
 					// If last status was offline
 					else if (currentWebAppResponse.isOnline() && currentWebApp.getlastStatus().equalsIgnoreCase("offline")) {
 						currentWebApp.setlastStatus("online");
-						currentWebApp.increaseNumberOfTests();
 
 						if (sendEmails) {
 							mailManager.sendEmail(subject + " - "+ currentWebApp.getName() + " is BACK ONLINE", 
@@ -276,13 +271,13 @@ public class Monitor {
 								"100",
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
-								eventBackOnline, tempWorkingDir);
+								eventBackOnline);
 						// Save load time and latency
 						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(),currentWebApp);
+						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
 						// httpWebServer.addEventResponse(currentWebApp);
 
@@ -295,8 +290,6 @@ public class Monitor {
 						currentWebApp.setlastStatus("offline");
 
 						log.warn("STILL OFFLINE\t| " + currentWebApp.getName()+ "\t | " + currentWebApp.getUrl());
-						currentWebApp.increaseNumberOfTests();
-						currentWebApp.increaseNumberOfOfflines();
 
 						// Add event
 						String now = dateUtil.now();
@@ -306,13 +299,13 @@ public class Monitor {
 								"0",
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
-								eventStandard, tempWorkingDir);
+								eventStandard);
 						// Save load time and latency
 						ev.setPageLoadTime(currentWebAppResponse.getPageLoadTime());
 						ev.setLatency(currentWebApp.getLatency());
 
 						// Set the response
-						ev.setCurrentResponseGlobal(currentWebApp.getCurrentResponse(),currentWebApp);
+						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
 
 						// Execute the executeOnOffline

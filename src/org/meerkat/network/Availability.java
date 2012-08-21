@@ -29,7 +29,7 @@ public class Availability {
 	 * Availability
 	 */
 	public Availability() {
-		super();
+
 	}
 
 	/**
@@ -55,6 +55,12 @@ public class Availability {
 			bd = new BigDecimal(avail);
 			bd = bd.setScale(decimalPlaces, BigDecimal.ROUND_DOWN);
 			avail = bd.doubleValue();
+		}else{ // first test
+			if(webApp.checkWebAppStatus().isOnline() == true){
+				return 100.0;
+			}
+
+
 		}
 		return avail;
 	}
