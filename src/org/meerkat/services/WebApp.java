@@ -22,7 +22,6 @@ package org.meerkat.services;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,6 +36,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -67,9 +67,7 @@ import org.meerkat.webapp.WebAppResponse;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-public class WebApp implements Serializable {
-
-	private static final long serialVersionUID = 366466730003252507L;
+public class WebApp {
 	private static Logger log = Logger.getLogger(WebApp.class);
 
 	private String name;
@@ -130,8 +128,8 @@ public class WebApp implements Serializable {
 		this.url = url;
 		this.expectedString = expectedString;
 		this.actionExecOutput = "";
-		events = new ArrayList<WebAppEvent>();
-		groups = new ArrayList<String>();
+		events = new CopyOnWriteArrayList<WebAppEvent>();
+		groups = new CopyOnWriteArrayList<String>();
 		mkm = new MasterKeyManager();
 	}
 
@@ -525,7 +523,7 @@ public class WebApp implements Serializable {
 	 */
 	public final void addEvent(WebAppEvent ev) {
 		PreparedStatement statement;
-		String queryInsert = "INSERT INTO MEERKAT.EVENTS(APPNAME, CRITICAL, DATEEV, STATUS, AVAILABILITY, LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE) VALUES(";
+		String queryInsert = "INSERT INTO MEERKAT.EVENTS(APPNAME, CRITICAL, DATEEV, ONLINE, AVAILABILITY, LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE) VALUES(";
 
 		String queryValues = "'"+ this.getName() +"', "+ev.isCritical()+", '"+ev.getDate()+"', '"+
 				ev.getStatus()+"', "+Double.valueOf(this.getAvailability())+", "+
@@ -542,6 +540,7 @@ public class WebApp implements Serializable {
 			statement = conn.prepareStatement(queryInsert+queryValues+")");
 			statement.setString(1, ev.getCurrentResponse());
 			statement.execute();
+			statement.close();
 			conn.commit();
 		} catch (SQLException e) {
 			log.error("Failed to insert event into DB! - "+e.getMessage());
@@ -570,11 +569,11 @@ public class WebApp implements Serializable {
 			conn = embDB.getConn();
 		}
 
-		events = new ArrayList<WebAppEvent>();
+		events = new CopyOnWriteArrayList<WebAppEvent>();
 
 		boolean critical;
 		String date;
-		String status;
+		boolean online;
 		String availability;
 		String loadTime;
 		String latency;
@@ -591,7 +590,7 @@ public class WebApp implements Serializable {
 			while(rs.next()) {
 				critical = rs.getBoolean(3);
 				date = rs.getTimestamp(4).toString();
-				status = rs.getString(5);
+				online = rs.getBoolean(5);
 				availability = String.valueOf(rs.getDouble(6));
 				loadTime = String.valueOf(rs.getDouble(7));
 				latency = String.valueOf(rs.getDouble(8));
@@ -599,14 +598,17 @@ public class WebApp implements Serializable {
 				description = rs.getString(10);
 				response = rs.getString(11);
 
-				WebAppEvent currEv = new WebAppEvent(critical, date, status, availability, httStatusCode, description);
+				WebAppEvent currEv = new WebAppEvent(critical, date, online, availability, httStatusCode, description);
 				currEv.setID(rs.getInt(1));
 				currEv.setPageLoadTime(loadTime);
 				currEv.setLatency(latency);
 				currEv.setCurrentResponse(response);
-
 				events.add(currEv);
 			}
+			
+			rs.close();
+			ps.close();
+			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query events from application "+this.getName());
@@ -641,6 +643,10 @@ public class WebApp implements Serializable {
 
 			rs.next();
 			numberOfCriticalEvents = rs.getInt(1);
+			
+			rs.close();
+			ps.close();
+			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query number of critical events from application "+this.getName());
@@ -665,6 +671,10 @@ public class WebApp implements Serializable {
 
 			rs.next();
 			loadTimeAvg = rs.getDouble(1);
+			
+			rs.close();
+			ps.close();
+			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query average load time from application "+this.getName());
@@ -688,6 +698,10 @@ public class WebApp implements Serializable {
 
 			rs.next();
 			latencyAvg = rs.getDouble(1);
+			
+			rs.close();
+			ps.close();
+			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query average load time from application "+this.getName());
@@ -711,6 +725,10 @@ public class WebApp implements Serializable {
 
 			rs.next();
 			availAvg = rs.getDouble(1);
+			
+			rs.close();
+			ps.close();
+			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query average availability from application "+this.getName());
@@ -974,6 +992,10 @@ public class WebApp implements Serializable {
 
 			rs.next();
 			lastLatency = rs.getDouble(2);
+			
+			rs.close();
+			ps.close();
+			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query average availability from application "+this.getName());
@@ -1006,7 +1028,7 @@ public class WebApp implements Serializable {
 		BigDecimal bd = new BigDecimal(doubleAvailAverage);
 		bd = bd.setScale(0, BigDecimal.ROUND_DOWN);
 		double availAverage = bd.doubleValue();
-		
+
 		// get the value of last event
 		double lastAvailability = 0;
 		PreparedStatement ps;
@@ -1018,11 +1040,15 @@ public class WebApp implements Serializable {
 					"WHERE ID = ( "+
 					"SELECT MAX(ID) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.getName()+"' "+
 					") ");
-					
+
 			rs = ps.executeQuery();
 
 			rs.next();
 			lastAvailability = rs.getDouble(2);
+			
+			rs.close();
+			ps.close();
+			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query average availability from application "+this.getName());
@@ -1071,6 +1097,10 @@ public class WebApp implements Serializable {
 
 			rs.next();
 			lastLoadTime = rs.getDouble(2);
+			
+			rs.close();
+			ps.close();
+			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query average load time from application "+this.getName());
@@ -1122,6 +1152,25 @@ public class WebApp implements Serializable {
 	 */
 	public final MasterKeyManager getMasterKeyManager(){
 		return this.mkm;
+	}
+	
+	public final void removeAllEvents() {
+		// Remove DB events of this application
+		Connection conn = embDB.getConn();
+		PreparedStatement statement = null;
+		
+		String queryDelete = "DELETE FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'";
+		
+		try {
+			statement = conn.prepareStatement(queryDelete);
+			statement.execute();
+			
+			statement.close();
+			conn.commit();
+		} catch (SQLException e) {
+			log.error("Failed to remove events of "+this.name+" from DB! - "+e.getMessage());
+		}
+		
 	}
 
 }

@@ -57,6 +57,8 @@ public class OptionsPanelDataBase extends JPanel {
 	private String[] dbTypes = { "", SQLService.TYPE_MYSQL, SQLService.TYPE_ORA, SQLService.TYPE_MSSQL };
 	private String selected = dbTypes[0];
 	private MasterKeyManager mkm = new MasterKeyManager();
+	final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
+	final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 
 	/**
 	 * Create the panel.
@@ -271,10 +273,9 @@ public class OptionsPanelDataBase extends JPanel {
 		button_delete = new JButton("Delete");
 		button_delete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				wAppCollection.removeWebApp(webApp);
-				wAppCollection.writeWebAppCollectionDataFile();
-				wAppCollection.saveConfigXMLFile();
-				mainMAppWindow.removeSelectNodeElementFromTree();
+				DialogBoxDeleteResetApp dappw = new DialogBoxDeleteResetApp(mainMAppWindow, wAppCollection, webApp, false);
+				dappw.showUp();
+				setCursor(DEFAULT_CURSOR);				
 			}
 		});
 		button_delete.setBounds(425, 511, 89, 23);
@@ -289,8 +290,6 @@ public class OptionsPanelDataBase extends JPanel {
 
 		// Test button
 		button_test = new JButton("Test");
-		final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
-		final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 		button_test.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				// Disable components
@@ -331,13 +330,24 @@ public class OptionsPanelDataBase extends JPanel {
 		});
 		button_test.setBounds(109, 511, 89, 23);
 		add(button_test);
+		
+		// Reset button
+		JButton btnReset = new JButton("Reset");
+		btnReset.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DialogBoxDeleteResetApp dappw = new DialogBoxDeleteResetApp(mainMAppWindow, wAppCollection, webApp, true);
+				dappw.showUp();
+				setCursor(DEFAULT_CURSOR);	
+			}
+		});
+		btnReset.setBounds(324, 511, 91, 23);
+		add(btnReset);
 
 		if (!webApp.isActive()) {
 			button_test.setEnabled(false);
 		}
 	}
-
+	
 	public OptionsPanelDataBase() {
 	}
-
 }

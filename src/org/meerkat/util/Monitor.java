@@ -142,7 +142,7 @@ public class Monitor {
 						ev = new WebAppEvent(
 								false,
 								now,
-								"100",
+								true,
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
 								eventNewMonitoringStart);
@@ -171,7 +171,7 @@ public class Monitor {
 						ev = new WebAppEvent(
 								true,
 								now,
-								"0",
+								false,
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
 								eventNewMonitoringStart);
@@ -203,7 +203,7 @@ public class Monitor {
 						ev = new WebAppEvent(
 								false,
 								now,
-								"100",
+								true,
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
 								eventStandard);
@@ -232,7 +232,7 @@ public class Monitor {
 						ev = new WebAppEvent(
 								true,
 								now,
-								"0",
+								false,
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
 								eventGoOffline);
@@ -268,7 +268,7 @@ public class Monitor {
 						ev = new WebAppEvent(
 								true,
 								now,
-								"100",
+								true,
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
 								eventBackOnline);
@@ -296,7 +296,7 @@ public class Monitor {
 						ev = new WebAppEvent(
 								false,
 								now,
-								"0",
+								false,
 								Double.toString(currentWebApp.getAvailability()),
 								currentWebAppResponse.getHttpStatus(),
 								eventStandard);

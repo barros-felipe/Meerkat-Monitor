@@ -21,7 +21,6 @@ package org.meerkat.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,9 +33,9 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.log4j.Logger;
 
-public class ShutdownDialogBox extends JDialog {
+public class DialogBoxShutdown extends JDialog {
 
-	private static Logger log = Logger.getLogger(ShutdownDialogBox.class);
+	private static Logger log = Logger.getLogger(DialogBoxShutdown.class);
 	private static final long serialVersionUID = 8757798906283071588L;
 	private final JPanel contentPanel = new JPanel();
 
@@ -45,7 +44,7 @@ public class ShutdownDialogBox extends JDialog {
 	 */
 	public final void showUp() {
 		try {
-			ShutdownDialogBox dialog = new ShutdownDialogBox();
+			DialogBoxShutdown dialog = new DialogBoxShutdown();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setLocationRelativeTo(null);
 			dialog.setVisible(true);
@@ -57,23 +56,21 @@ public class ShutdownDialogBox extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public ShutdownDialogBox() {
+	public DialogBoxShutdown() {
 		setTitle("Confirm Exit");
 		setIconImage(Toolkit.getDefaultToolkit()
 				.getImage(
-						ShutdownDialogBox.class
+						DialogBoxShutdown.class
 								.getResource("/resources/tray_icon.gif")));
-		setBounds(100, 100, 215, 112);
+		setBounds(100, 100, 215, 101);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(null);
-		{
-			JLabel lblAreYouSure = new JLabel("Exit Meerkat Monitor?");
-			lblAreYouSure.setFont(new Font("Tahoma", Font.PLAIN, 12));
-			lblAreYouSure.setBounds(40, 15, 119, 15);
-			contentPanel.add(lblAreYouSure);
-		}
+		
+		JLabel lblExitMeerkatMonitor = new JLabel("Confirm exit Meerkat Monitor?");
+		lblExitMeerkatMonitor.setBounds(38, 11, 159, 14);
+		contentPanel.add(lblExitMeerkatMonitor);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -100,5 +97,4 @@ public class ShutdownDialogBox extends JDialog {
 			}
 		}
 	}
-
 }

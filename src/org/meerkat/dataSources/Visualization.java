@@ -157,7 +157,7 @@ public class Visualization {
 		while (ie.hasNext()) {
 			webAppEvent = ie.next();
 
-			if (webAppEvent.getStatus().equalsIgnoreCase("0")) {
+			if (!webAppEvent.getStatus()) {
 				statusText = "OFFLINE";
 			} else {
 				statusText = "ONLINE";

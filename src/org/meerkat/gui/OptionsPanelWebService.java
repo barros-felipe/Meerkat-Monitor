@@ -52,11 +52,13 @@ public class OptionsPanelWebService extends JPanel {
 	private JTextField textField_soap_action;
 	private JTextField textField_executeOnOffline;
 	private JTextField textField_groups;
-	private JButton button;
+	private JButton button_delete;
 	private JButton button_edit_response;
 	private JButton button_edit_post;
 	WebAppResponse testCurrentWebAppResponse;
 	private JButton button_test;
+	final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
+	final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 
 	/**
 	 * Create the panel.
@@ -211,24 +213,21 @@ public class OptionsPanelWebService extends JPanel {
 		});
 
 		// Delete button
-		button = new JButton("Delete");
-		button.addActionListener(new ActionListener() {
+		button_delete = new JButton("Delete");
+		button_delete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				wAppCollection.removeWebApp(webApp);
-				wAppCollection.writeWebAppCollectionDataFile();
-				wAppCollection.saveConfigXMLFile();
-				mainMAppWindow.removeSelectNodeElementFromTree();
+				DialogBoxDeleteResetApp dappw = new DialogBoxDeleteResetApp(mainMAppWindow, wAppCollection, webApp, false);
+				dappw.showUp();
+				setCursor(DEFAULT_CURSOR);
 			}
 		});
-		button.setBounds(425, 511, 89, 23);
-		add(button);
+		button_delete.setBounds(425, 511, 89, 23);
+		add(button_delete);
 
 		// Test button
 		button_test = new JButton("Test");
-		final Cursor WAIT_CURSOR = Cursor
-				.getPredefinedCursor(Cursor.WAIT_CURSOR);
-		final Cursor DEFAULT_CURSOR = Cursor
-				.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
+		final Cursor WAIT_CURSOR = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
+		final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 		button_test.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				// Disable components
@@ -271,6 +270,18 @@ public class OptionsPanelWebService extends JPanel {
 		});
 		button_test.setBounds(109, 511, 89, 23);
 		add(button_test);
+
+		// Reset button
+		JButton btnReset = new JButton("Reset");
+		btnReset.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DialogBoxDeleteResetApp dappw = new DialogBoxDeleteResetApp(mainMAppWindow, wAppCollection, webApp, true);
+				dappw.showUp();
+				setCursor(DEFAULT_CURSOR);	
+			}
+		});
+		btnReset.setBounds(324, 511, 91, 23);
+		add(btnReset);
 
 		if (!webApp.isActive()) {
 			button_test.setEnabled(false);

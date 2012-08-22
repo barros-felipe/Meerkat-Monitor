@@ -51,8 +51,6 @@ public class MeerkatMonitor {
 
 	private static Logger log = Logger.getLogger(MeerkatMonitor.class);
 	private static Integer webserverPort;
-	//private static String sessionSaveFile = "meerkatDataSession.mrk";
-	//private static String saveFile = "meerkat-session-save.dat";
 	private static String propertiesFile = "meerkat.properties";
 	private static String configFile = "meerkat.webapps.xml";
 	private static Properties properties;
@@ -139,20 +137,11 @@ public class MeerkatMonitor {
 			log.error("", e);
 		}
 
-		// Setup web server
-		log.info("Setting up embedded server...");
-		webserverPort = Integer.parseInt(properties.getProperty("meerkat.webserver.port"));
-		String wsdlEndpoint = "http://"+hostname+":"+(webserverPort+1)+"/ws/manager";
-		String wsdlUrl = wsdlEndpoint+"?wsdl";
-		httpWebServer = new HttpServer(webserverPort, version, wsdlUrl, tempWorkingDir);
-		httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
-		// publish web services
-		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));
-
 		// Create the RSS Feed
 		log.info("Creating RSS service...");
 		rssFeed = new RSS("Meerkat Monitor", "Meerkat Monitor RSS Alerts", "", new File(mgo.getTmpWorkingDir()).getAbsolutePath());
 		rssFeed.refreshRSSFeed();
+		webserverPort = Integer.parseInt(properties.getProperty("meerkat.webserver.port"));
 		rssFeed.setServerPort(webserverPort);
 
 		// Extract needed resources
@@ -163,6 +152,16 @@ public class MeerkatMonitor {
 		log.info("Setting up embedded database...");
 		EmbeddedDB ebd = new EmbeddedDB();
 		ebd.initializeDB();
+		webAppsCollection.setDB(ebd);
+
+		// Setup web server
+		log.info("Setting up embedded server...");
+		String wsdlEndpoint = "http://"+hostname+":"+(webserverPort+1)+"/ws/manager";
+		String wsdlUrl = wsdlEndpoint+"?wsdl";
+		httpWebServer = new HttpServer(webserverPort, version, wsdlUrl, tempWorkingDir);
+		httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
+		// publish web services
+		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));
 
 		// Creating systray icon
 		log.info("Creating systray...");
@@ -173,129 +172,6 @@ public class MeerkatMonitor {
 		Monitor monitor = new Monitor(ebd, webAppsCollection, appGroupCollection, httpWebServer, systray, rssFeed, propertiesFile);
 		monitor.startMonitor();
 
-
 	}
-
-
-	/**
-	 * saveSession
-	 */
-	/**
-	private static void saveSession() {
-		systray.removeSystrayIcon();
-		systray.showStaticInfoIcon("Saving session...");
-
-		httpWebServer.createStartupPage("Saving session. Please wait...");
-
-		ObjectOutput out = null;
-		try {
-			out = new ObjectOutputStream(new FileOutputStream(tempWorkingDir + sessionSaveFile));
-		} catch (FileNotFoundException e) {
-			log.error("Session file not found", e);
-		} catch (IOException e) {
-			log.error("IO exception in session file", e);
-		}
-		try {
-			out.writeObject(webAppsCollection);
-		} catch (IOException e) {
-			log.error("IO exception writting session file", e);
-		}
-		try {
-			out.close();
-		} catch (IOException e) {
-			log.error("IO exception closing session file", e);
-		}
-
-		FileUtil fu = new FileUtil();
-
-		String monitTypes[] = fu.getFiletypeListFromDir(tempWorkingDir, ".txt");
-		String allDataFiles[] = new String[monitTypes.length + 1];
-
-		for (int i = 0; i < monitTypes.length; i++) {
-			allDataFiles[i] = monitTypes[i];
-		}
-
-		int lasPos = allDataFiles.length;
-		allDataFiles[lasPos - 1] = tempWorkingDir + sessionSaveFile;
-
-		ZipUtil ziputil = new ZipUtil();
-		ziputil.createZip(saveFile, allDataFiles);
-
-		// Refresh Meerkat page
-		httpWebServer.refreshIndex();
-
-		// Refresh webapp's TimeLine
-		webAppsCollection.writeWebAppCollectionDataFile();
-		systray.addSystrayIcon();
-		log.info("Save Session: saved "+ webAppsCollection.getWebAppCollectionSize() + " objects");
-	}
-	 */
-	/**
-	 * loadSession
-	 */
-	/**
-	private static void loadSession() {
-
-		systray.removeSystrayIcon();
-		systray.showStaticInfoIcon("Loading session...");
-		httpWebServer.createStartupPage("Loading session. Please wait...");
-
-		// restore data files
-		ZipUtil ziputil = new ZipUtil();
-		ziputil.unzip(saveFile, tempWorkingDir);
-
-		ObjectInput in = null;
-		try {
-			in = new ObjectInputStream(new FileInputStream(tempWorkingDir
-					+ sessionSaveFile));
-		} catch (FileNotFoundException e) {
-			log.error("Session file not found", e);
-			log.error("Disable autoload and start a new session");
-			System.exit(-1);
-		} catch (IOException e) {
-			log.error("IO exception reading session file", e);
-			System.exit(-1);
-		}
-		try {
-			webAppsCollection = null;
-			webAppsCollection = (WebAppCollection) in.readObject();
-		} catch (ClassNotFoundException e) {
-			log.error("Class not found exception", e);
-			System.exit(-1);
-		} catch (IOException e) {
-			log.error("IO exception reading objects on session file", e);
-			System.exit(-1);
-		}
-		try {
-			in.close();
-		} catch (IOException e) {
-			log.error("IO exception closing session file", e);
-			System.exit(-1);
-		}
-
-		// Refresh values in the WebApps
-		Iterator<WebApp> refreshT = webAppsCollection.getWebAppCollectionIterator();
-		WebApp wa;
-		while (refreshT.hasNext()) {
-			wa = refreshT.next();
-			wa.writeWebAppVisualizationDataFile();
-		}
-
-		// Refresh Meerkat page
-		// Refresh webapp's TimeLine
-		webAppsCollection.writeWebAppCollectionDataFile();
-
-		// Generate groups
-		appGroupCollection = new AppGroupCollection();
-		generateGroups();
-
-		// Update references
-		httpWebServer.setDataSources(webAppsCollection, appGroupCollection); 
-		httpWebServer.refreshIndex(); // Update dashboard
-
-		systray.addSystrayIcon();
-		log.info("Load Session: loaded "+ webAppsCollection.getWebAppCollectionSize() + " objects");
-	}
-	 */
 
 }

@@ -20,7 +20,6 @@
 package org.meerkat.group;
 
 import java.io.File;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,9 +31,8 @@ import org.meerkat.services.WebApp;
 import org.meerkat.util.FileUtil;
 import org.meerkat.webapp.WebAppCollection;
 
-public class AppGroupCollection implements Serializable {
+public class AppGroupCollection {
 
-	private static final long serialVersionUID = 3761788588472531960L;
 	private static Logger log = Logger.getLogger(AppGroupCollection.class);
 	private List<AppGroup> appGroupCollection = Collections
 			.synchronizedList(new ArrayList<AppGroup>());

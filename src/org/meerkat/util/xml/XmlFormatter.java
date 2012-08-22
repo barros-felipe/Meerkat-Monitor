@@ -20,7 +20,6 @@
 package org.meerkat.util.xml;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -37,9 +36,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 @SuppressWarnings("deprecation")
-public class XmlFormatter implements Serializable {
+public class XmlFormatter {
 	private static Logger log = Logger.getLogger(XmlFormatter.class);
-	private static final long serialVersionUID = 6285958678250898966L;
 
 	public XmlFormatter() {
 

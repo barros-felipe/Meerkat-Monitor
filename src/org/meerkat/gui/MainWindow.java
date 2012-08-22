@@ -163,7 +163,7 @@ public class MainWindow {
 		JMenuItem menuItemShutdown = new JMenuItem("Shutdown Meerkat");
 		menuItemShutdown.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ShutdownDialogBox sdb = new ShutdownDialogBox();
+				DialogBoxShutdown sdb = new DialogBoxShutdown();
 				sdb.showUp();
 			}
 		});
@@ -216,7 +216,7 @@ public class MainWindow {
 
 		mntmAbout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				AboutDialog ab = new AboutDialog(webCollection.getAppVersion());
+				DialogBoxAbout ab = new DialogBoxAbout(webCollection.getAppVersion());
 				ab.showUp();
 			}
 		});
@@ -487,12 +487,7 @@ public class MainWindow {
 		appOptionsPanel.revalidate();
 		appOptionsPanel.repaint();
 
-		// Update Web Dashboard
-		webCollection.writeWebAppCollectionDataFile();
-		httpServer.refreshIndex();
-
 		appTree.revalidate();
-
 	}
 
 	/**

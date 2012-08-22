@@ -19,7 +19,6 @@
 
 package org.meerkat.webapp;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,12 +30,11 @@ import org.apache.log4j.Logger;
 import org.meerkat.db.EmbeddedDB;
 import org.meerkat.util.DateUtil;
 
-public class WebAppEvent implements Serializable {
+public class WebAppEvent {
 
 	private static Logger log = Logger.getLogger(WebAppEvent.class);
-	private static final long serialVersionUID = 1L;
 	private String date;
-	private String status; // 0 represents offline, 100 online
+	private boolean online; // false offline, true online
 	private String availability;
 	private String description;
 	private String pageLoadTime;
@@ -54,11 +52,11 @@ public class WebAppEvent implements Serializable {
 	 * @param date
 	 */
 	public WebAppEvent(final boolean critical, final String date,
-			final String status, final String availability,
+			final boolean online, final String availability,
 			final int httpStatusCode, final String description) {
 		this.setCritical(critical);
 		this.date = date;
-		this.status = status;
+		this.online = online;
 		this.availability = availability;
 		this.httpStatusCode = httpStatusCode;
 		this.description = description;
@@ -122,8 +120,8 @@ public class WebAppEvent implements Serializable {
 	 * 
 	 * @return Status
 	 */
-	public final String getStatus() {
-		return status;
+	public final boolean getStatus() {
+		return online;
 	}
 
 	/**
@@ -131,8 +129,8 @@ public class WebAppEvent implements Serializable {
 	 * 
 	 * @param status
 	 */
-	public final void setStatus(String status) {
-		this.status = status;
+	public final void setStatus(boolean online) {
+		this.online = online;
 	}
 
 	/**
@@ -260,7 +258,7 @@ public class WebAppEvent implements Serializable {
 		WebAppEvent currEv = null;
 		boolean critical;
 		String date;
-		String status;
+		boolean online;
 		String availability;
 		String loadTime;
 		String latency;
@@ -277,7 +275,7 @@ public class WebAppEvent implements Serializable {
 			rs.next();
 			critical = rs.getBoolean(3);
 			date = rs.getTimestamp(4).toString();
-			status = rs.getString(5);
+			online = rs.getBoolean(5);
 			availability = String.valueOf(rs.getDouble(6));
 			loadTime = String.valueOf(rs.getDouble(7));
 			latency = String.valueOf(rs.getDouble(8));
@@ -285,7 +283,7 @@ public class WebAppEvent implements Serializable {
 			description = rs.getString(10);
 			response = rs.getString(11);
 
-			currEv = new WebAppEvent(critical, date, status, availability, httStatusCode, description);
+			currEv = new WebAppEvent(critical, date, online, availability, httStatusCode, description);
 			currEv.setID(rs.getInt(1));
 			currEv.setPageLoadTime(loadTime);
 			currEv.setLatency(latency);

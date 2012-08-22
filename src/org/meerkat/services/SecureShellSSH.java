@@ -34,7 +34,6 @@ import com.jcraft.jsch.Session;
 
 public class SecureShellSSH extends WebApp {
 
-	private static final long serialVersionUID = -5058284964745491131L;
 	private static Logger log = Logger.getLogger(SecureShellSSH.class);
 
 	private String user;

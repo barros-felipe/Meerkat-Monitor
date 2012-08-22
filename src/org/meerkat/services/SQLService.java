@@ -30,7 +30,6 @@ import org.meerkat.webapp.WebAppResponse;
 public class SQLService extends WebApp {
 
 	private static Logger log = Logger.getLogger(SQLService.class);
-	private static final long serialVersionUID = 1L;
 	public static String TYPE_MYSQL = "MYSQL";
 	public static String TYPE_ORA = "ORA";
 	public static String TYPE_MSSQL = "MSSQL";

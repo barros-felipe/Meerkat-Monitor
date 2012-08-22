@@ -34,7 +34,6 @@ import org.meerkat.webapp.WebAppResponse;
 
 public class SocketService extends WebApp {
 
-	private static final long serialVersionUID = -7175499037523917260L;
 	private static Logger log = Logger.getLogger(SocketService.class);
 
 	private String server;

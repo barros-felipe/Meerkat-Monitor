@@ -20,13 +20,13 @@
 package org.meerkat.webapp;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.Logger;
+import org.meerkat.db.EmbeddedDB;
 import org.meerkat.httpServer.HTMLComponents;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.FileUtil;
@@ -36,9 +36,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-public class WebAppCollection implements Serializable {
-	@XStreamOmitField
-	private static final long serialVersionUID = 5521654246559063878L;
+public class WebAppCollection {
 	@XStreamOmitField
 	private static Logger log = Logger.getLogger(WebAppCollection.class);
 
@@ -55,14 +53,19 @@ public class WebAppCollection implements Serializable {
 	private String configXMLFile;
 	@XStreamOmitField
 	XStream xstream = new XStream(new DomDriver("UTF-8"));
+	@XStreamOmitField
+	EmbeddedDB embDB = null;
 
 	/**
 	 * WebAppCollection
 	 */
 	public WebAppCollection() {
-		webAppsCollection = Collections
-				.synchronizedList(new ArrayList<WebApp>());
+		webAppsCollection = new CopyOnWriteArrayList<WebApp>();
 	}
+
+	public final void setDB(EmbeddedDB embDB){
+		this.embDB = embDB;
+	}	
 
 	/**
 	 * setConfigFile
@@ -105,6 +108,7 @@ public class WebAppCollection implements Serializable {
 	 * @param app
 	 */
 	public final void addWebApp(WebApp app) {
+		app.setTempWorkingDir(this.tempWorkingDir);
 		webAppsCollection.add(app);
 	}
 
@@ -198,7 +202,7 @@ public class WebAppCollection implements Serializable {
 			while (ie.hasNext()) {
 				webAppEvent = ie.next();
 
-				if (webAppEvent.getStatus().equalsIgnoreCase("0")) {
+				if (!webAppEvent.getStatus()) {
 					statusText = "OFFLINE";
 				} else {
 					statusText = "ONLINE";

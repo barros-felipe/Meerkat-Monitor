@@ -24,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -35,9 +34,8 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.meerkat.gui.SimplePopup;
 
-public class PropertiesLoader implements Serializable{
+public class PropertiesLoader {
 
-	private static final long serialVersionUID = 1008089266551755831L;
 	private static Logger log = Logger.getLogger(PropertiesLoader.class);
 	private String propertiesFile;
 	private String[] expectedProperties;
@@ -50,7 +48,7 @@ public class PropertiesLoader implements Serializable{
 		
 		// NOTE: all properties are also referenced in 
 		//		 in function generateDefaultPropertiesFile()
-		expectedProperties = new String[24];
+		expectedProperties = new String[22];
 		expectedProperties[0] = "meerkat.email.send.emails";
 		expectedProperties[1] = "meerkat.email.smtp.server";
 		expectedProperties[2] = "meerkat.email.smtp.security";
@@ -63,18 +61,16 @@ public class PropertiesLoader implements Serializable{
 		expectedProperties[9] = "meerkat.email.sending.test";
 		expectedProperties[10] = "meerkat.monit.test.time";
 		expectedProperties[11] = "meerkat.webserver.port";
-		expectedProperties[12] = "meerkat.autosave.exit";
-		expectedProperties[13] = "meerkat.autoload.start";
-		expectedProperties[14] = "meerkat.ssl.keystore";
-		expectedProperties[15] = "meerkat.ssl.password";
-		expectedProperties[16] = "meerkat.dashboard.gauge";
-		expectedProperties[17] = "meerkat.webserver.rconfig";
-		expectedProperties[18] = "meerkat.password.master";
-		expectedProperties[19] = "meerkat.webserver.logaccess";
-		expectedProperties[20] = "meerkat.webserver.showapptype";
-		expectedProperties[21] = "meerkat.embeddeddb.user";
-		expectedProperties[22] = "meerkat.embeddeddb.passwd";
-		expectedProperties[23] = "meerkat.embeddeddb.dbname";
+		expectedProperties[12] = "meerkat.ssl.keystore";
+		expectedProperties[13] = "meerkat.ssl.password";
+		expectedProperties[14] = "meerkat.dashboard.gauge";
+		expectedProperties[15] = "meerkat.webserver.rconfig";
+		expectedProperties[16] = "meerkat.password.master";
+		expectedProperties[17] = "meerkat.webserver.logaccess";
+		expectedProperties[18] = "meerkat.webserver.showapptype";
+		expectedProperties[19] = "meerkat.embeddeddb.user";
+		expectedProperties[20] = "meerkat.embeddeddb.passwd";
+		expectedProperties[21] = "meerkat.embeddeddb.dbname";
 		
 		File tmpPropFile = new File(propertiesFile);
 		if(!tmpPropFile.exists()){
@@ -203,8 +199,6 @@ public class PropertiesLoader implements Serializable{
 		prop.put("meerkat.email.sending.test", "false");
 		prop.put("meerkat.monit.test.time", "5");
 		prop.put("meerkat.webserver.port", "6777");
-		prop.put("meerkat.autosave.exit", "false");
-		prop.put("meerkat.autoload.start", "false");
 		prop.put("meerkat.ssl.keystore", "meerkatKeystore.jks");
 		prop.put("meerkat.ssl.password", "meerkatKeystorePassword");
 		prop.put("meerkat.dashboard.gauge", "true");

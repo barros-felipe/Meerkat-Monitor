@@ -25,7 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -33,9 +32,8 @@ import java.nio.charset.Charset;
 
 import org.apache.log4j.Logger;
 
-public class FileUtil implements Serializable {
+public class FileUtil {
 
-	private static final long serialVersionUID = 4289625655152555245L;
 	private static Logger log = Logger.getLogger(FileUtil.class);
 
 	public FileUtil() {
@@ -115,30 +113,6 @@ public class FileUtil implements Serializable {
 
 	/**
 	 * writeToFile
-	 * 
-	 * @param filename
-	 * @param contents
-	 * @throws IOException
-	 */
-	/**
-	 * On Windows platforms may occur error the error: 
-	 * "The requested operation cannot be performed on a file with a user-mapped section open"
-	 *
-	 * This is a known bug: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
-	 * (should be used the implementation below...) 
-
-	public final void writeToFile(String filename, String contents) {
-		File outFile = new File(filename);
-		try {
-			FileUtils.writeStringToFile(outFile, contents);
-		} catch (IOException e) {
-			log.error("IO Error writing file: " + filename +"("+e.getMessage()+")");
-		}
-	}
-	 */
-
-	/**
-	 * writeToFile
 	 * @param filename
 	 * @param contents
 	 */
@@ -149,7 +123,6 @@ public class FileUtil implements Serializable {
 			if(tmpFile.exists()){
 				tmpFile.delete();
 			}
-
 			destFile = new RandomAccessFile (filename, "rw");
 		} catch (FileNotFoundException e) {
 			log.error("Error accessing file: "+filename+" ("+e.getMessage()+")");

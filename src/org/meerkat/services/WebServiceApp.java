@@ -37,7 +37,6 @@ import org.meerkat.webapp.WebAppResponse;
 
 public class WebServiceApp extends WebApp {
 
-	private static final long serialVersionUID = 1L;
 	private static Logger log = Logger.getLogger(WebServiceApp.class);
 	private String postXML = "";
 	private String responseXML = "";

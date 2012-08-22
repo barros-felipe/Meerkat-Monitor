@@ -19,7 +19,6 @@
 
 package org.meerkat.group;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,9 +27,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.meerkat.services.WebApp;
 
-public class AppGroup implements Serializable {
+public class AppGroup {
 
-	private static final long serialVersionUID = 1287382193891158911L;
 	private static Logger log = Logger.getLogger(AppGroup.class);
 	private String groupname;
 	private String groupDesc;

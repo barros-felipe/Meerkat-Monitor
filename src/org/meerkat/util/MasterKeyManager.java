@@ -18,7 +18,6 @@
  */
 package org.meerkat.util;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -29,8 +28,7 @@ import org.meerkat.services.SecureShellSSH;
 import org.meerkat.services.WebApp;
 import org.meerkat.webapp.WebAppCollection;
 
-public class MasterKeyManager implements Serializable{
-	private static final long serialVersionUID = 3589782125629650359L;
+public class MasterKeyManager {
 	private static Logger log = Logger.getLogger(MasterKeyManager.class);
 
 	private WebAppCollection wac;

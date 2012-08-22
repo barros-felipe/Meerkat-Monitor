@@ -88,7 +88,7 @@ public class EmbeddedDB {
 							"APPNAME VARCHAR(200), "+
 							"CRITICAL BOOLEAN NOT NULL, "+
 							"DATEEV TIMESTAMP NOT NULL, "+
-							"STATUS VARCHAR(10) NOT NULL, "+
+							"ONLINE BOOLEAN NOT NULL, "+
 							"AVAILABILITY DOUBLE, "+
 							"LOADTIME DOUBLE, "+
 							"LATENCY DOUBLE, "+

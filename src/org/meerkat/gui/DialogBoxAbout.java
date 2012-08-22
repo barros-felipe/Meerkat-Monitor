@@ -22,26 +22,25 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import javax.swing.ImageIcon;
-import javax.swing.JScrollPane;
-import javax.swing.JLabel;
-import javax.swing.JEditorPane;
-import javax.swing.UIManager;
 
 import org.apache.log4j.Logger;
 
-public class AboutDialog extends JFrame {
-	private static Logger log = Logger.getLogger(AboutDialog.class);
+public class DialogBoxAbout extends JFrame {
+	private static Logger log = Logger.getLogger(DialogBoxAbout.class);
 	private static final long serialVersionUID = -6537445587806159092L;
 	private JPanel contentPane;
 
@@ -71,7 +70,7 @@ public class AboutDialog extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					AboutDialog frame = new AboutDialog(version);
+					DialogBoxAbout frame = new DialogBoxAbout(version);
 					frame.setLocationRelativeTo(null);
 					frame.setResizable(false);
 					frame.setAlwaysOnTop(true);
@@ -86,7 +85,7 @@ public class AboutDialog extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public AboutDialog(String version) {
+	public DialogBoxAbout(String version) {
 		setTitle("About");
 		this.version = version;
 		setIconImage(Toolkit.getDefaultToolkit().getImage(

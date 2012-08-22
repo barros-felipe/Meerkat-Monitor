@@ -120,7 +120,7 @@
 		<antcall target="win-installer" />
 		
 		<delete dir="build" />
-		<delete dir="temp" />
+		<!-- <delete dir="temp" /> -->
 	</target>
 	
 	

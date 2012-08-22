@@ -19,12 +19,10 @@
 
 package org.meerkat.util;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class Counter implements Serializable {
+public class Counter {
 
-	private static final long serialVersionUID = 3274944762080008166L;
 	private long startTime;
 	private long endTime;
 

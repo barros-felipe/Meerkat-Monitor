@@ -19,11 +19,9 @@
 
 package org.meerkat.util.xml;
 
-import java.io.Serializable;
 
-public class XMLComparator implements Serializable {
+public class XMLComparator {
 
-	private static final long serialVersionUID = -3233598868784273190L;
 	private String xmlBlock1; // The first block (which might contain the symbol
 	// ?
 	private String xmlBlock2; // The second block which we want to compare

@@ -88,7 +88,7 @@ public class SysTrayIcon {
 		menu.add(webClientItem);
 		menu.addSeparator();
 
-		MenuItem AppWindowItem = new MenuItem("Aplication Window");
+		MenuItem AppWindowItem = new MenuItem("Settings");
 
 		menu.add(AppWindowItem);
 
@@ -146,83 +146,24 @@ public class SysTrayIcon {
 				setGroupsCollection(groupsCollection);
 				setHttpServer(httpServer);
 
-				Menu sessionOperations = new Menu("Save/Load Session");
-				// Add save session button
-				ActionListener saveSession = new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						/**
-						showMessage(
-								"Saving Session",
-								"Please wait. It may take several minutes to save data...\nYou'll be notified when finished.");
-						MeerkatMonitor.saveSession();
-						showMessage("Save Session", "Session saved: "
-								+ webAppsCollection.getWebAppCollectionSize()
-								+ " apps.");
-						 */
-						showMessage("TODO","SAVE NOT IMPLEMENTED!!");
-					}
-				};
-
-				// Add load session button
-				ActionListener loadSession = new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						/**
-						showMessage(
-								"Load Session",
-								"Please wait. It may take several minutes to load data...\nYou'll be notified when finished.");
-						MeerkatMonitor.loadSession();
-						showMessage(
-								"Load Session",
-								"Loaded session successfully: "
-										+ webAppsCollection
-										.getWebAppCollectionSize()
-										+ " apps.");
-						 */
-						showMessage("TODO","LOAD NOT IMPLEMENTED!!");
-					}
-				};
-
 				// Exit
 				ActionListener exitListener = new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						// Save session if enable in properties
-						/**
-						autosaveOnExit = Boolean.parseBoolean(properties.getProperty("meerkat.autosave.exit"));
-						if (autosaveOnExit) {
-							log.info("Auto save on exit enable.");
-							saveSession();
-							log.info("Session saved\n");
-						}
-						// Save XML Config File
-						webAppsCollection.saveConfigXMLFile();
-						 */
-						System.exit(0);
+						DialogBoxShutdown sdb = new DialogBoxShutdown();
+						sdb.showUp();
 					}
 				};
 
 				// About button
 				ActionListener aboutListener = new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						AboutDialog ab = new AboutDialog(version);
+						DialogBoxAbout ab = new DialogBoxAbout(version);
 						ab.showUp();
 					}
 				};
 
-				MenuItem save = new MenuItem("Save Session");
-				save.addActionListener(saveSession);
-
-				MenuItem load = new MenuItem("Load Session");
-				load.addActionListener(loadSession);
-
 				MenuItem aboutm = new MenuItem("About");
 				aboutm.addActionListener(aboutListener);
-
-				sessionOperations.add(save);
-				sessionOperations.add(load);
-				// systray.addSeparator();
-				// systray.addMenuItem("Reload Configuration",
-				// reloadConfigListener);
-				addMenu(sessionOperations);
 				addSeparator();
 				addMenuItem("About", aboutListener);
 				addSeparator();
@@ -397,5 +338,5 @@ public class SysTrayIcon {
 			log.error("Error adding icon to tray!", e);
 		}
 	}
-	
+
 }
