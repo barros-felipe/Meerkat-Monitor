@@ -31,11 +31,11 @@ public class HTMLComponents {
 	public HTMLComponents(String appVersion) {
 		footer = "<div class=\"spacer\">"
 				+ "</div>\n<div id=\"ftlinks\">"
-				+ "- <a href=\"http://meerkat-monitor.org/\" style=\"text-decoration:none\" target=\"_blank\">Meerkat Monitor v"
+				+ "- <a href=\"http://meerkat-monitor.org/?utm_source=application&utm_medium=dashboard&utm_campaign=dashlink\" style=\"text-decoration:none\" target=\"_blank\">Meerkat Monitor v"
 				+ appVersion
 				+ " <img src=\"resources/tango-slink.png\" alt=\"link\" border=\"0\" width=\"10\" height=\"10\"/></a>"
 				+ " - <a href=\"http://www.gnu.org/licenses/gpl.html\" style=\"text-decoration:none\" target=\"_blank\">Open Source GPL <img src=\"resources/tango-slink.png\" alt=\"link\" border=\"0\" width=\"10\" height=\"10\"/></a>"
-				+ " - <a href=\"http://meerkat-monitor.org/documentation/\" style=\"text-decoration:none\" target=\"_blank\">Documentation <img src=\"resources/tango-slink.png\" alt=\"link\" border=\"0\" width=\"10\" height=\"10\"/></a>"
+				+ " - <a href=\"http://meerkat-monitor.org/documentation/?utm_source=application&utm_medium=dashboard&utm_campaign=dashlink\" style=\"text-decoration:none\" target=\"_blank\">Documentation <img src=\"resources/tango-slink.png\" alt=\"link\" border=\"0\" width=\"10\" height=\"10\"/></a>"
 				+ " - </div>";
 	}
 

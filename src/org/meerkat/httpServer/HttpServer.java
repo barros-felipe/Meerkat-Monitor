@@ -179,7 +179,7 @@ public class HttpServer {
 				+ "<div id=\"container\">\n"
 
 				+ "<div class=\"full_width big\">\n"
-				+ "<a href=\"http://meerkat-monitor.org/\" style=\"text-decoration:none\" target=\"_blank\">\n"
+				+ "<a href=\"http://meerkat-monitor.org/?utm_source=application&utm_medium=dashboard&utm_campaign=dashlink\" style=\"text-decoration:none\" target=\"_blank\">\n"
 				+ "<img src=\"resources/meerkat-small.png\" alt=\"Meerkat Monitor Logo\" border=\"0\" align=\"absmiddle\" />"
 				+ "<img src=\"resources/meerkat.png\" alt=\"Meerkat Monitor\" border=\"0\" align=\"absmiddle\" /></a>\n"
 				+ "</div>\n";
