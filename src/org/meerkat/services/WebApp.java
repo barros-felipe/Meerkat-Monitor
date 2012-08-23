@@ -515,7 +515,7 @@ public class WebApp {
 	public final void addEvent(WebAppEvent ev) {
 		PreparedStatement statement;
 		String queryInsert = "INSERT INTO MEERKAT.EVENTS(APPNAME, CRITICAL, DATEEV, ONLINE, AVAILABILITY, LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE) VALUES(";
-		
+
 		String queryValues = "'"+ this.getName() +"', "+ev.isCritical()+", '"+ev.getDate()+"', '"+
 				ev.getStatus()+"', "+Double.valueOf(this.getAvailability())+", "+
 				Double.valueOf(ev.getPageLoadTime())+", ";
@@ -526,9 +526,9 @@ public class WebApp {
 		}else{
 			queryValues += ev.getLatency();
 		}
-		
+
 		queryValues += ", "+Integer.valueOf(ev.getHttpStatusCode())+", '"+ev.getDescription()+"', ?";
-		
+
 		if(ev.getCurrentResponse().length() > 20000){
 			// truncate the size of response
 			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, 20000));
@@ -583,7 +583,9 @@ public class WebApp {
 		PreparedStatement ps;
 		ResultSet rs = null;
 		try {
-			ps = conn.prepareStatement("SELECT * FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
+			ps = conn.prepareStatement("SELECT ID, APPNAME, CRITICAL, DATEEV, ONLINE, AVAILABILITY, " +
+					"LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE " +
+					"FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
 			rs = ps.executeQuery();
 
 			while(rs.next()) {
@@ -604,7 +606,7 @@ public class WebApp {
 				currEv.setCurrentResponse(response);
 				events.add(currEv);
 			}
-			
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -642,7 +644,7 @@ public class WebApp {
 
 			rs.next();
 			numberOfCriticalEvents = rs.getInt(1);
-			
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -653,7 +655,7 @@ public class WebApp {
 		}
 		return numberOfCriticalEvents;
 	}
-	
+
 	/**
 	 * getNumberOfCriticalEvents
 	 * 
@@ -669,7 +671,7 @@ public class WebApp {
 
 			rs.next();
 			numberOfOfflines = rs.getInt(1);
-			
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -697,7 +699,7 @@ public class WebApp {
 
 			rs.next();
 			loadTimeAvg = rs.getDouble(1);
-			
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -724,7 +726,7 @@ public class WebApp {
 
 			rs.next();
 			latencyAvg = rs.getDouble(1);
-			
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -751,7 +753,7 @@ public class WebApp {
 
 			rs.next();
 			availAvg = rs.getDouble(1);
-			
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -1007,18 +1009,17 @@ public class WebApp {
 		ResultSet rs = null;
 
 		try {
-			ps = conn.prepareStatement("SELECT * FROM ( "+
-					"SELECT ID, LATENCY FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' "+
-					") AS TMP "+
-					"WHERE ID = ( "+
-					"SELECT MAX(ID) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' "+
-					") ");
+			ps = conn.prepareStatement("SELECT ID, LATENCY "+
+					"FROM MEERKAT.EVENTS "+
+					"WHERE APPNAME LIKE '"+this.name+"' "+
+					"AND ID = (SELECT MAX(ID) FROM MEERKAT.EVENTS)");
 
 			rs = ps.executeQuery();
 
-			rs.next();
-			lastLatency = rs.getDouble(2);
-			
+			while(rs.next()){
+				lastLatency = rs.getDouble(2);
+			}
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -1060,18 +1061,17 @@ public class WebApp {
 		PreparedStatement ps;
 		ResultSet rs = null;
 		try {
-			ps = conn.prepareStatement("SELECT * FROM ( "+
-					"SELECT ID, AVAILABILITY FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.getName()+"' "+
-					") AS TMP "+
-					"WHERE ID = ( "+
-					"SELECT MAX(ID) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.getName()+"' "+
-					") ");
+			ps = conn.prepareStatement("SELECT ID, AVAILABILITY "+
+					"FROM MEERKAT.EVENTS "+
+					"WHERE APPNAME LIKE '"+this.getName()+"' "+ 
+					"AND ID = (SELECT MAX(ID) FROM MEERKAT.EVENTS)");
 
 			rs = ps.executeQuery();
 
-			rs.next();
-			lastAvailability = rs.getDouble(2);
-			
+			while(rs.next()){
+				lastAvailability = rs.getDouble(2);
+			}
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -1112,18 +1112,17 @@ public class WebApp {
 		PreparedStatement ps;
 		ResultSet rs = null;
 		try {
-			ps = conn.prepareStatement("SELECT * FROM ( "+
-					"SELECT ID, LOADTIME FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' "+
-					") AS TMP "+
-					"WHERE ID = ( "+
-					"SELECT MAX(ID) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' "+
-					") ");
+			ps = conn.prepareStatement("SELECT ID, LOADTIME "+
+					"FROM MEERKAT.EVENTS "+
+					"WHERE APPNAME LIKE '"+this.name+"' "+
+					"AND ID = (SELECT MAX(ID) FROM MEERKAT.EVENTS)");
 
 			rs = ps.executeQuery();
 
-			rs.next();
-			lastLoadTime = rs.getDouble(2);
-			
+			while(rs.next()){
+				lastLoadTime = rs.getDouble(2);
+			}
+
 			rs.close();
 			ps.close();
 			conn.commit();
@@ -1179,24 +1178,24 @@ public class WebApp {
 	public final MasterKeyManager getMasterKeyManager(){
 		return this.mkm;
 	}
-	
+
 	public final void removeAllEvents() {
 		// Remove DB events of this application
 		Connection conn = embDB.getConn();
 		PreparedStatement statement = null;
-		
+
 		String queryDelete = "DELETE FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'";
-		
+
 		try {
 			statement = conn.prepareStatement(queryDelete);
 			statement.execute();
-			
+
 			statement.close();
 			conn.commit();
 		} catch (SQLException e) {
 			log.error("Failed to remove events of "+this.name+" from DB! - "+e.getMessage());
 		}
-		
+
 	}
 
 }

@@ -17,7 +17,7 @@
  * along with Meerkat Monitor.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.meerkat.util;
+package org.meerkat;
 
 import java.sql.Connection;
 import java.util.Iterator;
@@ -33,6 +33,8 @@ import org.meerkat.httpServer.HttpServer;
 import org.meerkat.network.MailManager;
 import org.meerkat.network.RSS;
 import org.meerkat.services.WebApp;
+import org.meerkat.util.DateUtil;
+import org.meerkat.util.PropertiesLoader;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
 import org.meerkat.webapp.WebAppResponse;

@@ -387,7 +387,7 @@ public class HttpServer {
 						responseStatus += "</td>\n";
 					}
 				}
-
+				
 				/**
 				 * Load Time
 				 */
@@ -395,7 +395,6 @@ public class HttpServer {
 				BigDecimal bd1 = new BigDecimal(wApp.getLoadsAverage());
 				bd1 = bd1.setScale(3, BigDecimal.ROUND_DOWN);
 				responseStatus += bd1.doubleValue();
-
 				// trend
 				if (wApp.getNumberOfTests() > 1) {
 					if (wApp.getLoadTimeIndicator() > 0) {
@@ -406,7 +405,7 @@ public class HttpServer {
 						responseStatus += "</td>\n";
 					}
 				}
-
+				
 				// Status
 				if (wApp.getlastStatus().equalsIgnoreCase("online")) {
 					responseStatus += "<td class=\"center\" style=\"background-color: #2d9500;\">\n";
@@ -415,7 +414,6 @@ public class HttpServer {
 				} else {
 					responseStatus += "<td class=\"center\" style=\"background-color: #949494;\">\n";
 				}
-
 				// Link to URL only makes sense on Web pages
 				if (!wApp.getType().equals(WebApp.TYPE_WEBAPP)) {
 					responseStatus += "<strong>"
@@ -465,7 +463,6 @@ public class HttpServer {
 			log.warn("Failed to remove file: " + f.toString());
 		}
 		fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
-
 	}
 
 	/**

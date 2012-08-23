@@ -222,7 +222,7 @@ public class PropertiesOptionsPanelEmail extends JPanel {
 		add(btnSave);
 
 		// Cancel button
-		JButton btnClose = new JButton("Cancel");
+		JButton btnClose = new JButton("Close");
 		btnClose.setBounds(495, 362, 89, 23);
 		add(btnClose);
 

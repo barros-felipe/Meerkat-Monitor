@@ -179,7 +179,6 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 				prop.setProperty("meerkat.webserver.rconfig", String.valueOf(checkBox_remoteconfig.isSelected()));
 				prop.setProperty("meerkat.webserver.logaccess", String.valueOf(checkBox_weblog.isSelected()));
 				prop.setProperty("meerkat.webserver.showapptype", String.valueOf(checkBox_showAppType.isSelected()));
-
 				// Password is managed by MasterKeyManager - not set directly
 				//prop.setProperty("meerkat.password.master", String.valueOf(textField_masterPasswd.getPassword()));
 
@@ -192,7 +191,7 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 				}catch(Exception e){
 					log.error("Error changing master key!", e);
 				}
-
+				
 				httpServer.refreshIndex();
 				jfather.setAlwaysOnTop(false);
 

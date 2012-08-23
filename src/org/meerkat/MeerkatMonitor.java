@@ -39,7 +39,6 @@ import org.meerkat.network.RSS;
 import org.meerkat.util.LogSettings;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.MeerkatGeneralOperations;
-import org.meerkat.util.Monitor;
 import org.meerkat.util.PropertiesLoader;
 import org.meerkat.util.sql.SQLDriverLoader;
 import org.meerkat.webapp.WebAppCollection;
