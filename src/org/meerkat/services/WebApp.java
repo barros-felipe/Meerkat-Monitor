@@ -206,7 +206,7 @@ public class WebApp {
 
 			return response;
 		} catch (IOException e) {
-			log.error("IOException", e);
+			log.error("IOException - "+e.getMessage());
 
 			response.setHttpStatus(0);
 			response.setHttpTextResponse(e.toString());
@@ -395,15 +395,6 @@ public class WebApp {
 	}
 
 	/**
-	 * getNumberOfOfflines
-	 * 
-	 * @return NumberOfOfflines
-	 */
-	public final int getNumberOfOfflines() {
-		return getNumberOfCriticalEvents();
-	}
-
-	/**
 	 * getNumberOfTests
 	 * 
 	 * @return NumberOfTests
@@ -524,12 +515,20 @@ public class WebApp {
 	public final void addEvent(WebAppEvent ev) {
 		PreparedStatement statement;
 		String queryInsert = "INSERT INTO MEERKAT.EVENTS(APPNAME, CRITICAL, DATEEV, ONLINE, AVAILABILITY, LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE) VALUES(";
-
+		
 		String queryValues = "'"+ this.getName() +"', "+ev.isCritical()+", '"+ev.getDate()+"', '"+
 				ev.getStatus()+"', "+Double.valueOf(this.getAvailability())+", "+
-				Double.valueOf(ev.getPageLoadTime())+", "+Double.valueOf(ev.getLatency())+", "+
-				Integer.valueOf(ev.getHttpStatusCode())+", '"+ev.getDescription()+"', ?";
+				Double.valueOf(ev.getPageLoadTime())+", ";
 
+		// Handle latency - may be null if host not available)
+		if(ev.getLatency() == null){
+			queryValues += null;
+		}else{
+			queryValues += ev.getLatency();
+		}
+		
+		queryValues += ", "+Integer.valueOf(ev.getHttpStatusCode())+", '"+ev.getDescription()+"', ?";
+		
 		if(ev.getCurrentResponse().length() > 20000){
 			// truncate the size of response
 			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, 20000));
@@ -653,6 +652,33 @@ public class WebApp {
 			log.error("", e);
 		}
 		return numberOfCriticalEvents;
+	}
+	
+	/**
+	 * getNumberOfCriticalEvents
+	 * 
+	 * @return NumberOfCriticalEvents
+	 */
+	public final int getNumberOfOfflines() {
+		int numberOfOfflines = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"' AND NOT ONLINE");
+			rs = ps.executeQuery();
+
+			rs.next();
+			numberOfOfflines = rs.getInt(1);
+			
+			rs.close();
+			ps.close();
+			conn.commit();
+
+		} catch (SQLException e) {
+			log.error("Failed query number of offlines from application "+this.getName());
+			log.error("", e);
+		}
+		return numberOfOfflines;
 	}
 
 

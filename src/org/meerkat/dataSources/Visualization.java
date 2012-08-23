@@ -68,7 +68,7 @@ public class Visualization {
 		while (ie.hasNext()) {
 			webAppEvent = ie.next();
 
-			if (webAppEvent.getLatency().equalsIgnoreCase("N/A")) {
+			if (webAppEvent.getLatency() == null) {
 				latency = "undefined";
 			} else {
 				latency = webAppEvent.getLatency();

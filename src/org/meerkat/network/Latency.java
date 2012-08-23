@@ -36,7 +36,7 @@ public class Latency {
 	private Double latency;
 	private Double latAverage;
 	private Counter c;
-	private String noValueString = "undefined";
+	private String noValueString = null;
 
 	/**
 	 * Latency
@@ -74,12 +74,10 @@ public class Latency {
 			try {
 				status = InetAddress.getByName(host).isReachable(timeOut);
 			} catch (UnknownHostException e) {
-				log.error("Cannot resolve host: " + host
-						+ ". Latency unavailable", e);
+				log.error("Cannot resolve host: " + host + ". Latency unavailable - "+ e.getMessage());
 				break;
 			} catch (IOException e) {
-				log.error("Cannot check host: " + host
-						+ ". Latency unavailable", e);
+				log.error("Cannot check host: " + host+ ". Latency unavailable - "+ e.getMessage());
 				break;
 			}
 			c.stopCounter();

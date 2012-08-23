@@ -41,7 +41,7 @@ public class WebAppEvent {
 	private String latency;
 	private boolean critical;
 	private int httpStatusCode;
-	private String noValueString = "undefined";
+	private String noValueString = null;
 	private String currentResponse;
 	private int id;
 
@@ -219,7 +219,7 @@ public class WebAppEvent {
 	public final String getLatency() {
 		NumberFormat nf = new DecimalFormat("#");
 		String result;
-		if (!latency.equalsIgnoreCase(noValueString)) {
+		if(latency != noValueString) {
 			Double formatedLatency = Double.valueOf(latency);
 			result = nf.format(formatedLatency);
 		} else {

@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 import org.meerkat.services.WebApp;
 
 public class Availability {
-
+	
 	/**
 	 * Availability
 	 */
@@ -58,8 +58,9 @@ public class Availability {
 		}else{ // first test
 			if(webApp.checkWebAppStatus().isOnline() == true){
 				return 100.0;
+			}else{
+				return 0.0;
 			}
-
 
 		}
 		return avail;

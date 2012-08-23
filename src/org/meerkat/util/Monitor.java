@@ -133,8 +133,7 @@ public class Monitor {
 					currentWebAppResponse = currentWebApp.checkWebAppStatus();
 
 					// First test to set the lastStatus
-					if (currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase("NA")) {
+					if (currentWebAppResponse.isOnline() && currentWebApp.getlastStatus().equalsIgnoreCase("NA")) {
 						currentWebApp.setlastStatus("online");
 
 						// Add event
@@ -154,8 +153,7 @@ public class Monitor {
 						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
 
-					} else if (!currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase("NA")) {
+					} else if (!currentWebAppResponse.isOnline() && currentWebApp.getlastStatus().equalsIgnoreCase("NA")) {
 						currentWebApp.setlastStatus("offline");
 
 						log.warn("OFFLINE\t| " + currentWebApp.getName()+ "\t | " + currentWebApp.getUrl());
@@ -182,7 +180,6 @@ public class Monitor {
 						// Set the response
 						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
-						// httpWebServer.addEventResponse(currentWebApp);
 
 						// Add RSS item
 						rssFeed.addItem(currentWebApp.getName(), currentWebApp.getDataFileName(), now, currentWebApp.getName() + " is OFFLINE");
@@ -215,8 +212,7 @@ public class Monitor {
 						ev.setCurrentResponse(currentWebApp.getCurrentResponse());
 						currentWebApp.addEvent(ev);
 
-					} else if (!currentWebAppResponse.isOnline()
-							&& currentWebApp.getlastStatus().equalsIgnoreCase("online")) {
+					} else if (!currentWebAppResponse.isOnline() && currentWebApp.getlastStatus().equalsIgnoreCase("online")) {
 						currentWebApp.setlastStatus("offline");
 
 						log.warn("OFFLINE\t| " + currentWebApp.getName()+ "\t | " + currentWebApp.getUrl());
@@ -260,7 +256,7 @@ public class Monitor {
 
 						if (sendEmails) {
 							mailManager.sendEmail(subject + " - "+ currentWebApp.getName() + " is BACK ONLINE", 
-									"The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl() + " iis BACK ONLINE!!");
+									"The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl() + " is BACK ONLINE!!");
 						}
 
 						// Add event
