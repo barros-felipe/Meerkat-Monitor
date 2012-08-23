@@ -349,9 +349,9 @@ public class HttpServer {
 				// Trend
 				if (wApp.getNumberOfTests() > 1) {
 					if (wApp.getAvailabilityIndicator() > 0) {
-						responseStatus += "<img src=\"resources/up-green.png\" alt=\"increase\" width=\"10\" height=\"10\"/>\n</td>\n";
+						responseStatus += "<img src=\"resources/up-green.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else if (wApp.getAvailabilityIndicator() < 0) {
-						responseStatus += "<img src=\"resources/down-red.png\" alt=\"decrease\" width=\"10\" height=\"10\"/>\n</td>\n";
+						responseStatus += "<img src=\"resources/down-red.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
 						responseStatus += "</td>\n";
 					}
@@ -380,9 +380,9 @@ public class HttpServer {
 				if (wApp.getNumberOfTests() > 1) {
 					// check for "undefined" values
 					if (wApp.getLatencyIndicator() > 0) {
-						responseStatus += "<img src=\"resources/up-red.png\" alt=\"increase\" width=\"10\" height=\"10\"/>\n</td>\n";
+						responseStatus += "<img src=\"resources/up-red.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else if (wApp.getLatencyIndicator() < 0) {
-						responseStatus += "<img src=\"resources/down-green.png\" alt=\"decrease\" width=\"10\" height=\"10\"/>\n</td>\n";
+						responseStatus += "<img src=\"resources/down-green.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
 						responseStatus += "</td>\n";
 					}
@@ -399,9 +399,9 @@ public class HttpServer {
 				// trend
 				if (wApp.getNumberOfTests() > 1) {
 					if (wApp.getLoadTimeIndicator() > 0) {
-						responseStatus += "<img src=\"resources/up-red.png\" alt=\"increase\" width=\"10\" height=\"10\"/>\n</td>\n";
+						responseStatus += "<img src=\"resources/up-red.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else if (wApp.getLoadTimeIndicator() < 0) {
-						responseStatus += "<img src=\"resources/down-green.png\" alt=\"decrease\" width=\"10\" height=\"10\"/>\n</td>\n";
+						responseStatus += "<img src=\"resources/down-green.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
 						responseStatus += "</td>\n";
 					}
