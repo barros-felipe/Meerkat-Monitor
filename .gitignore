@@ -1,12 +1,12 @@
 # Misc Options
-bin/
-build/
-bundle/
-dist/
-DOC/
-INSTALLER/
-setup/
-src/example/
+/bin/
+/build/
+/bundle/
+/dist/
+/DOC/
+/INSTALLER/
+/setup/
+/src/example/
 *.log
 meerkat.properties
 meerkat.webapps.xml
