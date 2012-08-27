@@ -708,6 +708,11 @@ public class WebApp {
 			log.error("Failed query average load time from application "+this.getName());
 			log.error("", e);
 		}
+		
+		BigDecimal bd = new BigDecimal(loadTimeAvg);
+		bd = bd.setScale(3, BigDecimal.ROUND_DOWN);
+		loadTimeAvg = bd.doubleValue();
+		
 		return loadTimeAvg;
 	}
 
@@ -1031,7 +1036,7 @@ public class WebApp {
 		}
 
 		BigDecimal bd1 = new BigDecimal(lastLatency);
-		bd1 = bd1.setScale(0, BigDecimal.ROUND_DOWN);
+		bd1 = bd1.setScale(2, BigDecimal.ROUND_DOWN);
 		lastLatency = bd1.doubleValue();
 
 		if(lastLatency > latencyAverage){
@@ -1083,7 +1088,7 @@ public class WebApp {
 		}
 
 		BigDecimal bd1 = new BigDecimal(lastAvailability);
-		bd1 = bd1.setScale(0, BigDecimal.ROUND_DOWN);
+		bd1 = bd1.setScale(2, BigDecimal.ROUND_DOWN);
 		lastAvailability = bd1.doubleValue();
 
 		if(lastAvailability > availAverage){
@@ -1136,7 +1141,7 @@ public class WebApp {
 		}
 
 		BigDecimal bd1 = new BigDecimal(lastLoadTime);
-		bd1 = bd1.setScale(0, BigDecimal.ROUND_DOWN);
+		bd1 = bd1.setScale(3, BigDecimal.ROUND_DOWN);
 		lastLoadTime = bd1.doubleValue();
 		
 		if(lastLoadTime > loadTimeAverage){
