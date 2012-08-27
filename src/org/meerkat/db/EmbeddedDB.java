@@ -72,7 +72,7 @@ public class EmbeddedDB {
 	public final void initializeDB(){
 		Connection c = getConn();
 		PreparedStatement ps;
-		Statement st;
+		Statement st, st1;
 		ResultSet rs;
 		try {
 			ps = getConn().prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS");
@@ -94,16 +94,23 @@ public class EmbeddedDB {
 							"LATENCY DOUBLE, "+
 							"HTTPSTATUSCODE INT, "+
 							"DESCRIPTION VARCHAR(50), "+
-							"RESPONSE VARCHAR(20000) "+
+							"RESPONSE VARCHAR(30000) "+
 							")");
+					
+					st1 = c.createStatement();
+					st1.executeUpdate("CREATE INDEX MEERKAT.IDX_APPNAME ON MEERKAT.EVENTS (APPNAME)");
+					
 					st.close();
+					st1.close();
 					c.commit();
 					c.close();
 				} catch (SQLException e1) {
 					log.error("Error creating database!", e1);
+					logSQLException(e1);
 				}
 			}else{
 				log.error("Error initializing database!", e);
+				logSQLException(e);
 			}
 		}
 
@@ -119,7 +126,7 @@ public class EmbeddedDB {
 			conn = DriverManager.getConnection(protocol + dbName + ";create=true", dbProps);
 		} catch (SQLException e) {
 			log.fatal("Failed to create connection to embedded DB! "+e.getMessage());
-			log.fatal("", e);
+			logSQLException(e);
 		}
 
 		// We want to control transactions manually
@@ -127,6 +134,7 @@ public class EmbeddedDB {
 			conn.setAutoCommit(false);
 		} catch (SQLException e) {
 			log.error("Failed to set DB auto-commit to false! "+e.getMessage());
+			logSQLException(e);
 		}
 		return conn;
 

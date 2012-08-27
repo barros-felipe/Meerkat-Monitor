@@ -689,7 +689,7 @@ public class WebApp {
 	 * 
 	 * @return PageLoadsAverage
 	 */
-	public final String getLoadsAverage() {
+	public final double getLoadsAverage() {
 		double loadTimeAvg = 0;
 		PreparedStatement ps;
 		ResultSet rs = null;
@@ -708,7 +708,7 @@ public class WebApp {
 			log.error("Failed query average load time from application "+this.getName());
 			log.error("", e);
 		}
-		return String.valueOf(loadTimeAvg);
+		return loadTimeAvg;
 	}
 
 	/**
@@ -1103,7 +1103,7 @@ public class WebApp {
 	 * 			(No decimal plates considered)
 	 */
 	public double getLoadTimeIndicator() {
-		double doubleLoadTimeAverage = getAvailabilityAverage();
+		double doubleLoadTimeAverage = getLoadsAverage();
 		BigDecimal bd = new BigDecimal(doubleLoadTimeAverage);
 		bd = bd.setScale(0, BigDecimal.ROUND_DOWN);
 		double loadTimeAverage = bd.doubleValue();
