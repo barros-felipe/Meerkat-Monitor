@@ -1007,12 +1007,13 @@ public class WebApp {
 		double lastLatency = 0;
 		PreparedStatement ps;
 		ResultSet rs = null;
+		int maxID = embDB.getMaxIDofApp(this.name);
 
 		try {
 			ps = conn.prepareStatement("SELECT ID, LATENCY "+
 					"FROM MEERKAT.EVENTS "+
 					"WHERE APPNAME LIKE '"+this.name+"' "+
-					"AND ID = (SELECT MAX(ID) FROM MEERKAT.EVENTS)");
+					"AND ID = "+maxID);
 
 			rs = ps.executeQuery();
 
@@ -1060,11 +1061,12 @@ public class WebApp {
 		double lastAvailability = 0;
 		PreparedStatement ps;
 		ResultSet rs = null;
+		int maxId = embDB.getMaxIDofApp(this.getName());
 		try {
 			ps = conn.prepareStatement("SELECT ID, AVAILABILITY "+
 					"FROM MEERKAT.EVENTS "+
-					"WHERE APPNAME LIKE '"+this.getName()+"' "+ 
-					"AND ID = (SELECT MAX(ID) FROM MEERKAT.EVENTS)");
+					"WHERE APPNAME LIKE '"+this.getName()+"' "+
+					"AND ID = "+maxId);
 
 			rs = ps.executeQuery();
 
@@ -1074,7 +1076,6 @@ public class WebApp {
 
 			rs.close();
 			ps.close();
-			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query average availability from application "+this.getName());
@@ -1111,11 +1112,13 @@ public class WebApp {
 		double lastLoadTime = 0;
 		PreparedStatement ps;
 		ResultSet rs = null;
+		int maxID = embDB.getMaxIDofApp(this.name);
+		
 		try {
 			ps = conn.prepareStatement("SELECT ID, LOADTIME "+
 					"FROM MEERKAT.EVENTS "+
 					"WHERE APPNAME LIKE '"+this.name+"' "+
-					"AND ID = (SELECT MAX(ID) FROM MEERKAT.EVENTS)");
+					"AND ID = "+maxID);
 
 			rs = ps.executeQuery();
 
@@ -1135,7 +1138,7 @@ public class WebApp {
 		BigDecimal bd1 = new BigDecimal(lastLoadTime);
 		bd1 = bd1.setScale(0, BigDecimal.ROUND_DOWN);
 		lastLoadTime = bd1.doubleValue();
-
+		
 		if(lastLoadTime > loadTimeAverage){
 			return 1;
 		}else if(lastLoadTime < loadTimeAverage){

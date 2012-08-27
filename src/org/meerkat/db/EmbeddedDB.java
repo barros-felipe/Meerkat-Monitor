@@ -84,7 +84,7 @@ public class EmbeddedDB {
 				try {
 					st = c.createStatement();
 					st.executeUpdate("CREATE TABLE MEERKAT.EVENTS( "+
-							"ID SMALLINT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "+
+							"ID INTEGER PRIMARY KEY NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "+
 							"APPNAME VARCHAR(200), "+
 							"CRITICAL BOOLEAN NOT NULL, "+
 							"DATEEV TIMESTAMP NOT NULL, "+
@@ -153,7 +153,39 @@ public class EmbeddedDB {
 			}
 		}
 	}
+	
+	/**
+	 * getMaxIDofApp 
+	 * @param appName
+	 * @return id
+	 */
+	public int getMaxIDofApp(String appName){
+		PreparedStatement ps;
+		ResultSet rs = null;
+		
+		int maxId = 0;
+		try {
+			ps = conn.prepareStatement("SELECT MAX(ID) "+ 
+					"FROM MEERKAT.EVENTS "+
+					"WHERE APPNAME LIKE '"+appName+"' ");
 
+			rs = ps.executeQuery();
+			while(rs.next()){
+				maxId = rs.getInt(1);
+			}
+			ps.close();
+			rs.close();
+		} catch (SQLException e) {
+			log.error("Failed query average availability from application "+appName);
+			logSQLException(e);
+		}
+		
+		return maxId;
+		
+	}
+
+	
+	
 	/**
 	 * logSQLException
 	 * @param e SQL Exception

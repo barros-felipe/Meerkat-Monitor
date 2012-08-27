@@ -347,10 +347,11 @@ public class HttpServer {
 				responseStatus += "<td class=\"center\">" + wApp.getAvailability();
 
 				// Trend
+				double availIndicator = wApp.getAvailabilityIndicator();
 				if (wApp.getNumberOfTests() > 1) {
-					if (wApp.getAvailabilityIndicator() > 0) {
+					if (availIndicator > 0) {
 						responseStatus += "<img src=\"resources/up-green.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else if (wApp.getAvailabilityIndicator() < 0) {
+					} else if (availIndicator < 0) {
 						responseStatus += "<img src=\"resources/down-red.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
 						responseStatus += "</td>\n";
@@ -377,11 +378,12 @@ public class HttpServer {
 				bd = bd.setScale(2, BigDecimal.ROUND_DOWN);
 				responseStatus += bd.doubleValue();
 				// trend
+				double latencyIndicator = wApp.getLatencyIndicator();
 				if (wApp.getNumberOfTests() > 1) {
 					// check for "undefined" values
-					if (wApp.getLatencyIndicator() > 0) {
+					if (latencyIndicator > 0) {
 						responseStatus += "<img src=\"resources/up-red.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else if (wApp.getLatencyIndicator() < 0) {
+					} else if (latencyIndicator < 0) {
 						responseStatus += "<img src=\"resources/down-green.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
 						responseStatus += "</td>\n";
@@ -396,10 +398,11 @@ public class HttpServer {
 				bd1 = bd1.setScale(3, BigDecimal.ROUND_DOWN);
 				responseStatus += bd1.doubleValue();
 				// trend
+				double loadTimeIndicator = wApp.getLoadTimeIndicator();
 				if (wApp.getNumberOfTests() > 1) {
-					if (wApp.getLoadTimeIndicator() > 0) {
+					if (loadTimeIndicator > 0) {
 						responseStatus += "<img src=\"resources/up-red.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else if (wApp.getLoadTimeIndicator() < 0) {
+					} else if (loadTimeIndicator < 0) {
 						responseStatus += "<img src=\"resources/down-green.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
 					} else {
 						responseStatus += "</td>\n";
