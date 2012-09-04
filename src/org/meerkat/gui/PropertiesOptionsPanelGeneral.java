@@ -191,8 +191,9 @@ public class PropertiesOptionsPanelGeneral extends JPanel {
 				}catch(Exception e){
 					log.error("Error changing master key!", e);
 				}
-				
+
 				httpServer.refreshIndex();
+
 				jfather.setAlwaysOnTop(false);
 
 				btnSave.setEnabled(true);

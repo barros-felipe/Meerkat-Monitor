@@ -97,9 +97,6 @@ public class Visualization {
 	 * @return JSDataTable
 	 */
 	public final String getDataTable(WebApp webApp) {
-		WebAppEvent webAppEvent;
-		String statusText = "";
-		String dataTableData = "";
 		String iconStatus = "";
 
 		if (webApp.getlastStatus().equalsIgnoreCase("ONLINE")) {
@@ -113,14 +110,37 @@ public class Visualization {
 		String dataTableBegin = "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.js\"></script>\n"
 				+ "<script type=\"text/javascript\" language=\"javascript\" src=\"resources/jquery.dataTables.js\"></script>\n"
 				+ "<script type=\"text/javascript\" charset=\"utf-8\">\n"
-				+ "$(document).ready(function() {\n"
-				+ "oTable = $('#example').dataTable({\n"
-				+ "\"bJQueryUI\": true,\n"
-				+ "\"sPaginationType\": \"full_numbers\",\n"
-				+ "\"bStateSave\": true\n"
-				+ "});\n"
-				+ "} );\n"
+
+				+ "$(document).ready(function() { \n"
+				+ "   $('#example').dataTable( { \n"
+				+ "		\"bJQueryUI\": true, \n"
+				+ "		\"sPaginationType\": \"full_numbers\", \n"
+				+ "		\"bFilter\": false, \n"
+				+ "     \"bProcessing\": true, \n"
+				+ "     \"bServerSide\": true, \n"
+				+ "     \"sAjaxSource\": \"/event-list-"+webApp.getName()+"\", \n"
+				+ "		\"aoColumns\": [ \n"
+				+ "				/* Id */   		{ \"sClass\": \"center\", \"sWidth\": \"50px\" }, \n"
+				+ "		        /* Date */  	{ \"sClass\": \"center\", \"sWidth\": \"180px\" }, \n"
+				+ "		        /* Status */ 	{ \"sClass\": \"center\" }, \n"
+				+ "        	    /* Avail. */  	{ \"sClass\": \"center\" }, \n"
+				+ "		        /* Load time */ { \"sClass\": \"center\" }, \n"
+				+ "		        /* Latency */   { \"sClass\": \"center\" }, \n";
+
+		// omit http status code if doesn't make sense
+		if (webApp.getType().equals(WebApp.TYPE_WEBAPP)
+				|| webApp.getType().equals(WebApp.TYPE_WEBSERVICE)) {
+			dataTableBegin += "/* HTTP code */ { \"sClass\": \"center\" }, \n";
+		}else{
+			dataTableBegin += "/* HTTP code */ { \"sClass\": \"center\", \"bVisible\": false }, \n";
+		}
+
+		dataTableBegin += "     /* Desc. */ 	{ \"sClass\": \"center\" }, \n"
+				+ "		        /* Response */ 	{ \"sClass\": \"center\", \"bSearchable\": false, \"bSortable\": false}, \n"
+				+ "		]    } ); \n"
+				+ "	} ); \n"
 				+ "</script>\n"
+
 				+ "</head>\n"
 				+ "<body id=\"dt_example\">"
 				+ "<div id=\"container\">\n"
@@ -129,7 +149,8 @@ public class Visualization {
 				+ iconStatus
 				+ "</h1>"
 				+ "<div id=\"chart_div\" style=\"width: 900px; height: 300px;\"></div>\n"
-				+ "\n"
+				+ "\n\n"
+				+ "<div class=\"demo_jui\"> \n"
 				+ "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"display\" id=\"example\">\n"
 				+ "<thead>\n"
 				+ "<tr>\n"
@@ -137,73 +158,30 @@ public class Visualization {
 				+ "<th>Date</th>\n"
 				+ "<th>Status</th>\n"
 				+ "<th>Availability (%)</th>\n"
-				+ "<th>Latency (ms)</th>\n" + "<th>Load Time (s)</th>\n";
+				+ "<th>Load Time (s)</th>\n"
+				+ "<th>Latency (ms)</th>\n";
 
-		if (!webApp.getType().equals(WebApp.TYPE_DATABASE)
-				&& !webApp.getType().equals(WebApp.TYPE_SOCKET)
-				&& !webApp.getType().equals(WebApp.TYPE_SSH)) {
-			dataTableBegin += "<th>HTTP Status</th>\n";
-		}
+		dataTableBegin += "<th>HTTP Status</th>\n";
 
-		dataTableBegin += "<th>Description</th>\n" + "<th>Response</th>\n"
-				+ "</tr>\n" + "</thead>\n" + "<tbody>\n";
+		dataTableBegin += "<th>Description</th>\n" 
+				+ "<th>Response</th>\n"
+				+ "</tr>\n" 
+				+ "</thead>\n" 
+				+ "<tbody>\n";
 
-		String dataTableEnd = "</tbody>\n" + "</table>\n";
+		String dataTableEnd = "</tbody>\n" 
+				+ "</table> \n"
+				+"</div> \n";
 
-		Iterator<WebAppEvent> ie = webApp.getEventListIterator();
-		String latency = "";
-		int eventID = 0;
+		return dataTableBegin + dataTableEnd;
 
-		while (ie.hasNext()) {
-			webAppEvent = ie.next();
 
-			if (!webAppEvent.getStatus()) {
-				statusText = "OFFLINE";
-			} else {
-				statusText = "ONLINE";
-			}
-
-			if (webAppEvent.getLatency().equalsIgnoreCase("N/A")) {
-				latency = "undefined";
-			} else {
-				latency = webAppEvent.getLatency();
-			}
-
-			dataTableData += "<tr class=\"gradeA\">\n" + "<td>" + eventID
-					+ "</td>\n" + "<td>" + webAppEvent.getDate() + "</td>\n"
-					+ "<td class=\"center\">" + statusText + "</td>\n"
-					+ "<td class=\"center\">" + webAppEvent.getAvailability()
-					+ "</td>\n" + "<td class=\"center\">" + latency + "</td>\n"
-					+ "<td class=\"center\">" + webAppEvent.getPageLoadTime()
-					+ "</td>\n";
-
-			if (!webApp.getType().equals(WebApp.TYPE_DATABASE)
-					&& !webApp.getType().equals(WebApp.TYPE_SOCKET)
-					&& !webApp.getType().equals(WebApp.TYPE_SSH)) {
-				dataTableData += "<td class=\"center\">"
-						+ webAppEvent.getHttpStatusCode() + "</td>\n";
-			}
-
-			dataTableData += "<td class=\"center\">"
-					+ webAppEvent.getDescription()
-					+ "</td>\n"
-					+ "<td class=\"center\">"
-					+ "<a href=\"event-id-"
-					+ webAppEvent.getID()
-					+ "\" onclick=\"return popitup('event-id-"
-					+ webAppEvent.getID()
-					+ "')\"><img src=\"resources/tango_edit-find.png\" border=\"0\" alt=\"\" /></a>"
-					+ "</td>\n" + "</tr>\n";
-
-			eventID++;
-		}
-		return dataTableBegin + dataTableData + dataTableEnd;
 	}
 
 	/**
 	 * writeWebAppDataFile
 	 */
-	public final void writeWebAppVisualizationDataFile(WebApp webApp) {
+	public void writeWebAppVisualizationDataFile(WebApp webApp) {
 		this.tempDir = webApp.getTempDir();
 		FileUtil fu = new FileUtil();
 		HTMLComponents htmlc = new HTMLComponents(appVersion);
@@ -249,7 +227,8 @@ public class Visualization {
 				+ "</div></body>\n" + "</html>\n";
 
 		String htmlFileContents = htmlFileContentsTop
-				+ this.getAnnotatedTimeLine(webApp) + this.getDataTable(webApp)
+				+ this.getAnnotatedTimeLine(webApp) 
+				+ this.getDataTable(webApp)
 				+ htmlFileContentsEnd;
 
 		File tmp = new File(tempDir);

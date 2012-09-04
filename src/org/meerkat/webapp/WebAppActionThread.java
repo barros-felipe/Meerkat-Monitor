@@ -72,7 +72,7 @@ public class WebAppActionThread extends Thread {
 			} finally {
 				try {
 					input.close();
-				} catch (IOException e) {
+				} catch (Exception e) {
 					log.error("ERROR closing input stream!", e);
 				}
 			}

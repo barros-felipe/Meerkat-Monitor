@@ -230,16 +230,21 @@ public class WebAppCollection {
 	 * writeWebAppCollectionDataFile
 	 */
 	public final void writeWebAppCollectionDataFile() {
-		fu = new FileUtil();
-		HTMLComponents htmlc = new HTMLComponents(appVersion);
+		final WebAppCollection wap = this;
+		// With many records this will be time consuming
+		Runnable dataCollectionWriter = new Runnable(){
+			@Override
+			public void run() {
+				fu = new FileUtil();
+				HTMLComponents htmlc = new HTMLComponents(appVersion);
 
-		String htmlFileContentsTop = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
-				+ "<html>\n"
-				+ "<head>\n"
-				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>"
-				+ "<title>TimeLine</title>\n"
-				+ "<link rel=\"icon\"  href=\"/favicon.ico\"  type=\"image/x-icon\"></link>\n"
-				+ "<script type='text/javascript' src='http://www.google.com/jsapi'></script>\n"
+				String htmlFileContentsTop = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
+						+ "<html>\n"
+						+ "<head>\n"
+						+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>"
+						+ "<title>TimeLine</title>\n"
+						+ "<link rel=\"icon\"  href=\"/favicon.ico\"  type=\"image/x-icon\"></link>\n"
+						+ "<script type='text/javascript' src='http://www.google.com/jsapi'></script>\n"
 
 				+ "<style type=\"text/css\" title=\"currentStyle\">\n"
 				+ "	@import \"resources/demo_page.css\";\n"
@@ -251,27 +256,30 @@ public class WebAppCollection {
 				+ "	width: 1000px;\n" + "	margin: 10px auto;\n"
 				+ "	padding: 0;\n" + "}\n" + "</style>\n";
 
-		String htmlFileContentsEnd = "</head>\n"
-				+ "<body id=\"dt_example\">\n"
-				+ "<div id=\"container\">\n"
-				+ "<a href=\"javascript:history.go(-1)\"><img src=\"resources/tango-previous.png\" border=\"0\"></a>\n"
-				+ "<h1>Annotated Time Line</h1>"
-				+ "<div id=\"chart_div\" style=\"width: 900px; height: 500px;\"></div>"
-				+ htmlc.getFooter() + "</div></body>" + "</html>";
+				String htmlFileContentsEnd = "</head>\n"
+						+ "<body id=\"dt_example\">\n"
+						+ "<div id=\"container\">\n"
+						+ "<a href=\"javascript:history.go(-1)\"><img src=\"resources/tango-previous.png\" border=\"0\"></a>\n"
+						+ "<h1>Annotated Time Line</h1>"
+						+ "<div id=\"chart_div\" style=\"width: 900px; height: 500px;\"></div>"
+						+ htmlc.getFooter() + "</div></body>" + "</html>";
 
-		String htmlFileContents = htmlFileContentsTop
-				+ this.getJSCollectionTimeLine() + htmlFileContentsEnd;
+				String htmlFileContents = htmlFileContentsTop
+						+ wap.getJSCollectionTimeLine() + htmlFileContentsEnd;
 
-		File tmp = new File(tempWorkingDir);
-		if (!tmp.exists()) {
-			if (!tmp.mkdirs()) {
-				log.error("ERROR creating temporary directory: "
-						+ tempWorkingDir);
+				File tmp = new File(tempWorkingDir);
+				if (!tmp.exists()) {
+					if (!tmp.mkdirs()) {
+						log.error("ERROR creating temporary directory: "
+								+ tempWorkingDir);
+					}
+				}
+				fu.removeFile(tmp + "/" + wap.getCollectionDataFileName());
+				fu.writeToFile(tmp + "/" + wap.getCollectionDataFileName(),htmlFileContents);
 			}
-		}
-		fu.removeFile(tmp + "/" + this.getCollectionDataFileName());
-		fu.writeToFile(tmp + "/" + this.getCollectionDataFileName(),
-				htmlFileContents);
+		};
+		Thread visDataWriterThread = new Thread(dataCollectionWriter);
+		visDataWriterThread.start();
 	}
 
 	/**

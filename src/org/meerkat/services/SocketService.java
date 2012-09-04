@@ -68,7 +68,7 @@ public class SocketService extends WebApp {
 		super();
 		this.setTypeSocketService();
 	}
-
+	
 	@Override
 	public final WebAppResponse checkWebAppStatus() {
 		WebAppResponse response = new WebAppResponse();

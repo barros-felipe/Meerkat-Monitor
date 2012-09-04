@@ -35,8 +35,9 @@ import org.meerkat.util.xml.XMLComparator;
 import org.meerkat.util.xml.XmlFormatter;
 import org.meerkat.webapp.WebAppResponse;
 
-public class WebServiceApp extends WebApp {
 
+public class WebServiceApp extends WebApp {
+	
 	private static Logger log = Logger.getLogger(WebServiceApp.class);
 	private String postXML = "";
 	private String responseXML = "";
@@ -64,7 +65,6 @@ public class WebServiceApp extends WebApp {
 		super(name, url, "", executeOnOffline);
 		this.setTypeWebService();
 		this.setSOAPAction(soapAction);
-
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class WebServiceApp extends WebApp {
 		super();
 		this.setTypeWebService();
 	}
-
+	
 	/**
 	 * checkWebAppStatus
 	 */

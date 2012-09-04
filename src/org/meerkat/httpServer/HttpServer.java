@@ -66,6 +66,7 @@ public class HttpServer {
 	private String wsdlUrl = "";
 	private String timeLineFile = "TimeLine.html";
 	private String hostname = netUtil.getHostname();
+	private CustomResourceHandler customResHandler;
 
 	private String footer = "";
 
@@ -89,13 +90,13 @@ public class HttpServer {
 		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
 		resourceHandler.setResourceBase(tempWorkingDir);
 
-		// Add custom resource handler to get custom 404 Error's
-		CustomResourceHandler customResHandler = new CustomResourceHandler();
-
+		// Add custom resource handler
+		customResHandler = new CustomResourceHandler();
+		
 		HandlerList handlers = new HandlerList();
 		handlers.setHandlers(new Handler[] { resourceHandler, customResHandler });
 		mServer.setHandler(handlers);
-
+		
 		try {
 			mServer.start();
 		} catch (Exception e) {
@@ -117,6 +118,7 @@ public class HttpServer {
 		this.wac = wac.getCopyWebApps();
 		numberEvents = wac.getNumberOfEventsInCollection();
 		this.agc = agc;
+		customResHandler.setWebAppCollection(wac);
 	}
 
 	/**
@@ -232,240 +234,246 @@ public class HttpServer {
 
 	/**
 	 * refresh
-	 * 
-	 * @param wac
 	 */
 	public void refreshIndex() {
-		// Refresh the index
-		Iterator<WebApp> i = wac.iterator();
-		WebApp wApp;
+		// Refresh index in new thread as this might take few moments
+		Runnable refresher = new Runnable(){
+			@Override
+			public void run() {
+				// Refresh the index
+				Iterator<WebApp> i = wac.iterator();
+				WebApp wApp;
 
-		// Get properties
-		PropertiesLoader pl = new PropertiesLoader(propertiesFile);
-		prop = pl.getPropetiesFromFile();
+				// Get properties
+				PropertiesLoader pl = new PropertiesLoader(propertiesFile);
+				prop = pl.getPropetiesFromFile();
 
-		// Check if application type before name is activated
-		boolean appTypePrefixEnabled = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.showapptype"));
-		String appPrefix = "";
+				// Check if application type before name is activated
+				boolean appTypePrefixEnabled = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.showapptype"));
+				String appPrefix = "";
 
-		// Check if we should enable home groups gauge
-		String responseStatus;
+				// Check if we should enable home groups gauge
+				String responseStatus;
 
-		displayGroupGauge = Boolean.parseBoolean(prop.getProperty("meerkat.dashboard.gauge"));
-		if (displayGroupGauge) {
-			responseStatus = getTopContent(agc, displayGroupGauge, appTypePrefixEnabled);
-		} else {
-			responseStatus = getTopContent(agc, false, appTypePrefixEnabled);
-		}
-
-		// Check if remote access to config is allowed
-		allowRemoteConfig = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.rconfig"));
-
-		if (allowRemoteConfig) {
-			FileUtil fu = new FileUtil();
-			String configXml = fu.readFileContents(configFile);
-			fu.writeToFile(tempWorkingDir + configFile, configXml);
-		} else {
-			FileUtil fu = new FileUtil();
-			fu.writeToFile(tempWorkingDir + configFile,
-					"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
-							"<meerkat-monitor>" +
-							" <info>Remote access to config file is disabled!</info>" +
-					"</meerkat-monitor>");
-		}
-
-		// Check if web log access is allowed
-		allowWebLogAccess = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.logaccess"));
-
-		if (allowWebLogAccess) {
-			FileUtil fu = new FileUtil();
-			String logFileContents = fu.readFileContents(logFile);
-			fu.writeToFile(tempWorkingDir + webLogFile, logFileContents);
-		} else {
-			FileUtil fu = new FileUtil();
-			fu.writeToFile(tempWorkingDir + webLogFile,
-					"Web access to log file is disabled!");
-		}
-
-		while (i.hasNext()) {
-			wApp = i.next();
-			if (wApp.isActive()) {
-				// using CSS grade so we can later set a grade for each application type
-				if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_WEBAPP)) {
-					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
-							+ "<a href=\"" + "http://" + hostname + ":"
-							+ webServerPort + "/" + wApp.getDataFileName()
-							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
-
-				} else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_DATABASE)) {
-					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
-							+ "<a href=\"" + "http://" + hostname + ":"
-							+ webServerPort + "/" + wApp.getDataFileName()
-							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
+				displayGroupGauge = Boolean.parseBoolean(prop.getProperty("meerkat.dashboard.gauge"));
+				if (displayGroupGauge) {
+					responseStatus = getTopContent(agc, displayGroupGauge, appTypePrefixEnabled);
+				} else {
+					responseStatus = getTopContent(agc, false, appTypePrefixEnabled);
 				}
 
-				else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_WEBSERVICE)) {
-					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
-							+ "<a href=\"" + "http://" + hostname + ":"
-							+ webServerPort + "/" + wApp.getDataFileName()
-							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
+				// Check if remote access to config is allowed
+				allowRemoteConfig = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.rconfig"));
+
+				if (allowRemoteConfig) {
+					FileUtil fu = new FileUtil();
+					String configXml = fu.readFileContents(configFile);
+					fu.writeToFile(tempWorkingDir + configFile, configXml);
+				} else {
+					FileUtil fu = new FileUtil();
+					fu.writeToFile(tempWorkingDir + configFile,
+							"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
+									"<meerkat-monitor>" +
+									" <info>Remote access to config file is disabled!</info>" +
+							"</meerkat-monitor>");
 				}
 
-				else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SOCKET)) {
-					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
-							+ "<a href=\"" + "http://" + hostname + ":"
-							+ webServerPort + "/" + wApp.getDataFileName()
-							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
+				// Check if web log access is allowed
+				allowWebLogAccess = Boolean.parseBoolean(prop.getProperty("meerkat.webserver.logaccess"));
+
+				if (allowWebLogAccess) {
+					FileUtil fu = new FileUtil();
+					String logFileContents = fu.readFileContents(logFile);
+					fu.writeToFile(tempWorkingDir + webLogFile, logFileContents);
+				} else {
+					FileUtil fu = new FileUtil();
+					fu.writeToFile(tempWorkingDir + webLogFile,
+							"Web access to log file is disabled!");
 				}
 
-				else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SSH)) {
-					responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
-							+ "<a href=\"" + "http://" + hostname + ":"
-							+ webServerPort + "/" + wApp.getDataFileName()
-							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
-				}
+				while (i.hasNext()) {
+					wApp = i.next();
+					if (wApp.isActive()) {
+						// using CSS grade so we can later set a grade for each application type
+						if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_WEBAPP)) {
+							responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
+									+ "<a href=\"" + "http://" + hostname + ":"
+									+ webServerPort + "/" + wApp.getDataFileName()
+									+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
 
-				else {
-					responseStatus += "\n<tr class=\"gradeC\">\n" + "<td>\n"
-							+ "<a href=\"" + "http://" + hostname + ":"
-							+ webServerPort + "/" + wApp.getDataFileName()
-							+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
-				}
+						} else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_DATABASE)) {
+							responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
+									+ "<a href=\"" + "http://" + hostname + ":"
+									+ webServerPort + "/" + wApp.getDataFileName()
+									+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
+						}
 
-				/**
-				 * Show Application type if active
-				 */
-				if(appTypePrefixEnabled){
-					appPrefix = "<small>"+wApp.getType()+"</small>";
-					responseStatus += "<td class=\"center\">" + appPrefix;
-					responseStatus += "</td>\n";
-				}
+						else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_WEBSERVICE)) {
+							responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
+									+ "<a href=\"" + "http://" + hostname + ":"
+									+ webServerPort + "/" + wApp.getDataFileName()
+									+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
+						}
 
-				/**
-				 * Availability
-				 */
-				responseStatus += "<td class=\"center\">" + wApp.getAvailability();
+						else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SOCKET)) {
+							responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
+									+ "<a href=\"" + "http://" + hostname + ":"
+									+ webServerPort + "/" + wApp.getDataFileName()
+									+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
+						}
 
-				// Trend
-				double availIndicator = wApp.getAvailabilityIndicator();
-				if (wApp.getNumberOfTests() > 2) {
-					if (availIndicator > 0) {
-						responseStatus += "<img src=\"resources/up-green.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else if (availIndicator < 0) {
-						responseStatus += "<img src=\"resources/down-red.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else {
+						else if (wApp.getType().equalsIgnoreCase(WebApp.TYPE_SSH)) {
+							responseStatus += "\n<tr class=\"gradeA\">\n" + "<td>\n"
+									+ "<a href=\"" + "http://" + hostname + ":"
+									+ webServerPort + "/" + wApp.getDataFileName()
+									+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
+						}
+
+						else {
+							responseStatus += "\n<tr class=\"gradeC\">\n" + "<td>\n"
+									+ "<a href=\"" + "http://" + hostname + ":"
+									+ webServerPort + "/" + wApp.getDataFileName()
+									+ "\">" + wApp.getName() + "</a>\n" + "</td>\n";
+						}
+
+						/**
+						 * Show Application type if active
+						 */
+						if(appTypePrefixEnabled){
+							appPrefix = "<small>"+wApp.getType()+"</small>";
+							responseStatus += "<td class=\"center\">" + appPrefix;
+							responseStatus += "</td>\n";
+						}
+
+						/**
+						 * Availability
+						 */
+						responseStatus += "<td class=\"center\">" + wApp.getAvailability();
+
+						// Trend
+						double availIndicator = wApp.getAvailabilityIndicator();
+						if (wApp.getNumberOfTests() > 2) {
+							if (availIndicator > 0) {
+								responseStatus += "<img src=\"resources/up-green.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
+							} else if (availIndicator < 0) {
+								responseStatus += "<img src=\"resources/down-red.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
+							} else {
+								responseStatus += "</td>\n";
+							}
+						}
+
+						// Link to events
+						responseStatus += "<td class=\"center\">";
+						if (wApp.getNumberOfEvents() > 0) {
+							responseStatus += "<a href=\"" + "http://" + hostname + ":"
+									+ webServerPort + "/" + wApp.getDataFileName()
+									+ "\">" + wApp.getNumberOfCriticalEvents()
+									+ "</a>\n";
+						} else {
+							responseStatus += "N/A";
+						}
 						responseStatus += "</td>\n";
+
+						/**
+						 * Latency
+						 */
+						responseStatus += "<td class=\"center\">\n";
+						BigDecimal bd = new BigDecimal(wApp.getLatencyAverage());
+						bd = bd.setScale(1, BigDecimal.ROUND_DOWN);
+						responseStatus += bd.doubleValue();
+						// trend
+						double latencyIndicator = wApp.getLatencyIndicator();
+						if (wApp.getNumberOfTests() > 2) {
+							// check for "undefined" values
+							if (latencyIndicator > 0) {
+								responseStatus += "<img src=\"resources/up-red.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
+							} else if (latencyIndicator < 0) {
+								responseStatus += "<img src=\"resources/down-green.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
+							} else {
+								responseStatus += "</td>\n";
+							}
+						}
+
+						/**
+						 * Load Time
+						 */
+						responseStatus += "<td class=\"center\">\n";
+						BigDecimal bd1 = new BigDecimal(wApp.getLoadsAverage());
+						bd1 = bd1.setScale(1, BigDecimal.ROUND_DOWN);
+						responseStatus += bd1.doubleValue();
+						// trend
+						double loadTimeIndicator = wApp.getLoadTimeIndicator();
+						if (wApp.getNumberOfTests() > 2) {
+							if (loadTimeIndicator > 0) {
+								responseStatus += "<img src=\"resources/up-red.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
+							} else if (loadTimeIndicator < 0) {
+								responseStatus += "<img src=\"resources/down-green.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
+							} else {
+								responseStatus += "</td>\n";
+							}
+						}
+
+						// Status
+						if (wApp.getlastStatus().equalsIgnoreCase("online")) {
+							responseStatus += "<td class=\"center\" style=\"background-color: #2d9500;\">\n";
+						} else if (wApp.getlastStatus().equalsIgnoreCase("offline")) {
+							responseStatus += "<td class=\"center\" style=\"background-color: #ff0000;\">\n";
+						} else {
+							responseStatus += "<td class=\"center\" style=\"background-color: #949494;\">\n";
+						}
+						// Link to URL only makes sense on Web pages
+						if (!wApp.getType().equals(WebApp.TYPE_WEBAPP)) {
+							responseStatus += "<strong>"
+									+ wApp.getlastStatus().toUpperCase(
+											Locale.getDefault())
+											+ "</strong></td>\n</tr>\n";
+						} else {
+							responseStatus += "<a href=\""
+									+ wApp.getUrl()
+									+ "\" target=\"_blank\"><strong>"
+									+ wApp.getlastStatus().toUpperCase(
+											Locale.getDefault())
+											+ "</strong></a></td>\n</tr>\n";
+						}
 					}
 				}
 
-				// Link to events
-				responseStatus += "<td class=\"center\">";
-				if (wApp.getNumberOfEvents() > 0) {
-					responseStatus += "<a href=\"" + "http://" + hostname + ":"
-							+ webServerPort + "/" + wApp.getDataFileName()
-							+ "\">" + wApp.getNumberOfCriticalEvents()
-							+ "</a>\n";
-				} else {
-					responseStatus += "N/A";
-				}
-				responseStatus += "</td>\n";
+				responseStatus += bottomContent;
+				responseStatus += "<a href=\""
+						+ wsdlUrl
+						+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n";
 
-				/**
-				 * Latency
-				 */
-				responseStatus += "<td class=\"center\">\n";
-				BigDecimal bd = new BigDecimal(wApp.getLatencyAverage());
-				bd = bd.setScale(1, BigDecimal.ROUND_DOWN);
-				responseStatus += bd.doubleValue();
-				// trend
-				double latencyIndicator = wApp.getLatencyIndicator();
-				if (wApp.getNumberOfTests() > 2) {
-					// check for "undefined" values
-					if (latencyIndicator > 0) {
-						responseStatus += "<img src=\"resources/up-red.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else if (latencyIndicator < 0) {
-						responseStatus += "<img src=\"resources/down-green.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else {
-						responseStatus += "</td>\n";
-					}
-				}
-				
-				/**
-				 * Load Time
-				 */
-				responseStatus += "<td class=\"center\">\n";
-				BigDecimal bd1 = new BigDecimal(wApp.getLoadsAverage());
-				bd1 = bd1.setScale(1, BigDecimal.ROUND_DOWN);
-				responseStatus += bd1.doubleValue();
-				// trend
-				double loadTimeIndicator = wApp.getLoadTimeIndicator();
-				if (wApp.getNumberOfTests() > 2) {
-					if (loadTimeIndicator > 0) {
-						responseStatus += "<img src=\"resources/up-red.png\" alt=\"Last value higher than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else if (loadTimeIndicator < 0) {
-						responseStatus += "<img src=\"resources/down-green.png\" alt=\"Last value lower than average\" width=\"10\" height=\"10\"/>\n</td>\n";
-					} else {
-						responseStatus += "</td>\n";
-					}
-				}
-				
-				// Status
-				if (wApp.getlastStatus().equalsIgnoreCase("online")) {
-					responseStatus += "<td class=\"center\" style=\"background-color: #2d9500;\">\n";
-				} else if (wApp.getlastStatus().equalsIgnoreCase("offline")) {
-					responseStatus += "<td class=\"center\" style=\"background-color: #ff0000;\">\n";
-				} else {
-					responseStatus += "<td class=\"center\" style=\"background-color: #949494;\">\n";
-				}
-				// Link to URL only makes sense on Web pages
-				if (!wApp.getType().equals(WebApp.TYPE_WEBAPP)) {
-					responseStatus += "<strong>"
-							+ wApp.getlastStatus().toUpperCase(
-									Locale.getDefault())
-									+ "</strong></td>\n</tr>\n";
-				} else {
+				// If remote config (webapps.xml) access is enable create link for it
+				if(allowRemoteConfig){
 					responseStatus += "<a href=\""
-							+ wApp.getUrl()
-							+ "\" target=\"_blank\"><strong>"
-							+ wApp.getlastStatus().toUpperCase(
-									Locale.getDefault())
-									+ "</strong></a></td>\n</tr>\n";
+							+ configFile
+							+ "\"><img src=\"resources/tango-xml-config.png\" alt=\"App Config XML\" align=\"right\" style=\"border-style: none\"/></a> \n";
 				}
+
+				// If log file access is enable create link for it
+				if(allowWebLogAccess){
+					responseStatus += "<a href=\""
+							+ webLogFile
+							+ "\"><img src=\"resources/tango-find-log.png\" alt=\"Log\" align=\"right\" style=\"border-style: none\"/></a> \n";
+				}
+
+
+				responseStatus += "<br>\n<div>\nUpdated: " + date.now() + " ["
+						+ numberEvents + " tests]" + "</div>\n";
+				responseStatus += "</div>"; // Close div
+				responseStatus += footer;
+				responseStatus += bodyEnd;
+
+				// Write the index file
+				File f = new File(tempWorkingDir + "index.html");
+				if (!f.delete()) {
+					log.warn("Failed to remove file: " + f.toString());
+				}
+				fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
 			}
-		}
-
-		responseStatus += bottomContent;
-		responseStatus += "<a href=\""
-				+ wsdlUrl
-				+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n";
-
-		// If remote config (webapps.xml) access is enable create link for it
-		if(allowRemoteConfig){
-			responseStatus += "<a href=\""
-					+ configFile
-					+ "\"><img src=\"resources/tango-xml-config.png\" alt=\"App Config XML\" align=\"right\" style=\"border-style: none\"/></a> \n";
-		}
-
-		// If log file access is enable create link for it
-		if(allowWebLogAccess){
-			responseStatus += "<a href=\""
-					+ webLogFile
-					+ "\"><img src=\"resources/tango-find-log.png\" alt=\"Log\" align=\"right\" style=\"border-style: none\"/></a> \n";
-		}
-
-
-		responseStatus += "<br>\n<div>\nUpdated: " + date.now() + " ["
-				+ numberEvents + " tests]" + "</div>\n";
-		responseStatus += "</div>"; // Close div
-		responseStatus += footer;
-		responseStatus += bodyEnd;
-
-		// Write the index file
-		File f = new File(tempWorkingDir + "index.html");
-		if (!f.delete()) {
-			log.warn("Failed to remove file: " + f.toString());
-		}
-		fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
+		};
+		Thread refresherThread = new Thread(refresher);
+		refresherThread.start();
 	}
 
 	/**

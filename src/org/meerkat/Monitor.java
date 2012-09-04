@@ -19,7 +19,6 @@
 
 package org.meerkat;
 
-import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -63,8 +62,6 @@ public class Monitor {
 	String eventBackOnline = "Back Online";
 	int testPause;
 	long pauseTime;
-	Connection conn;
-
 
 	public Monitor(EmbeddedDB ebd, WebAppCollection webAppsCollection, AppGroupCollection appGroupCollection, 
 			HttpServer httpWebServer, SysTrayIcon systray, RSS rssFeed, String propertiesFile){
@@ -77,8 +74,6 @@ public class Monitor {
 		dateUtil = new DateUtil();
 		tempWorkingDir = webAppsCollection.getTmpDir();
 		pL = new PropertiesLoader(propertiesFile);
-
-		conn = ebd.getConn();
 
 	}
 
@@ -96,9 +91,11 @@ public class Monitor {
 		while (i.hasNext()) {
 			currentWebApp = i.next();
 			currentWebApp.setTempWorkingDir(tempWorkingDir);
-			currentWebApp.writeWebAppVisualizationDataFile(); 
+			currentWebApp.writeWebAppVisualizationInfoWorkingOn(); // shows user that's working on data
+			currentWebApp.writeWebAppVisualizationDataFile(); // this takes time - executed in new thread
 		}
-
+		log.info("");
+		
 		// Launch the monitor process
 		while (true) {
 			// Check for updated user defined new properties
@@ -123,9 +120,6 @@ public class Monitor {
 				percent = roundCompletedApps * 100 / numberOfApps;
 				currentWebApp = i.next();
 				log.info("["+roundCompletedApps+"/"+numberOfApps+" "+percent+"%]\t"+currentWebApp.getName());
-
-				// Add the DB connection to application
-				currentWebApp.addEmbeddedDB(conn);
 
 				// check if the webApp is ready to monit or not - temp created in the gui
 				if (currentWebApp.isActive()) {
@@ -313,13 +307,15 @@ public class Monitor {
 						}
 					}
 				}
-				// Refresh dashboard and app in every app cycle
-				webAppsCollection.writeWebAppCollectionDataFile();
-				httpWebServer.refreshIndex();
-
+				
 				// increase checked apps
 				roundCompletedApps++;
 			}
+			
+			// Refresh dashboard and app in (not every app cycle because its heavy!)
+			webAppsCollection.writeWebAppCollectionDataFile();
+			httpWebServer.refreshIndex();
+			
 			// reset percentage
 			percent = 0;
 			roundCompletedApps = 0;

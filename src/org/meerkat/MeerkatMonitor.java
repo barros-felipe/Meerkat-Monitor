@@ -167,9 +167,11 @@ public class MeerkatMonitor {
 		systray = new SysTrayIcon(mkm, httpWebServer, webAppsCollection, appGroupCollection);
 		systray.createSystrayIcon();
 
-		log.info("");
+		// Start monitor
+		log.info("Setting up monitor...");
 		Monitor monitor = new Monitor(ebd, webAppsCollection, appGroupCollection, httpWebServer, systray, rssFeed, propertiesFile);
 		monitor.startMonitor();
+		
 
 	}
 

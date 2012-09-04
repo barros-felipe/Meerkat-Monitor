@@ -36,9 +36,9 @@
     <minVersion>1.6.0</minVersion>
     <!-- <maxVersion>x.x.x[_xx]</maxVersion> -->
     <!-- <jdkPreference>jreOnly|preferJre|preferJdk|jdkOnly</jdkPreference> -->
-    <!-- <initialHeapSize>128</initialHeapSize> --><!-- MB -->
-    <!-- <initialHeapPercent>50</initialHeapPercent> --><!-- percent -->
-    <!-- <maxHeapSize>512</maxHeapSize> -->
+    <initialHeapSize>256</initialHeapSize> <!-- MB -->
+    <!-- <initialHeapPercent>50</initialHeapPercent> --> <!-- percent -->
+    <maxHeapSize>512</maxHeapSize>
     <!-- <maxHeapPercent>100</maxHeapPercent> -->
     <!-- <opt>text</opt> -->
   </jre>

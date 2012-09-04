@@ -20,6 +20,7 @@
 package org.meerkat.services;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
@@ -58,6 +59,7 @@ import org.meerkat.db.EmbeddedDB;
 import org.meerkat.network.Availability;
 import org.meerkat.network.Latency;
 import org.meerkat.util.Counter;
+import org.meerkat.util.FileUtil;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.StringUtil;
 import org.meerkat.webapp.WebAppActionResultThread;
@@ -74,7 +76,6 @@ public class WebApp {
 	private String url;
 	private String expectedString;
 	private String executeOnOffline = "";
-
 	@XStreamOmitField
 	public static String TYPE_WEBAPP = "WEBAPP";
 	@XStreamOmitField
@@ -565,7 +566,7 @@ public class WebApp {
 	private List<WebAppEvent> getEvents(){
 		if(conn == null){
 			embDB = new EmbeddedDB();
-			conn = embDB.getConn();
+			conn = embDB.getConnForQueries();
 		}
 
 		events = new CopyOnWriteArrayList<WebAppEvent>();
@@ -609,7 +610,6 @@ public class WebApp {
 
 			rs.close();
 			ps.close();
-			conn.commit();
 
 		} catch (SQLException e) {
 			log.error("Failed query events from application "+this.getName());
@@ -708,11 +708,11 @@ public class WebApp {
 			log.error("Failed query average load time from application "+this.getName());
 			log.error("", e);
 		}
-		
+
 		BigDecimal bd = new BigDecimal(loadTimeAvg);
 		bd = bd.setScale(3, BigDecimal.ROUND_DOWN);
 		loadTimeAvg = bd.doubleValue();
-		
+
 		return loadTimeAvg;
 	}
 
@@ -809,9 +809,45 @@ public class WebApp {
 	 * writeWebAppDataFile
 	 */
 	public final void writeWebAppVisualizationDataFile() {
-		Visualization gv = new Visualization();
-		gv.setAppVersion(appVersion);
-		gv.writeWebAppVisualizationDataFile(this);
+		final WebApp curr = this;
+		// With many records this will be time consuming
+		Runnable visDataWriter = new Runnable(){
+			@Override
+			public void run() {
+				Visualization gv = new Visualization();
+				gv.setAppVersion(appVersion);
+				gv.writeWebAppVisualizationDataFile(curr);
+			}
+		};
+		Thread visDataWriterThread = new Thread(visDataWriter);
+		visDataWriterThread.start();
+	}
+
+	/**
+	 * 
+	 */
+	public final void writeWebAppVisualizationInfoWorkingOn() {
+		FileUtil fu = new FileUtil();
+		String pageContents = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
+				+ "<html>\n"
+				+ "<head>\n"
+				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><meta http-equiv=\"refresh\" content=\"5\"></meta>\n"
+				+ "<title>Meerkat Loading Data...</title>\n"
+				+ "<link rel=\"icon\"  href=\"/resources/faviconM.gif\"  type=\"image/x-icon\"></link>\n"
+				+ "</head>\n"
+				+ "<body>\n"
+				+ "<h4>"
+				+ "I'm working on data for \""+this.name+"\". <br /> Please come back later..."
+				+ "</h4>\n"
+				+ "</body>\n" + "</html>\n";
+
+		File tmp = new File(this.tempWorkingDir);
+		if (!tmp.exists()) {
+			if (!tmp.mkdirs()) {
+				log.error("ERROR creating temporary file: " + this.tempWorkingDir);
+			}
+		}
+		fu.writeToFile(tmp + "/" + this.getDataFileName(), pageContents);
 	}
 
 	/**
@@ -1118,7 +1154,7 @@ public class WebApp {
 		PreparedStatement ps;
 		ResultSet rs = null;
 		int maxID = embDB.getMaxIDofApp(this.name);
-		
+
 		try {
 			ps = conn.prepareStatement("SELECT ID, LOADTIME "+
 					"FROM MEERKAT.EVENTS "+
@@ -1143,7 +1179,7 @@ public class WebApp {
 		BigDecimal bd1 = new BigDecimal(lastLoadTime);
 		bd1 = bd1.setScale(3, BigDecimal.ROUND_DOWN);
 		lastLoadTime = bd1.doubleValue();
-		
+
 		if(lastLoadTime > loadTimeAverage){
 			return 1;
 		}else if(lastLoadTime < loadTimeAverage){
@@ -1187,9 +1223,12 @@ public class WebApp {
 		return this.mkm;
 	}
 
+	/**
+	 * removeAllEvents
+	 */
 	public final void removeAllEvents() {
 		// Remove DB events of this application
-		Connection conn = embDB.getConn();
+		Connection conn = embDB.getConnForUpdates();
 		PreparedStatement statement = null;
 
 		String queryDelete = "DELETE FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'";
@@ -1203,7 +1242,112 @@ public class WebApp {
 		} catch (SQLException e) {
 			log.error("Failed to remove events of "+this.name+" from DB! - "+e.getMessage());
 		}
-
 	}
+
+	/**
+	 * getCustomEventsList
+	 * @param appName
+	 * @param rows
+	 * @param rowBegin
+	 * @param rowEnd
+	 * @param orderBy
+	 * @param asdDSC
+	 * @return customEvents
+	 */
+	public final ArrayList<WebAppEvent> getCustomEventsList(String rowBegin, String rowEnd, String orderBy, String asdDSC){
+		ArrayList<WebAppEvent> customEvents = new ArrayList<WebAppEvent>();
+		Connection conn = embDB.getConnForQueries();
+		String orderByStr = "";
+
+		// Prevent null values if called direct link (outside Datatables)
+		if(rowBegin == null || rowEnd == null){
+			rowBegin = "0";
+			rowEnd = "10";
+		}
+
+		// Process order
+		if(orderBy == null){
+			orderBy = "0";
+		}
+		if(orderBy.equals("0")){
+			orderByStr = "ID";
+		}else if(orderBy.equals("1")){
+			orderByStr = "DATEEV";
+		}else if(orderBy.equals("2")){
+			orderByStr = "ONLINE";
+		}else if(orderBy.equals("3")){
+			orderByStr = "AVAILABILITY";
+		}else if(orderBy.equals("4")){
+			orderByStr = "LOADTIME";
+		}else if(orderBy.equals("5")){
+			orderByStr = "LATENCY";
+		}else if(orderBy.equals("6")){
+			orderByStr = "HTTPSTATUSCODE";
+		}else if(orderBy.equals("7")){
+			orderByStr = "DESCRIPTION";
+		}
+
+		int nRows = Integer.valueOf(rowEnd) - Integer.valueOf(rowBegin);
+
+		String fields = "SELECT ID, CRITICAL, DATEEV, ONLINE, AVAILABILITY, \n"+ 
+				"LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION \n";
+
+		log.debug(" ");
+		log.debug("||-- APP: "+this.name);
+		log.debug("||-- Results: "+rowBegin+" to: "+rowBegin+nRows);
+		log.debug("||-- Order by: "+orderByStr+" "+asdDSC);
+
+		String eventsQuery = fields + "FROM MEERKAT.EVENTS \n"+
+				"WHERE APPNAME LIKE '"+this.name+"' \n"+
+				"ORDER BY "+orderByStr+" "+asdDSC+" \n" +
+				"OFFSET "+rowBegin+" ROWS FETCH NEXT "+nRows+" ROWS ONLY ";
+		
+		int id;
+		boolean critical;
+		String date;
+		boolean online;
+		String availability;
+		String loadTime;
+		String latency;
+		int httStatusCode = 0;
+		String description;
+
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement(eventsQuery);
+			rs = ps.executeQuery();
+
+			while(rs.next()) {
+				id = rs.getInt(1);
+				critical = rs.getBoolean(2);
+				date = rs.getTimestamp(3).toString();
+				online = rs.getBoolean(4);
+				availability = String.valueOf(rs.getDouble(5));
+				loadTime = String.valueOf(rs.getDouble(6));
+				latency = String.valueOf(rs.getDouble(7));
+				httStatusCode = rs.getInt(8);
+				description = rs.getString(9);
+
+				WebAppEvent currEv = new WebAppEvent(critical, date, online, availability, httStatusCode, description);
+				currEv.setID(id);
+				currEv.setPageLoadTime(loadTime);
+				currEv.setLatency(latency);
+				customEvents.add(currEv);
+			}
+
+			rs.close();
+			ps.close();
+
+		} catch (SQLException e) {
+			log.error("Failed query events from application "+this.getName());
+			log.error("", e);
+			log.error("QUERY IS: "+eventsQuery);
+		}
+
+		return customEvents;
+	}
+
+
 
 }

@@ -64,7 +64,7 @@ public class SecureShellSSH extends WebApp {
 		this.setTypeSSH();
 
 	}
-
+	
 	/**
 	 * checkWebAppStatus
 	 */

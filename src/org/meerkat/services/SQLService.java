@@ -96,7 +96,7 @@ public class SQLService extends WebApp {
 		super();
 		this.setTypeSQL();
 	}
-
+	
 	/**
 	 * checkWebAppStatus
 	 */

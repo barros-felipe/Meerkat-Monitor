@@ -1,6 +1,6 @@
 /**
  * Meerkat Monitor - Network Monitor Tool
- * Copyright (C) 2011 Merkat-Monitor
+ * Copyright (C) 2012 Merkat-Monitor
  * mailto: contact AT meerkat-monitor DOT org
  * 
  * Meerkat Monitor is free software: you can redistribute it and/or modify
@@ -22,6 +22,9 @@ package org.meerkat.httpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +36,8 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.ByteArrayISO8859Writer;
 import org.eclipse.jetty.util.IO;
+import org.meerkat.services.WebApp;
+import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
 
 public class CustomResourceHandler extends ResourceHandler {
@@ -41,6 +46,10 @@ public class CustomResourceHandler extends ResourceHandler {
 	byte[] _favicon;
 	boolean _serveIcon = true;
 	private String eventRequestID = "/event-id-";
+	private String eventListRequest = "/event-list-";
+	int eventListRequestLength = eventListRequest.length();
+	private WebAppCollection wac;
+
 	private String notFound = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
 			+ "<html>\n"
 			+ "<head>\n"
@@ -72,8 +81,7 @@ public class CustomResourceHandler extends ResourceHandler {
 			+ "</div>\n"
 			+ "</body>\n"
 			+ "</html>\n";
-	
-	
+
 
 	public CustomResourceHandler() {
 		// Set the favicon
@@ -88,10 +96,14 @@ public class CustomResourceHandler extends ResourceHandler {
 		}
 	}
 
+	public final void setWebAppCollection(WebAppCollection wac){
+		this.wac = wac;
+	}
+
 	@Override
 	public final void handle(String target, Request baseRequest,
 			HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
+					throws IOException, ServletException {
 
 		if (response.isCommitted() || baseRequest.isHandled()) {
 			return;
@@ -102,45 +114,162 @@ public class CustomResourceHandler extends ResourceHandler {
 				response.setContentType("image/x-icon");
 				response.setContentLength(_favicon.length);
 				response.getOutputStream().write(_favicon);
+				baseRequest.setHandled(true);
 				return;
-				
+
 			}else if(request.getRequestURI().contains(eventRequestID)){ // This is a request for event
 				// Get request id
 				String requestRef = request.getRequestURI();
 				requestRef = requestRef.substring(eventRequestID.length(), requestRef.length());
 				int id = Integer.valueOf(requestRef);
 				WebAppEvent ev = WebAppEvent.getEventByID(id);
-				
+
 				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
 				response.setContentType(MimeTypes.TEXT_HTML);
 				if(ev != null){
 					response.setStatus(HttpServletResponse.SC_OK);
 					writer.write(ev.getCurrentResponse());
+					writer.flush();
+					response.setContentLength(writer.size());
+					OutputStream out = response.getOutputStream();
+					writer.writeTo(out);
+					out.close();
+					writer.close();
+					baseRequest.setHandled(true);
+					return;
 				}else{
-					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-					writer.write(notFound);
+					log.info("-- prepare to load 404 handler..");
+					processNotFound404(response, baseRequest);
 				}
+
+			}
+
+			// Deal with request for datatables events
+			else if(request.getRequestURI().contains(eventListRequest)){
+
+				// Get application
+				String requestRef = request.getRequestURI();
+				requestRef = requestRef.substring(eventListRequest.length(), requestRef.length());
+				String appName = URLDecoder.decode(requestRef, "UTF-8");
+
+				// Handle paging
+				String displayStart, displayLength;
+				displayStart = request.getParameter("iDisplayStart");
+				displayLength = request.getParameter("iDisplayLength");
+				if(displayStart == null || displayLength == null){
+					displayStart = "0";
+					displayLength = "10";
+				}
+
+				// Ordering
+				String orderBy = request.getParameter("iSortCol_0");
+				String sortOrder = request.getParameter("sSortDir_0");
+				if(orderBy == null || sortOrder == null){
+					orderBy = "0";
+					sortOrder = "ASC";
+				}
+
+				String sEcho = request.getParameter("sEcho");
+				if(sEcho == null){
+					sEcho = "1";
+				}
+
+				// Get number of events of application
+				WebApp webapp = wac.getWebAppByName(appName);
+				if(webapp == null){
+					log.info("Application "+appName+" not present!");
+					webapp = new WebApp(); // prevent null in getCustomEventsList
+					processNotFound404(response, baseRequest);
+				}
+
+				int numberEvents = 0;
+				try{
+					numberEvents = webapp.getNumberOfEvents();
+				}catch(NullPointerException e){
+					log.error("Failed to get number of events from app. - "+e.getMessage());
+				}
+
+				int numberOfEventsToShow = Integer.valueOf(displayStart) + Integer.valueOf(displayLength);
+				ArrayList<WebAppEvent> requestedEventList = webapp.getCustomEventsList(displayStart, String.valueOf(numberOfEventsToShow), orderBy, sortOrder.toUpperCase());
+
+				String returnResp = "{ \n"+
+						"\"sEcho\": "+sEcho+", \n"+
+						"\"iTotalRecords\": \""+numberEvents+"\", \n"+
+						"\"iTotalDisplayRecords\": \""+numberEvents+"\", \n"+
+						"\"aaData\": [ \n";
+
+				Iterator<WebAppEvent> it = requestedEventList.iterator();
+				WebAppEvent ev;
+				String jSONresponse = returnResp;
+				while(it.hasNext()){
+					ev = it.next();
+
+					jSONresponse += "[\n"+
+							"\""+ev.getID()+"\", \n"+
+							"\""+ev.getDate()+"\", \n";
+
+					if(ev.getStatus()){
+						jSONresponse +=	"\"Online\", \n";
+					}else{
+						jSONresponse +=	"\"Offline\", \n";
+					}
+
+					jSONresponse += "\""+ev.getAvailability()+"\", \n"+
+							"\""+ev.getPageLoadTime()+"\", \n"+
+							"\""+ev.getLatency()+"\", \n";
+
+
+					jSONresponse +=	"\""+ev.getHttpStatusCode()+"\", \n";
+
+
+					jSONresponse += "\""+ev.getDescription()+"\", \n"+
+							"\"<a href=\\\"event-id-"+ev.getID()+"\\\" onclick=\\\"return popitup('event-id-"+
+							+ev.getID()+ "')\\\"><img src=\\\"resources/tango_edit-find.png\\\" border=\\\"0\\\" alt=\\\"\\\" /></a>\" \n"+
+							"],"; // only the one doesnt have ","
+				}
+
+				// remove the last ","
+				jSONresponse = jSONresponse.substring(0, jSONresponse.length()-1);
+
+				jSONresponse += "\n] \n"+
+						"}";
+
+				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
+				response.setContentType(MimeTypes.TEXT_JSON_UTF_8);
+				response.setStatus(HttpServletResponse.SC_OK);
+				writer.write(jSONresponse);
 				writer.flush();
 				response.setContentLength(writer.size());
 				OutputStream out = response.getOutputStream();
 				writer.writeTo(out);
 				out.close();
 				writer.close();
+				baseRequest.setHandled(true);
 				return;
 			}
 
-			// Otherwise give a not found 404
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			response.setContentType(MimeTypes.TEXT_HTML);
-			ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
-			writer.write(notFound);
-			writer.flush();
-			response.setContentLength(writer.size());
-			OutputStream out = response.getOutputStream();
-			writer.writeTo(out);
-			out.close();
-			writer.close();
+			// Otherwise return not found 404
+			processNotFound404(response, baseRequest);
 		}
 	}
+
+
+	private final void processNotFound404(HttpServletResponse response, Request baseRequest)
+			throws IOException, ServletException{
+		ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
+		response.setContentType(MimeTypes.TEXT_HTML);
+		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		writer.write(notFound);
+
+		writer.flush();
+		response.setContentLength(writer.size());
+		OutputStream out = response.getOutputStream();
+		writer.writeTo(out);
+		out.close();
+		writer.close();
+		baseRequest.setHandled(true);
+		return;
+	}
+
 
 }

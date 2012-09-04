@@ -30,14 +30,15 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.meerkat.util.PropertiesLoader;
 
-public class EmbeddedDB {
+public class EmbeddedDB implements Runnable{
 	private static Logger log = Logger.getLogger(EmbeddedDB.class);
 	private String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 	private String protocol = "jdbc:derby:";
 
 	private Properties dbProps;
 	private String dbName = "";
-	Connection conn = null;
+	Connection connQueries = null;
+	Connection connUpdates = null;
 
 	public EmbeddedDB(){
 		PropertiesLoader pL = new PropertiesLoader("meerkat.properties");
@@ -70,12 +71,12 @@ public class EmbeddedDB {
 	 * Create DB if not present
 	 */
 	public final void initializeDB(){
-		Connection c = getConn();
+		Connection c = getConnForUpdates();
 		PreparedStatement ps;
-		Statement st, st1;
+		Statement st, st1, st2, st3, st4, st5, st6, st7;
 		ResultSet rs;
 		try {
-			ps = getConn().prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS");
+			ps = getConnForUpdates().prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS");
 			rs = ps.executeQuery();
 			rs.next();
 		} catch (SQLException e) {
@@ -96,12 +97,31 @@ public class EmbeddedDB {
 							"DESCRIPTION VARCHAR(50), "+
 							"RESPONSE VARCHAR(30000) "+
 							")");
-					
+
 					st1 = c.createStatement();
+					st2 = c.createStatement();
+					st3 = c.createStatement();
+					st4= c.createStatement();
+					st5 = c.createStatement();
+					st6 = c.createStatement();
+					st7 = c.createStatement();
+
 					st1.executeUpdate("CREATE INDEX MEERKAT.IDX_APPNAME ON MEERKAT.EVENTS (APPNAME)");
-					
+					st2.executeUpdate("CREATE INDEX MEERKAT.IDX_DATEEV ON MEERKAT.EVENTS (DATEEV)");
+					st3.executeUpdate("CREATE INDEX MEERKAT.IDX_ONLINE ON MEERKAT.EVENTS (ONLINE)");
+					st4.executeUpdate("CREATE INDEX MEERKAT.IDX_AVAILABILITY ON MEERKAT.EVENTS (AVAILABILITY)");
+					st5.executeUpdate("CREATE INDEX MEERKAT.IDX_LATENCY ON MEERKAT.EVENTS (LATENCY)");
+					st6.executeUpdate("CREATE INDEX MEERKAT.IDX_HTTPSTATUSCODE ON MEERKAT.EVENTS (HTTPSTATUSCODE)");
+					st7.executeUpdate("CREATE INDEX MEERKAT.IDX_DESCRIPTION ON MEERKAT.EVENTS (DESCRIPTION)");
+
 					st.close();
 					st1.close();
+					st2.close();
+					st3.close();
+					st4.close();
+					st5.close();
+					st6.close();
+					st7.close();
 					c.commit();
 					c.close();
 				} catch (SQLException e1) {
@@ -116,14 +136,35 @@ public class EmbeddedDB {
 
 	}
 
+	@Override
+	public void run() {
+	}
 
 	/**
 	 * getConn
 	 * @return
 	 */
-	public final Connection getConn(){
+	public final Connection getConnForQueries(){
 		try {
-			conn = DriverManager.getConnection(protocol + dbName + ";create=true", dbProps);
+			connQueries = DriverManager.getConnection(protocol + dbName + ";create=true", dbProps);
+		} catch (SQLException e) {
+			log.fatal("Failed to create connection to embedded DB! "+e.getMessage());
+			logSQLException(e);
+		}
+
+		try {
+			connQueries.setAutoCommit(true);
+		} catch (SQLException e) {
+			log.error("Failed to set DB auto-commit to false! "+e.getMessage());
+			logSQLException(e);
+		}
+		return connQueries;
+
+	}
+
+	public final Connection getConnForUpdates(){
+		try {
+			connUpdates = DriverManager.getConnection(protocol + dbName + ";create=true", dbProps);
 		} catch (SQLException e) {
 			log.fatal("Failed to create connection to embedded DB! "+e.getMessage());
 			logSQLException(e);
@@ -131,12 +172,12 @@ public class EmbeddedDB {
 
 		// We want to control transactions manually
 		try {
-			conn.setAutoCommit(false);
+			connUpdates.setAutoCommit(false);
 		} catch (SQLException e) {
 			log.error("Failed to set DB auto-commit to false! "+e.getMessage());
 			logSQLException(e);
 		}
-		return conn;
+		return connUpdates;
 
 	}
 
@@ -161,7 +202,7 @@ public class EmbeddedDB {
 			}
 		}
 	}
-	
+
 	/**
 	 * getMaxIDofApp 
 	 * @param appName
@@ -170,10 +211,10 @@ public class EmbeddedDB {
 	public int getMaxIDofApp(String appName){
 		PreparedStatement ps;
 		ResultSet rs = null;
-		
+
 		int maxId = 0;
 		try {
-			ps = conn.prepareStatement("SELECT MAX(ID) "+ 
+			ps = connQueries.prepareStatement("SELECT MAX(ID) "+ 
 					"FROM MEERKAT.EVENTS "+
 					"WHERE APPNAME LIKE '"+appName+"' ");
 
@@ -187,13 +228,13 @@ public class EmbeddedDB {
 			log.error("Failed query average availability from application "+appName);
 			logSQLException(e);
 		}
-		
+
 		return maxId;
-		
+
 	}
 
-	
-	
+
+
 	/**
 	 * logSQLException
 	 * @param e SQL Exception

@@ -268,25 +268,11 @@ public class SysTrayIcon {
 	 * 
 	 */
 	public final void reloadSystray() {
-		// Get tray icons
-		TrayIcon[] trayIcons = sysTray.getTrayIcons();
-
-		boolean mmTrayIconIsPresent = false;
-		for (int i = 0; i < trayIcons.length; i++) {
-			if (trayIcons[i].equals(sysTray)) {
-				mmTrayIconIsPresent = true;
-				break;
-			}
-		}
-
-		// Try to re-create the tray icon
-		if (!mmTrayIconIsPresent) {
-			try {
-				sysTray.remove(trayIcon);
-				sysTray.add(trayIcon);
-			} catch (AWTException e) {
-				log.error("Failed to reload systray!", e);
-			}
+		try {
+			sysTray.remove(trayIcon);
+			sysTray.add(trayIcon);
+		} catch (AWTException e) {
+			log.error("Failed to reload systray!", e);
 		}
 	}
 

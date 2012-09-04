@@ -219,7 +219,7 @@ public class WebAppEvent {
 	public final String getLatency() {
 		NumberFormat nf = new DecimalFormat("#");
 		String result;
-		if(latency != noValueString) {
+		if(!latency.equals(noValueString)) {
 			Double formatedLatency = Double.valueOf(latency);
 			result = nf.format(formatedLatency);
 		} else {
@@ -253,7 +253,7 @@ public class WebAppEvent {
 	 */
 	public final static WebAppEvent getEventByID(int id){
 		EmbeddedDB embDB = new EmbeddedDB();
-		Connection conn = embDB.getConn();
+		Connection conn = embDB.getConnForQueries();
 
 		WebAppEvent currEv = null;
 		boolean critical;
@@ -288,6 +288,9 @@ public class WebAppEvent {
 			currEv.setPageLoadTime(loadTime);
 			currEv.setLatency(latency);
 			currEv.setCurrentResponse(response);
+			
+			rs.close();
+			ps.close();
 		} catch (SQLException e) {
 			log.error("Failed query event id "+id+". (Exists?)");
 		}

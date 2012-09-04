@@ -102,7 +102,7 @@ public class PropertiesLoader {
 		} finally {
 			try {
 				fis.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				log.error("ERROR closing properties file!", e);
 			}
 		}
