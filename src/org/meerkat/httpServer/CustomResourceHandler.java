@@ -138,6 +138,7 @@ public class CustomResourceHandler extends ResourceHandler {
 					baseRequest.setHandled(true);
 					return;
 				}else{
+					writer.close();
 					log.info("-- prepare to load 404 handler..");
 					processNotFound404(response, baseRequest);
 				}
