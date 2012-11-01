@@ -127,7 +127,7 @@ public class MeerkatGeneralOperations {
 		}
 
 		// Register resources
-		String[] resources = new String[23];
+		String[] resources = new String[25];
 		resources[0] = "resources/demo_page.css";
 		resources[1] = "resources/demo_table_jui.css";
 		resources[2] = "resources/jquery-ui-1.8.4.custom.css";
@@ -151,6 +151,8 @@ public class MeerkatGeneralOperations {
 		resources[20] = "resources/tango_wsdl.png";
 		resources[21] = "resources/tango-xml-config.png";
 		resources[22] = "resources/tango-find-log.png";
+		resources[23] = "resources/prettify.css";
+		resources[24] = "resources/prettify.js";
 
 		String[] resourcesImages = new String[13];
 		resourcesImages[0] = "resources/images/ui-bg_flat_0_aaaaaa_40x100.png";

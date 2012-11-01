@@ -37,8 +37,10 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.ByteArrayISO8859Writer;
 import org.eclipse.jetty.util.IO;
 import org.meerkat.services.WebApp;
+import org.meerkat.util.HtmlOperations;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml3;
 
 public class CustomResourceHandler extends ResourceHandler {
 	private static Logger log = Logger.getLogger(CustomResourceHandler.class);
@@ -128,7 +130,15 @@ public class CustomResourceHandler extends ResourceHandler {
 				response.setContentType(MimeTypes.TEXT_HTML);
 				if(ev != null){
 					response.setStatus(HttpServletResponse.SC_OK);
-					writer.write(ev.getCurrentResponse());
+
+					// Escape the response
+					String escapedResponse = escapeHtml3(ev.getCurrentResponse());
+					//String escapedResponse = StringUtils.replaceEach(ev.getCurrentResponse(), new String[]{"&", "\"", "<", ">"}, new String[]{"&amp;", "&quot;", "&lt;", "&gt;"});
+
+					// Prettify response
+					String prettified = HtmlOperations.addPrettifier(escapedResponse);
+
+					writer.write(prettified);
 					writer.flush();
 					response.setContentLength(writer.size());
 					OutputStream out = response.getOutputStream();
