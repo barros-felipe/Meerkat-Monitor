@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.meerkat.gui.SimplePopup;
 
 public class PropertiesLoader {
 
@@ -96,9 +95,6 @@ public class PropertiesLoader {
 			properties.load(fis);
 		} catch (IOException e) {
 			log.error("Properties file unavailable! " + propertiesFile, e);
-			SimplePopup sp = new SimplePopup("Properties file unavailable!");
-			sp.show();
-
 		} finally {
 			try {
 				fis.close();
@@ -152,10 +148,8 @@ public class PropertiesLoader {
 		}
 
 		if (numberOfMissingProperties > 0) {
+			log.error(missingProperties);
 			log.fatal("Required properties missing in properties file");
-			SimplePopup sp = new SimplePopup(missingProperties);
-			sp.show();
-
 		} else {
 			log.info("Validated required properties");
 		}

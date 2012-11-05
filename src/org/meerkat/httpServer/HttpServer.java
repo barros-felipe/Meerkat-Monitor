@@ -32,7 +32,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.meerkat.group.AppGroupCollection;
-import org.meerkat.gui.SimplePopup;
 import org.meerkat.network.NetworkUtil;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.DateUtil;
@@ -101,8 +100,6 @@ public class HttpServer {
 			mServer.start();
 		} catch (Exception e) {
 			log.fatal("Cannot start webserver!", e);
-			SimplePopup p = new SimplePopup("Cannot start webserver!\n" + e);
-			p.show();
 			System.exit(-1);
 		}
 

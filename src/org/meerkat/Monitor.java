@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
-import org.meerkat.gui.SysTrayIcon;
+import org.meerkat.gui.SimplePopup;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.network.MailManager;
 import org.meerkat.network.RSS;
@@ -44,7 +44,6 @@ public class Monitor {
 	WebAppCollection webAppsCollection;
 	AppGroupCollection appGroupCollection;
 	HttpServer httpWebServer;
-	SysTrayIcon systray;
 	RSS rssFeed;
 	PropertiesLoader pL;
 	WebApp currentWebApp;
@@ -64,12 +63,11 @@ public class Monitor {
 	long pauseTime;
 
 	public Monitor(EmbeddedDB ebd, WebAppCollection webAppsCollection, AppGroupCollection appGroupCollection, 
-			HttpServer httpWebServer, SysTrayIcon systray, RSS rssFeed, String propertiesFile){
+			HttpServer httpWebServer, RSS rssFeed, String propertiesFile){
 		this.ebd = ebd;
 		this.webAppsCollection = webAppsCollection;
 		this.appGroupCollection = appGroupCollection;
 		this.httpWebServer = httpWebServer;
-		this.systray = systray;
 		this.rssFeed = rssFeed;
 		dateUtil = new DateUtil();
 		tempWorkingDir = webAppsCollection.getTmpDir();
@@ -158,8 +156,8 @@ public class Monitor {
 							mailManager.sendEmail(subject + " - "+ currentWebApp.getName() + " is OFFLINE", 
 									"The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl() + " is OFFLINE!");
 						}
-						systray.showMessageError(currentWebApp.getName(), currentWebApp.getName() + " is OFFLINE!");
-
+						SimplePopup.showErrorMsg(currentWebApp.getName() + " is OFFLINE!");
+						
 						// Add event
 						String now = dateUtil.now();
 						ev = new WebAppEvent(
@@ -182,7 +180,7 @@ public class Monitor {
 
 						// Execute the executeOnOffline
 						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
-							systray.showMessage(currentWebApp.getName(), "Taking action on offline: "+ currentWebApp.getName());
+							SimplePopup.showErrorMsg("Taking action on offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
@@ -217,8 +215,8 @@ public class Monitor {
 							mailManager.sendEmail(subject + " - "+ currentWebApp.getName() + " is OFFLINE", 
 									"The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl() + " is OFFLINE!");
 						}
-						systray.showMessageError(currentWebApp.getName(),currentWebApp.getName() + " is OFFLINE!");
-
+						SimplePopup.showErrorMsg(currentWebApp.getName() + " is OFFLINE!");
+						
 						// Add event
 						String now = dateUtil.now();
 						ev = new WebAppEvent(
@@ -241,7 +239,7 @@ public class Monitor {
 
 						// Execute the executeOnOffline
 						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
-							systray.showMessageError(currentWebApp.getName(), "Taking action on offline: "+ currentWebApp.getName());
+							SimplePopup.showErrorMsg("Taking action on offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
@@ -273,7 +271,7 @@ public class Monitor {
 						currentWebApp.addEvent(ev);
 						// httpWebServer.addEventResponse(currentWebApp);
 
-						systray.showMessage(currentWebApp.getName(),currentWebApp.getName() + " is BACK ONLINE!");
+						SimplePopup.showErrorMsg(currentWebApp.getName() + " is BACK ONLINE!");
 
 						// Add RSS item
 						rssFeed.addItem(currentWebApp.getName(),currentWebApp.getDataFileName(), now,currentWebApp.getName() + " is BACK ONLINE!");
@@ -302,7 +300,7 @@ public class Monitor {
 
 						// Execute the executeOnOffline
 						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
-							systray.showMessageError(currentWebApp.getName(),"Taking action on still offline: "+ currentWebApp.getName());
+							SimplePopup.showErrorMsg("Taking action on still offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
@@ -335,8 +333,8 @@ public class Monitor {
 				log.fatal("Error in the running thread.", e);
 			}
 
-			// Refresh systray
-			systray.reloadSystray();
+			
+			
 		}
 	}
 

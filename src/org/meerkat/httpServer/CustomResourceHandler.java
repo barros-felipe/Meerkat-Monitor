@@ -19,6 +19,8 @@
 
 package org.meerkat.httpServer;
 
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml3;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -40,7 +42,6 @@ import org.meerkat.services.WebApp;
 import org.meerkat.util.HtmlOperations;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
-import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml3;
 
 public class CustomResourceHandler extends ResourceHandler {
 	private static Logger log = Logger.getLogger(CustomResourceHandler.class);

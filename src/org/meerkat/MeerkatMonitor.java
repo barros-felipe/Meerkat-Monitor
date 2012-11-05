@@ -30,8 +30,6 @@ import javax.xml.ws.Endpoint;
 import org.apache.log4j.Logger;
 import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
-import org.meerkat.gui.SplashScreen;
-import org.meerkat.gui.SysTrayIcon;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.network.MailManager;
 import org.meerkat.network.NetworkUtil;
@@ -53,7 +51,6 @@ public class MeerkatMonitor {
 	private static String propertiesFile = "meerkat.properties";
 	private static String configFile = "meerkat.webapps.xml";
 	private static Properties properties;
-	private static SysTrayIcon systray;
 	private static NetworkUtil netUtil = new NetworkUtil();
 	private static String hostname = netUtil.getHostname();
 	private static HttpServer httpWebServer;
@@ -69,8 +66,6 @@ public class MeerkatMonitor {
 	public static void main(String[] args) {
 		// Show splash screen
 		log.info("Meekat-Monitor v."+version+" starting...");
-		Thread threadSplash = new Thread(new SplashScreen(version));
-		threadSplash.start();
 
 		// Setup general log settings
 		log.info("Updating log setting...");
@@ -161,15 +156,10 @@ public class MeerkatMonitor {
 		httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
 		// publish web services
 		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));
-
-		// Creating systray icon
-		log.info("Creating systray...");
-		systray = new SysTrayIcon(mkm, httpWebServer, webAppsCollection, appGroupCollection);
-		systray.createSystrayIcon();
-
+		
 		// Start monitor
 		log.info("Setting up monitor...");
-		Monitor monitor = new Monitor(ebd, webAppsCollection, appGroupCollection, httpWebServer, systray, rssFeed, propertiesFile);
+		Monitor monitor = new Monitor(ebd, webAppsCollection, appGroupCollection, httpWebServer, rssFeed, propertiesFile);
 		monitor.startMonitor();
 		
 
