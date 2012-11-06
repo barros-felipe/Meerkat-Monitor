@@ -23,8 +23,6 @@ import java.io.File;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.xml.ws.Endpoint;
 
 import org.apache.log4j.Logger;
@@ -44,16 +42,17 @@ import org.meerkat.ws.MeerkatWebService;
 
 public class MeerkatMonitor {
 
-	private static String version = "0.5.2";
+	private static String version = "0.6.0";
 
 	private static Logger log = Logger.getLogger(MeerkatMonitor.class);
 	private static Integer webserverPort;
 	private static String propertiesFile = "meerkat.properties";
 	private static String configFile = "meerkat.webapps.xml";
 	private static Properties properties;
+	private static HttpServer httpWebServer;
 	private static NetworkUtil netUtil = new NetworkUtil();
 	private static String hostname = netUtil.getHostname();
-	private static HttpServer httpWebServer;
+	private static String webServiceRoot = "/api";
 	private static RSS rssFeed;
 	private static MasterKeyManager mkm;
 	private static MeerkatGeneralOperations mgo;
@@ -117,20 +116,6 @@ public class MeerkatMonitor {
 			mailManager.sendTestEmail();
 		}
 
-		// Configure up look and feel
-		log.info("Configuring GUI settings...");
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException e) {
-			log.error("", e);
-		} catch (InstantiationException e) {
-			log.error("", e);
-		} catch (IllegalAccessException e) {
-			log.error("", e);
-		} catch (UnsupportedLookAndFeelException e) {
-			log.error("", e);
-		}
-
 		// Create the RSS Feed
 		log.info("Creating RSS service...");
 		rssFeed = new RSS("Meerkat Monitor", "Meerkat Monitor RSS Alerts", "", new File(mgo.getTmpWorkingDir()).getAbsolutePath());
@@ -150,7 +135,7 @@ public class MeerkatMonitor {
 
 		// Setup web server
 		log.info("Setting up embedded server...");
-		String wsdlEndpoint = "http://"+hostname+":"+(webserverPort+1)+"/ws/manager";
+		String wsdlEndpoint = "http://"+hostname+":"+(webserverPort+1)+webServiceRoot;
 		String wsdlUrl = wsdlEndpoint+"?wsdl";
 		httpWebServer = new HttpServer(webserverPort, version, wsdlUrl, tempWorkingDir);
 		httpWebServer.setDataSources(webAppsCollection, appGroupCollection);

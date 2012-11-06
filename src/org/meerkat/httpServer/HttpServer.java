@@ -501,12 +501,5 @@ public class HttpServer {
 		return "http://" + hostname + ":" + webServerPort + "/";
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	public int getPort(){
-		return webServerPort;
-	}
 
 }
