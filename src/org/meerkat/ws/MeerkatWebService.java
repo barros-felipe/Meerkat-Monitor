@@ -18,7 +18,11 @@
  */
 package org.meerkat.ws;
 
+import javax.annotation.Resource;
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
 import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HttpServer;
@@ -39,6 +43,8 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	private HttpServer httpServer;
 	private MasterKeyManager mkm;
 
+	@Resource WebServiceContext wsContext;
+
 	/**
 	 * MeerkatWebService
 	 * @param masterKey
@@ -49,6 +55,16 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		this.mkm = mkm;
 		this.httpServer = httpServer;
 		this.wapc = webAppsCollection;
+	}
+
+	/**
+	 * getRequestClientIP
+	 * @return
+	 */
+	public final String getRequestClientIP(){
+		MessageContext mc = wsContext.getMessageContext();
+		HttpServletRequest req = (HttpServletRequest)mc.get(MessageContext.SERVLET_REQUEST); 
+		return req.getRemoteAddr(); 
 	}
 
 	/**
@@ -66,7 +82,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 	@Override
 	public String getVersion() {
-		log.info("WS request: getVersion()");
+		log.info("WS request ["+getRequestClientIP()+"]: getVersion()");
 		return wapc.getAppVersion();
 	}
 
@@ -92,7 +108,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
-		log.info("WS request: addSSH() with name: "+name);
+		log.info("WS request ["+getRequestClientIP()+"]: addSSH() with name: "+name);
 		return "SSH application added! Current status: "+online+".";
 	}
 
@@ -111,7 +127,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			wapc.saveConfigXMLFile();
 			httpServer.refreshIndex();
 
-			log.info("WS request: removeAppByName() named: "+name);
+			log.info("WS request ["+getRequestClientIP()+"]: removeAppByName() named: "+name);
 			return "Application "+name+" removed successfully.";
 		}
 	}
@@ -119,6 +135,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	@Override
 	public String changeMasterKey(String currentMasterKey, String newMasterKey) {
 		if(!checkKey(currentMasterKey)){
+			log.info("WS BAD request ["+getRequestClientIP()+"]: changeMasterKey(). Bad attempt to change MasterKey!");
 			return "Incorrect current key!";
 		}
 
@@ -128,7 +145,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 		mkm.changeMasterKey(String.valueOf(newMasterKey));
 
-		log.info("WS request: changeMasterKey(). (MasterKey changed!)");
+		log.info("WS request ["+getRequestClientIP()+"]: changeMasterKey(). (MasterKey changed!)");
 		return "Master key changed successfully.";
 
 
@@ -158,7 +175,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
-		log.info("WS request: addSocket() named: "+name);
+		log.info("WS request ["+getRequestClientIP()+"]: addSocket() named: "+name);
 		return "Socket application added! Current status: "+online+".";
 	}
 
@@ -210,7 +227,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
-		log.info("WS request: addDB() named: "+name+", type: "+sqlService.getDBType());
+		log.info("WS request ["+getRequestClientIP()+"]: addDB() named: "+name+", type: "+sqlService.getDBType());
 		return "Database application added! Current status: "+online+".";
 	}
 
@@ -239,7 +256,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
-		log.info("WS request: addWeb() named: "+name);
+		log.info("WS request ["+getRequestClientIP()+"]: addWeb() named: "+name);
 		return "Web application added! Current status: "+online+".";
 	}
 
@@ -270,7 +287,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
-		log.info("WS request: addWebService() named: "+name);
+		log.info("WS request ["+getRequestClientIP()+"]: addWebService() named: "+name);
 		return "WebService added! Current status: "+online+".";
 	}
 
