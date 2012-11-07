@@ -20,6 +20,7 @@ package org.meerkat.ws;
 
 import javax.jws.WebService;
 
+import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.services.SQLService;
 import org.meerkat.services.SecureShellSSH;
@@ -33,6 +34,7 @@ import org.meerkat.webapp.WebAppResponse;
 @WebService
 public class MeerkatWebService implements MeerkatWebServiceManager{
 
+	private static Logger log = Logger.getLogger(MeerkatWebService.class);
 	private WebAppCollection wapc;
 	private HttpServer httpServer;
 	private MasterKeyManager mkm;
@@ -64,6 +66,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 	@Override
 	public String getVersion() {
+		log.info("WS request: getVersion()");
 		return wapc.getAppVersion();
 	}
 
@@ -89,6 +92,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
+		log.info("WS request: addSSH() with name: "+name);
 		return "SSH application added! Current status: "+online+".";
 	}
 
@@ -107,6 +111,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			wapc.saveConfigXMLFile();
 			httpServer.refreshIndex();
 
+			log.info("WS request: removeAppByName() named: "+name);
 			return "Application "+name+" removed successfully.";
 		}
 	}
@@ -123,6 +128,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 		mkm.changeMasterKey(String.valueOf(newMasterKey));
 
+		log.info("WS request: changeMasterKey(). (MasterKey changed!)");
 		return "Master key changed successfully.";
 
 
@@ -152,6 +158,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
+		log.info("WS request: addSocket() named: "+name);
 		return "Socket application added! Current status: "+online+".";
 	}
 
@@ -203,6 +210,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
+		log.info("WS request: addDB() named: "+name+", type: "+sqlService.getDBType());
 		return "Database application added! Current status: "+online+".";
 	}
 
@@ -231,6 +239,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
+		log.info("WS request: addWeb() named: "+name);
 		return "Web application added! Current status: "+online+".";
 	}
 
@@ -261,6 +270,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
+		log.info("WS request: addWebService() named: "+name);
 		return "WebService added! Current status: "+online+".";
 	}
 
