@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
-import org.meerkat.gui.SimplePopup;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.network.MailManager;
 import org.meerkat.network.RSS;
@@ -84,7 +83,7 @@ public class Monitor {
 
 		List<WebApp> webAppListCopy = webAppsCollection.getCopyWebApps();
 		Iterator<WebApp> i = webAppListCopy.iterator();
-
+		
 		// Prevent dashboard link from giving 404 at first round
 		while (i.hasNext()) {
 			currentWebApp = i.next();
@@ -106,8 +105,6 @@ public class Monitor {
 
 			log.info("[Starting test round]");
 
-			// We iterate over a copy of the collection so we can prevent
-			// ConcurrentModificationException from the GUI
 			webAppListCopy = webAppsCollection.getCopyWebApps();
 			i = webAppListCopy.iterator();
 			int numberOfApps = webAppsCollection.getWebAppCollectionSize();
@@ -156,7 +153,7 @@ public class Monitor {
 							mailManager.sendEmail(subject + " - "+ currentWebApp.getName() + " is OFFLINE", 
 									"The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl() + " is OFFLINE!");
 						}
-						SimplePopup.showErrorMsg(currentWebApp.getName() + " is OFFLINE!");
+						//SimplePopup.showErrorMsg(currentWebApp.getName() + " is OFFLINE!");
 						
 						// Add event
 						String now = dateUtil.now();
@@ -180,7 +177,7 @@ public class Monitor {
 
 						// Execute the executeOnOffline
 						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
-							SimplePopup.showErrorMsg("Taking action on offline: "+ currentWebApp.getName());
+							//SimplePopup.showErrorMsg("Taking action on offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
@@ -215,7 +212,7 @@ public class Monitor {
 							mailManager.sendEmail(subject + " - "+ currentWebApp.getName() + " is OFFLINE", 
 									"The webapp "+ currentWebApp.getName() + " on "+ currentWebApp.getUrl() + " is OFFLINE!");
 						}
-						SimplePopup.showErrorMsg(currentWebApp.getName() + " is OFFLINE!");
+						//SimplePopup.showErrorMsg(currentWebApp.getName() + " is OFFLINE!");
 						
 						// Add event
 						String now = dateUtil.now();
@@ -239,7 +236,7 @@ public class Monitor {
 
 						// Execute the executeOnOffline
 						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
-							SimplePopup.showErrorMsg("Taking action on offline: "+ currentWebApp.getName());
+							//SimplePopup.showErrorMsg("Taking action on offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
@@ -271,7 +268,7 @@ public class Monitor {
 						currentWebApp.addEvent(ev);
 						// httpWebServer.addEventResponse(currentWebApp);
 
-						SimplePopup.showErrorMsg(currentWebApp.getName() + " is BACK ONLINE!");
+						//SimplePopup.showErrorMsg(currentWebApp.getName() + " is BACK ONLINE!");
 
 						// Add RSS item
 						rssFeed.addItem(currentWebApp.getName(),currentWebApp.getDataFileName(), now,currentWebApp.getName() + " is BACK ONLINE!");
@@ -300,7 +297,7 @@ public class Monitor {
 
 						// Execute the executeOnOffline
 						if (!currentWebApp.getExecuteOnOffline().equalsIgnoreCase("")) {
-							SimplePopup.showErrorMsg("Taking action on still offline: "+ currentWebApp.getName());
+							//SimplePopup.showErrorMsg("Taking action on still offline: "+ currentWebApp.getName());
 							currentWebApp.executeOfflineAction();
 						}
 					}
