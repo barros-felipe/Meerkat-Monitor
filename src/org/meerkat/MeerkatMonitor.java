@@ -141,12 +141,21 @@ public class MeerkatMonitor {
 		httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
 		// publish web services
 		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));
-		
+
+		// Open Dashboard in default browser if available
+		java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
+		try {
+			java.net.URI uri = new java.net.URI("http://"+hostname+":"+webserverPort);
+			desktop.browse( uri );
+		}
+		catch ( Exception e ) {
+			log.info("Desktop environment not available. (Please open URL manually: http://"+hostname+":"+webserverPort+")");
+		}
+
 		// Start monitor
 		log.info("Setting up monitor...");
 		Monitor monitor = new Monitor(ebd, webAppsCollection, appGroupCollection, httpWebServer, rssFeed, propertiesFile);
 		monitor.startMonitor();
-		
 
 	}
 

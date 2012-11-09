@@ -1,6 +1,6 @@
 <launch4jConfig>
   <headerType>gui</headerType>
-  <outfile>../../bundle/Meerkat-Monitor.exe</outfile>
+  <outfile>../../bundle/Meerkat-Monitor-daemon.exe</outfile>
   <jar>../../bundle/Meerkat-Monitor.jar</jar>
   <dontWrapJar>false</dontWrapJar>
   <errTitle>Meerkat Monitor - Error</errTitle>
@@ -62,7 +62,7 @@
     <productName>Meerkat-Monitor</productName>
     <companyName>meerkat-monitor.org</companyName>
     <internalName>Meerkat-Monitor</internalName>
-    <originalFilename>Meerkat-Monitor.exe</originalFilename>
+    <originalFilename>Meerkat-Monitor-daemon.exe</originalFilename>
   </versionInfo>
 
   

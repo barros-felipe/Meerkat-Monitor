@@ -21,6 +21,7 @@
 		<copy todir="bundle/lib">
 			<fileset dir="lib"/>
 		</copy>
+		<copy file="${nsis.dir}/Meerkat-Monitor-Dashboard.URL" todir="bundle"/>
 		
 		<!-- Classpath -->
 		<path id="compile.classpath">
@@ -54,7 +55,7 @@
 		<!-- Create application jar -->
 		<jar destfile="bundle/${mm.exe.file}" basedir="build/classes">
 			<manifest>
-				<attribute name="Built-By" value="pgnunes"/> 
+				<attribute name="Built-By" value="pgh.nunes@gmail.com"/> 
 				<attribute name="Build-JDK" value="${ant.java.version}"/>
 				<attribute name="Class-Path" value="${jar.classpath}"/>
 				<attribute name="Main-Class" value="org.meerkat.MeerkatMonitor"/>
