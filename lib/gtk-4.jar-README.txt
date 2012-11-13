@@ -1,6 +1,0 @@
-When using Linux, you need to install GTK:
-
-See how for your distro here:
-
-http://java-gnome.sourceforge.net/get/
-
