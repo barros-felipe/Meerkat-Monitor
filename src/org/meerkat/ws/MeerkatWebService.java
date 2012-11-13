@@ -291,6 +291,52 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		return "WebService added! Current status: "+online+".";
 	}
 
+	@Override
+	public String resetAllData(String masterKey) {
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+
+		wapc.resetAllAppsData();
+		log.info("WS request ["+getRequestClientIP()+"]: resetAllData()");
+
+		return "Removed all applications data. (DB is now empty!)";
+
+	}
+
+	@Override
+	public String resetAllAppDataFromName(String masterKey, String name) {
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+
+		if(!wapc.isWebAppByNamePresent(name)){
+			return "Application: "+name+" - does not exist!";
+		}
+
+		wapc.resetAllAppDataFromName(name);
+		log.info("WS request ["+getRequestClientIP()+"]: resetAllAppDataFromName("+name+")");
+
+		return "Removed all data from application: "+name;
+	}
+
+	@Override
+	public String shutdown(String masterKey) {
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+
+		log.info("Shutting down Meerkat-Monitor...");
+		log.info("\tClosing Database...");
+		wapc.getEmbeddedDB().shutdownDB();
+		log.info("\tClosing application...");
+		log.info("\tFinished. Meerkat-Monitor stopped!");
+		log.info("");
+		System.exit(0);
+		
+		return ""; // keep the compiler happy
+	}
+
 
 
 

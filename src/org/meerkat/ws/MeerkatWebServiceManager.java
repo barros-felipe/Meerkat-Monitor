@@ -96,4 +96,19 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="sendXML") String sendXML,
 			@WebParam(name="responseXML") String responseXML,
 			@WebParam(name="executeOnOffline") String executeOnOffline);
+
+	@WebMethod(operationName = "resetAllData", action = "resetAllData")
+	String resetAllData(
+			@WebParam(name="masterKey") String masterKey);
+	
+	@WebMethod(operationName = "resetAllAppDataFromName", action = "resetAllAppDataFromName")
+	String resetAllAppDataFromName(
+			@WebParam(name="masterKey") String masterKey,
+			@WebParam(name="appName") String name);
+	
+	@WebMethod(operationName = "shutdown", action = "shutdown")
+	String shutdown(
+			@WebParam(name="masterKey") String masterKey);
+	
 }
+

@@ -20,6 +20,9 @@
 package org.meerkat.webapp;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -55,6 +58,8 @@ public class WebAppCollection {
 	XStream xstream = new XStream(new DomDriver("UTF-8"));
 	@XStreamOmitField
 	EmbeddedDB embDB = null;
+	@XStreamOmitField
+	Connection conn = null;
 
 	/**
 	 * WebAppCollection
@@ -65,6 +70,7 @@ public class WebAppCollection {
 
 	public final void setDB(EmbeddedDB embDB){
 		this.embDB = embDB;
+		conn = embDB.getConnForUpdates();
 	}	
 
 	/**
@@ -289,12 +295,6 @@ public class WebAppCollection {
 	 * @return
 	 */
 	public boolean isWebAppByNamePresent(String name) {
-
-		// To prevent empty names and webservices "?"
-		if(name.trim().equals("") || name.trim().equals("?")){
-			return true;
-		}
-
 		List<WebApp> webAppsCollectionCopy = this.webAppsCollection;
 		Iterator<WebApp> it = webAppsCollectionCopy.iterator();
 
@@ -429,6 +429,49 @@ public class WebAppCollection {
 			log.info("Name: "+curr.getName()+" \t|\t Type: "+curr.getType());
 		}
 
+	}
+
+	/**
+	 * resetAllAppsData
+	 */
+	public final void resetAllAppsData(){
+		String resetQuery = "DELETE FROM EVENTS";
+		PreparedStatement statement;
+		try {
+			statement = conn.prepareStatement(resetQuery);
+			statement.execute();
+			statement.close();
+			conn.commit();
+			webAppsCollection = new CopyOnWriteArrayList<WebApp>(); // @REVIEW !!!!!!!!!!!!!!!!!
+		} catch (SQLException e) {
+			log.error("Failed to reset all events from DB! - "+e.getMessage());
+		}
+	}
+
+	/**
+	 * resetAllAppDataFromName
+	 * @param appName
+	 */
+	public final void resetAllAppDataFromName(String appName){
+		String resetAppDataQuery = "DELETE FROM EVENTS WHERE APPNAME LIKE '"+appName+"'";
+		PreparedStatement statement;
+		try {
+			statement = conn.prepareStatement(resetAppDataQuery);
+			statement.execute();
+			statement.close();
+			conn.commit();
+			this.removeWebApp(this.getWebAppByName(appName));
+		} catch (SQLException e) {
+			log.error("Failed to reset all events from DB! - "+e.getMessage());
+		}
+	}
+	
+	/**
+	 * getEmbeddedDB
+	 * @return
+	 */
+	public final EmbeddedDB getEmbeddedDB(){
+		return embDB;
 	}
 
 }
