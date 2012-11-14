@@ -305,11 +305,15 @@ public class Monitor {
 				
 				// increase checked apps
 				roundCompletedApps++;
+				
+				// Refresh dashboard and app in dashboard after each test
+				httpWebServer.refreshIndex();
+				
 			}
 			
-			// Refresh dashboard and app in (not every app cycle because its heavy!)
+			// Refresh time line at the end of every round
 			webAppsCollection.writeWebAppCollectionTimeLine();
-			httpWebServer.refreshIndex();
+			
 			
 			// reset percentage
 			percent = 0;
