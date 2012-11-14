@@ -104,7 +104,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(sshApp);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionDataFile();
+		wapc.writeWebAppCollectionTimeLine();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -171,7 +171,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(socketService);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionDataFile();
+		wapc.writeWebAppCollectionTimeLine();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -223,7 +223,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(sqlService);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionDataFile();
+		wapc.writeWebAppCollectionTimeLine();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -252,7 +252,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(webApp);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionDataFile();
+		wapc.writeWebAppCollectionTimeLine();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -283,7 +283,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(webServApp);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionDataFile();
+		wapc.writeWebAppCollectionTimeLine();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -297,10 +297,10 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			return "Incorrect key!";
 		}
 
-		wapc.resetAllAppsData();
+		int nEvents = wapc.resetAllAppsData();
 		log.info("WS request ["+getRequestClientIP()+"]: resetAllData()");
-
-		return "Removed all applications data. (DB is now empty!)";
+		
+		return "Removed all applications events ("+nEvents+"). (DB is now empty!)";
 
 	}
 
@@ -314,10 +314,10 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			return "Application: "+name+" - does not exist!";
 		}
 
-		wapc.resetAllAppDataFromName(name);
+		int nEvents = wapc.resetAllAppDataFromName(name);
 		log.info("WS request ["+getRequestClientIP()+"]: resetAllAppDataFromName("+name+")");
 
-		return "Removed all data from application: "+name;
+		return "Removed all events ("+nEvents+") from application: "+name;
 	}
 
 	@Override
@@ -330,11 +330,25 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		log.info("\tClosing Database...");
 		wapc.getEmbeddedDB().shutdownDB();
 		log.info("\tClosing application...");
-		log.info("\tFinished. Meerkat-Monitor stopped!");
+		log.info("Finished. Meerkat-Monitor stopped!");
 		log.info("");
 		System.exit(0);
 		
 		return ""; // keep the compiler happy
+	}
+
+	@Override
+	public String removeAllApps(String masterKey) {
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+		
+		int nEvents = wapc.getNumberOfEventsInCollection();
+		int nApps = wapc.removeAllApps();
+		
+		log.info("WS request ["+getRequestClientIP()+"]: removeAllApps()");
+		
+		return "Removed "+nEvents+" events and "+nApps+" applications";
 	}
 
 

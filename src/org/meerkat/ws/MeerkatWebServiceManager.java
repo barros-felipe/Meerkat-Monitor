@@ -110,5 +110,9 @@ public interface MeerkatWebServiceManager{
 	String shutdown(
 			@WebParam(name="masterKey") String masterKey);
 	
+	@WebMethod(operationName = "removeAllApps", action = "removeAllApps")
+	String removeAllApps(
+			@WebParam(name="masterKey") String masterKey);
+	
 }
 

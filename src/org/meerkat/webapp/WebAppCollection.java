@@ -30,7 +30,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.Logger;
 import org.meerkat.db.EmbeddedDB;
+import org.meerkat.group.AppGroupCollection;
 import org.meerkat.httpServer.HTMLComponents;
+import org.meerkat.httpServer.HttpServer;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.FileUtil;
 import org.meerkat.util.xml.XStreamMeerkatConfig;
@@ -60,6 +62,11 @@ public class WebAppCollection {
 	EmbeddedDB embDB = null;
 	@XStreamOmitField
 	Connection conn = null;
+	@XStreamOmitField
+	HttpServer httpServer;
+	@XStreamOmitField
+	AppGroupCollection appGroupCollection;
+	
 
 	/**
 	 * WebAppCollection
@@ -68,11 +75,31 @@ public class WebAppCollection {
 		webAppsCollection = new CopyOnWriteArrayList<WebApp>();
 	}
 
+	/**
+	 * setDB
+	 * @param embDB
+	 */
 	public final void setDB(EmbeddedDB embDB){
 		this.embDB = embDB;
 		conn = embDB.getConnForUpdates();
 	}	
 
+	/**
+	 * setHttpServer
+	 * @param httpServer
+	 */
+	public final void setHttpServer(HttpServer httpServer){
+		this.httpServer = httpServer;
+	}
+	
+	/**
+	 * setGroupCollection
+	 * @param appGroupCollection
+	 */
+	public final void setGroupCollection(AppGroupCollection appGroupCollection){
+		this.appGroupCollection = appGroupCollection;
+	}
+	
 	/**
 	 * setConfigFile
 	 * 
@@ -235,7 +262,7 @@ public class WebAppCollection {
 	/**
 	 * writeWebAppCollectionDataFile
 	 */
-	public final void writeWebAppCollectionDataFile() {
+	public final void writeWebAppCollectionTimeLine() {
 		final WebAppCollection wap = this;
 		// With many records this will be time consuming
 		Runnable dataCollectionWriter = new Runnable(){
@@ -308,28 +335,6 @@ public class WebAppCollection {
 	}
 
 	/**
-	 * mergeWebAppsCollections
-	 * 
-	 * @param newCollection
-	 * @param origCollection
-	 * @return
-	 */
-	public final WebAppCollection mergeWebAppsCollections(
-			WebAppCollection newCollection, WebAppCollection origCollection) {
-		WebAppCollection mergedCollection = origCollection;
-
-		Iterator<WebApp> newIt = newCollection.getWebAppCollectionIterator();
-		WebApp wap;
-		while (newIt.hasNext()) {
-			wap = newIt.next();
-			if (!origCollection.isWebAppByNamePresent(wap.getName())) {
-				mergedCollection.addWebApp(wap);
-			}
-		}
-		return mergedCollection;
-	}
-
-	/**
 	 * getNumberOfEventsInCollection
 	 * 
 	 * @return
@@ -389,6 +394,7 @@ public class WebAppCollection {
 	 */
 	public final void removeWebApp(WebApp wApp) {
 		webAppsCollection.remove(wApp);
+		appGroupCollection.populateGroups(this); // Update Groups
 	}
 
 	/**
@@ -434,7 +440,8 @@ public class WebAppCollection {
 	/**
 	 * resetAllAppsData
 	 */
-	public final void resetAllAppsData(){
+	public final int resetAllAppsData(){
+		int nEvents = getNumberOfEventsInCollection();
 		String resetQuery = "DELETE FROM EVENTS";
 		PreparedStatement statement;
 		try {
@@ -442,17 +449,23 @@ public class WebAppCollection {
 			statement.execute();
 			statement.close();
 			conn.commit();
-			webAppsCollection = new CopyOnWriteArrayList<WebApp>(); // @REVIEW !!!!!!!!!!!!!!!!!
 		} catch (SQLException e) {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
 		}
+		
+		this.writeWebAppCollectionTimeLine();
+		
+		httpServer.refreshIndex();
+		
+		return nEvents;
 	}
 
 	/**
 	 * resetAllAppDataFromName
 	 * @param appName
 	 */
-	public final void resetAllAppDataFromName(String appName){
+	public final int resetAllAppDataFromName(String appName){
+		int nEvents = this.getWebAppByName(appName).getNumberOfEvents();
 		String resetAppDataQuery = "DELETE FROM EVENTS WHERE APPNAME LIKE '"+appName+"'";
 		PreparedStatement statement;
 		try {
@@ -460,10 +473,27 @@ public class WebAppCollection {
 			statement.execute();
 			statement.close();
 			conn.commit();
-			this.removeWebApp(this.getWebAppByName(appName));
 		} catch (SQLException e) {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
 		}
+		
+		this.getWebAppByName(appName).writeWebAppVisualizationDataFile();
+		httpServer.refreshIndex();
+		
+		return nEvents;
+	}
+	
+	/**
+	 * removeAllApps
+	 * @return
+	 */
+	public final int removeAllApps(){
+		int nWebApps = this.getWebAppCollectionSize();
+		this.resetAllAppsData(); // Clear DB
+		webAppsCollection.clear(); // Clear Apps
+		appGroupCollection.populateGroups(this); // Clear Groups
+		
+		return nWebApps;
 	}
 	
 	/**

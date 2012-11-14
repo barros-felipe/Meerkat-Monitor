@@ -22,7 +22,6 @@ package org.meerkat.httpServer;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -51,9 +50,8 @@ public class HttpServer {
 	private String propertiesFile = "meerkat.properties";
 
 	//private WebAppCollection wac;
-	private List<WebApp> wac;
+	private WebAppCollection wac;
 	private AppGroupCollection agc;
-	private int numberEvents = 0;
 	private Properties prop;
 	boolean displayGroupGauge;
 
@@ -112,8 +110,9 @@ public class HttpServer {
 	 * @param agc
 	 */
 	public final void setDataSources(WebAppCollection wac, AppGroupCollection agc) {
-		this.wac = wac.getCopyWebApps();
-		numberEvents = wac.getNumberOfEventsInCollection();
+		//this.wac = wac.getCopyWebApps();
+		this.wac = wac;
+		//numberEvents = wac.getNumberOfEventsInCollection();
 		this.agc = agc;
 		customResHandler.setWebAppCollection(wac);
 	}
@@ -238,7 +237,7 @@ public class HttpServer {
 			@Override
 			public void run() {
 				// Refresh the index
-				Iterator<WebApp> i = wac.iterator();
+				Iterator<WebApp> i = wac.getWebAppCollectionIterator();
 				WebApp wApp;
 
 				// Get properties
@@ -449,7 +448,7 @@ public class HttpServer {
 
 
 				responseStatus += "<br>\n<div>\nUpdated: " + date.now() + " ["
-						+ numberEvents + " tests]" + "</div>\n";
+						+ wac.getNumberOfEventsInCollection() + " tests]" + "</div>\n";
 				responseStatus += "</div>"; // Close div
 				responseStatus += footer;
 				responseStatus += bodyEnd;

@@ -197,7 +197,7 @@ public class EmbeddedDB implements Runnable{
 			} else {
 				// if the error code or SQLState is different, we have
 				// an unexpected exception (shutdown failed)
-				System.err.println("Derby did not shut down normally");
+				System.err.println("Embedded DB did not shut down normally");
 				logSQLException(e);
 			}
 		}

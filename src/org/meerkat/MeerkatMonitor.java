@@ -106,6 +106,7 @@ public class MeerkatMonitor {
 		appGroupCollection.setTempWorkingDir(tempWorkingDir);
 		appGroupCollection.populateGroups(webAppsCollection);
 		appGroupCollection.printLogGroupMembers();
+		webAppsCollection.setGroupCollection(appGroupCollection); // Set group to app collection
 
 		// Setup email settings
 		log.info("Setting up email settings...");
@@ -141,7 +142,9 @@ public class MeerkatMonitor {
 		httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
 		// publish web services
 		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));
-
+		// set the httpServer to webapp collection
+		webAppsCollection.setHttpServer(httpWebServer);
+		
 		// Open Dashboard in default browser if available
 		java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
 		try {
