@@ -28,6 +28,7 @@ import javax.xml.ws.Endpoint;
 import org.apache.log4j.Logger;
 import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
+import org.meerkat.gui.SplashScreen;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.network.MailManager;
 import org.meerkat.network.NetworkUtil;
@@ -63,9 +64,16 @@ public class MeerkatMonitor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// Show splash screen
+		// Show splash screen if available
 		log.info("Meekat-Monitor v."+version+" starting...");
-
+		try {
+			SplashScreen spcscreen = new SplashScreen(version);
+			spcscreen.run();
+		}
+		catch ( Exception e ) {
+			log.info("Desktop environment not available. [Running in console mode]");
+		}
+				
 		// Setup general log settings
 		log.info("Updating log setting...");
 		LogSettings ls = new LogSettings();
@@ -146,13 +154,13 @@ public class MeerkatMonitor {
 		webAppsCollection.setHttpServer(httpWebServer);
 		
 		// Open Dashboard in default browser if available
-		java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
 		try {
+			java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
 			java.net.URI uri = new java.net.URI("http://"+hostname+":"+webserverPort);
 			desktop.browse( uri );
 		}
 		catch ( Exception e ) {
-			log.info("Desktop environment not available. (Please open URL manually: http://"+hostname+":"+webserverPort+")");
+			log.info("[Console mode] Please open URL manually: http://"+hostname+":"+webserverPort+")");
 		}
 
 		// Start monitor

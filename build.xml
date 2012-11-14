@@ -106,7 +106,36 @@
 		<!-- Move the installer to dist dir -->
 		<move file="${nsis.dir}/Meerkat-Monitor-Installer.exe" todir="dist"/>
 		
+	</target>	
+	
+	<!-- CREATE LINUX PACKAGE -->
+	<target name="linux-jar-sh">
+		<!-- Get a clean base -->
+		<antcall target="clean_base"/>
+		
+		<!-- Rename the jar -->
+		<move file="bundle/${mm.exe.file}" tofile="bundle/${mm.id}-daemon.jar"/>
+		
+		<!-- Create dir and move files -->
+		<mkdir dir="bundle/Meerkat-Monitor"/>
+		<copy file="scripts/start.sh" todir="bundle"/>
+		<chmod file="bundle/start.sh" perm="ugo+rx"/>
+		
+		<move todir="bundle/Meerkat-Monitor">
+    		<fileset dir="bundle/" >
+    			<exclude name="**/Meerkat-Monitor"/>
+    		</fileset>
+  		</move>
+		
+		<tar destfile="Meerkat-Monitor-Linux.tar.gz" compression="gzip">
+  			<tarfileset dir="bundle/" />
+		</tar>
+
+		<!-- Move the installer to dist dir -->
+		<move file="Meerkat-Monitor-Linux.tar.gz" todir="dist"/>
+		
 	</target>		
+		
 		
 	<!-- CLEAN -->
 	<target name="clean">
@@ -119,9 +148,10 @@
 	<!-- CREATE DIST -->
 	<target name="dist" depends="bundle">
 		<antcall target="win-installer" />
+		<antcall target="linux-jar-sh" />
 		
 		<delete dir="build" />
-		<!-- <delete dir="temp" /> -->
+		<delete dir="temp" />
 	</target>
 	
 	
