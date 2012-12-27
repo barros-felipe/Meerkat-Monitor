@@ -33,6 +33,7 @@ public class MailManager {
 
 	public MailManager(String propertiesFile){
 		this.propertiesFile = propertiesFile;
+		refreshSettings();
 	}
 
 	private final void refreshSettings(){
@@ -84,6 +85,11 @@ public class MailManager {
 		email.setHostName(getSMTPServer());
 		email.setSmtpPort(Integer.valueOf(getSMTPPort()));
 		email.setSubject(subject);
+		try {
+			email.setHtmlMsg(message);
+		} catch (EmailException e2) {
+			log.error("Error in mail message. ", e2);
+		}
 
 		// SMTP security
 		String security = getSMTPSecurity();
@@ -96,7 +102,11 @@ public class MailManager {
 		email.setAuthentication(getSMTPUser(), getSMTPPassword());
 
 		try {
-			email.addTo(getTO());
+			String[] toList = getTO().split(",");
+			for(int i=0; i<toList.length; i++){
+				email.addTo(toList[i].trim());
+			}
+
 		} catch (EmailException e1) {
 			log.error("EmailException: addTo(" + getTO() + "). "+e1.getMessage());
 		}
@@ -111,10 +121,10 @@ public class MailManager {
 		try {
 			email.send();
 		} catch (EmailException e) {
-			log.error("Failed to send email! "+e.getMessage());
+			log.error("Failed to send email!", e);
 		}
 	}
-	
+
 	/**
 	 * sendEmail
 	 * @param message
