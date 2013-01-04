@@ -31,7 +31,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.log4j.Logger;
 import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
-import org.meerkat.httpServer.HTMLComponents;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.FileUtil;
@@ -204,7 +203,8 @@ public class WebAppCollection {
 	 * 
 	 * @return JSDataTable
 	 */
-	private String getJSCollectionTimeLine() {
+	private String DISABLED_getJSCollectionMotionChart() {
+		/**
 		WebApp webApp;
 		WebAppEvent webAppEvent;
 		String statusText = "";
@@ -231,7 +231,7 @@ public class WebAppCollection {
 
 		while (ia.hasNext()) {
 			webApp = ia.next();
-			Iterator<WebAppEvent> ie = webApp.getEventListIterator();
+			Iterator<WebAppEvent> ie = new WebAppEventListIterator(webApp);
 			while (ie.hasNext()) {
 				webAppEvent = ie.next();
 
@@ -257,12 +257,16 @@ public class WebAppCollection {
 			}
 		}
 		return dataTableBegin + dataTableData + dataTableEnd;
+		*/
+		return "";
 	}
+
 
 	/**
 	 * writeWebAppCollectionDataFile
 	 */
-	public final void writeWebAppCollectionTimeLine() {
+	public final void DISABLED_writeWebAppCollectionMotionChart() {
+		/**
 		final WebAppCollection wap = this;
 		// With many records this will be time consuming
 		Runnable dataCollectionWriter = new Runnable(){
@@ -313,6 +317,7 @@ public class WebAppCollection {
 		};
 		Thread visDataWriterThread = new Thread(dataCollectionWriter);
 		visDataWriterThread.start();
+		*/
 	}
 
 	/**
@@ -453,7 +458,7 @@ public class WebAppCollection {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
 		}
 		
-		this.writeWebAppCollectionTimeLine();
+		//this.writeWebAppCollectionMotionChart();
 		
 		httpServer.refreshIndex();
 		

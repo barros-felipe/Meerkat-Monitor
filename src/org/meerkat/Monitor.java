@@ -308,7 +308,7 @@ public class Monitor {
 			}
 			
 			// Refresh dashboard and app in (not every app cycle because its heavy!)
-			webAppsCollection.writeWebAppCollectionTimeLine();
+			//webAppsCollection.writeWebAppCollectionMotionChart();
 			httpWebServer.refreshIndex();
 			
 			// reset percentage

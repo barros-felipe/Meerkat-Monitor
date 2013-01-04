@@ -20,13 +20,11 @@
 package org.meerkat.dataSources;
 
 import java.io.File;
-import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HTMLComponents;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.FileUtil;
-import org.meerkat.webapp.WebAppEvent;
 
 public class Visualization {
 
@@ -44,51 +42,32 @@ public class Visualization {
 	 * @return JSAnnotatedTimeLine
 	 */
 	public final String getAnnotatedTimeLine(WebApp webApp) {
-		WebAppEvent webAppEvent;
-		String timeLineData = "";
-		String timeLineBegin = "<script type='text/javascript'>\n"
+		String timeLine = "<script type='text/javascript'>\n"
 				+ "google.load('visualization', '1', {'packages':['annotatedtimeline']});\n"
-				+ "google.setOnLoadCallback(drawChart);\n"
-				+ "function drawChart() {\n"
-				+ "var data = new google.visualization.DataTable();\n"
-				+ "data.addColumn('datetime', 'Date');\n"
-				+ "data.addColumn('number', 'Network Latency');\n"
-				+ "data.addColumn('number', 'Load Time');\n"
-				+ "data.addColumn('string', 'status_desc');\n"
-				+ "data.addRows([\n";
+				+ "</script>\n"
+				+ "<script type=\"text/javascript\">\n"
+				+ "var visualization;\n"
 
-		String timeLineEnd = "]);\n"
-				+ "var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n"
-				+ "chart.draw(data, {displayAnnotations: true, fill: 30});\n"
-				+ "}\n" + "</script>\n";
+	  + "  function drawVisualization() {\n"
+	  + "  var query = new google.visualization.Query('/event-gv-list-"+webApp.getName()+"');\n"
+	  + " // Send the query with a callback function.\n"
+	  + "  query.send(handleQueryResponse);\n"
+	  + " }\n"
 
-		Iterator<WebAppEvent> ie = webApp.getEventListIterator();
-		String latency = "";
+	   + " function handleQueryResponse(response) {\n"
+	   + "   if (response.isError()) {\n"
+	   + "     alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());\n"
+	   + "    return;\n"
+	   + "   }\n"
 
-		while (ie.hasNext()) {
-			webAppEvent = ie.next();
+	   + "  var data = response.getDataTable();\n"
+	   + "  visualization = new google.visualization.AnnotatedTimeLine(document.getElementById('visualization'));\n"
+	   + "  visualization.draw(data, { 'displayAnnotations': true });\n"
+	   + "  }\n"
+	   + "  google.setOnLoadCallback(drawVisualization);\n"
+	   + "  </script>\n";
 
-			if (webAppEvent.getLatency() == null) {
-				latency = "undefined";
-			} else {
-				latency = webAppEvent.getLatency();
-			}
-
-			timeLineData += "\n[new Date(" + webAppEvent.getDateFormatedGWT()
-					+ "), " + latency + "," + webAppEvent.getPageLoadTime()
-					+ ", '" + webAppEvent.getDescription() + "'],";
-		}
-
-		/**
-		 * IE FIX - remove the last comma NOK - [new Date(2010, 10, 17, 18, 20),
-		 * 10,1.0, ''],]); OK - [new Date(2010, 10, 17, 18, 20), 10,1.0, '']]);
-		 */
-		String finalString = timeLineBegin + timeLineData + timeLineEnd;
-		String temp = finalString.replace("],]);", "]]);");
-		finalString = temp;
-
-		return finalString;
-
+		return timeLine;
 	}
 
 	/**
@@ -148,7 +127,7 @@ public class Visualization {
 				+ "<h1>"
 				+ iconStatus
 				+ "</h1>"
-				+ "<div id=\"chart_div\" style=\"width: 900px; height: 300px;\"></div>\n"
+				+ "<div id=\"visualization\" style=\"width: 900px; height: 300px;\"></div>\n"
 				+ "\n\n"
 				+ "<div class=\"demo_jui\"> \n"
 				+ "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"display\" id=\"example\">\n"

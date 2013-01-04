@@ -110,9 +110,7 @@ public class HttpServer {
 	 * @param agc
 	 */
 	public final void setDataSources(WebAppCollection wac, AppGroupCollection agc) {
-		//this.wac = wac.getCopyWebApps();
 		this.wac = wac;
-		//numberEvents = wac.getNumberOfEventsInCollection();
 		this.agc = agc;
 		customResHandler.setWebAppCollection(wac);
 	}
@@ -188,9 +186,11 @@ public class HttpServer {
 		}
 
 		topContent += "<div class=\"full_width big\">\n"
+				/**
 				+ "<a href=\""
 				+ timeLineFile
 				+ "\"><img src=\"resources/tango_timeline.png\" alt=\"Timeline\" align=\"right\" style=\"border-style: none\"/></a>\n"
+				*/
 				+ "<a href=\""
 				+ rssResource
 				+ "\"><img src=\"resources/tango_rss.png\" alt=\"RSS\" align=\"right\" style=\"border-style: none\"/></a> \n"
@@ -387,7 +387,7 @@ public class HttpServer {
 						 * Load Time
 						 */
 						responseStatus += "<td class=\"center\">\n";
-						BigDecimal bd1 = new BigDecimal(wApp.getLoadsAverage());
+						BigDecimal bd1 = new BigDecimal(wApp.getAppLoadTimeAVG());
 						bd1 = bd1.setScale(1, BigDecimal.ROUND_DOWN);
 						responseStatus += bd1.doubleValue();
 						// trend

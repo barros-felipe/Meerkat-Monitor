@@ -104,7 +104,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(sshApp);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionTimeLine();
+		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -171,7 +171,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(socketService);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionTimeLine();
+		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -223,7 +223,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(sqlService);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionTimeLine();
+		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -252,7 +252,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(webApp);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionTimeLine();
+		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -283,7 +283,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		wapc.addWebApp(webServApp);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
-		wapc.writeWebAppCollectionTimeLine();
+		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 
@@ -350,15 +350,5 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		
 		return "Removed "+nEvents+" events and "+nApps+" applications";
 	}
-
-
-
-
-
-
-
-
-
-
 
 }

@@ -42,6 +42,7 @@ import org.meerkat.services.WebApp;
 import org.meerkat.util.HtmlOperations;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
+import org.meerkat.webapp.WebAppEventListIterator;
 
 public class CustomResourceHandler extends ResourceHandler {
 	private static Logger log = Logger.getLogger(CustomResourceHandler.class);
@@ -50,6 +51,7 @@ public class CustomResourceHandler extends ResourceHandler {
 	boolean _serveIcon = true;
 	private String eventRequestID = "/event-id-";
 	private String eventListRequest = "/event-list-";
+	private String eventListGoogleVisualizationRequest = "/event-gv-list-";
 	int eventListRequestLength = eventListRequest.length();
 	private WebAppCollection wac;
 
@@ -249,7 +251,94 @@ public class CustomResourceHandler extends ResourceHandler {
 				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
 				response.setContentType(MimeTypes.TEXT_JSON_UTF_8);
 				response.setStatus(HttpServletResponse.SC_OK);
+				// Disable cache
+				response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
 				writer.write(jSONresponse);
+				writer.flush();
+				response.setContentLength(writer.size());
+				OutputStream out = response.getOutputStream();
+				writer.writeTo(out);
+				out.close();
+				writer.close();
+				baseRequest.setHandled(true);
+				return;
+			}
+
+			// Deal with request for Google Visualization events
+			else if(request.getRequestURI().contains(eventListGoogleVisualizationRequest)){
+				// Get application
+				String requestRef = request.getRequestURI();
+				requestRef = requestRef.substring(eventListGoogleVisualizationRequest.length(), requestRef.length());
+				String appName = URLDecoder.decode(requestRef, "UTF-8");
+
+
+				String returnResp = "google.visualization.Query.setResponse({\n";
+				returnResp += "version:'0.6',\n"+
+						"reqId:'0',\n"+
+						"status:'ok',\n"+
+						"sig:'5982206968295329968',\n";
+
+				returnResp += "table:{\n"+
+						"cols:[\n";
+
+
+				returnResp += "{id:'Col1',\n"+
+						"label:'Date',\n"+
+						"type:'datetime'\n"+
+						"},\n"+
+
+					"{id:'Col2',\n"+
+					"label:'Network Latency',\n"+
+					"type:'number'\n"+
+					"},\n"+
+
+					"{id:'Col3',\n"+
+					"label:'Load Time',\n"+
+					"type:'number'\n"+
+					"},\n"+
+
+					"{id:'Col4',\n"+
+					"label:'Status Desc.',\n"+
+					"type:'string'\n"+
+					"}],";
+
+
+				WebApp webapp = wac.getWebAppByName(appName);
+				if(webapp == null){
+					log.info("Application "+appName+" not present!");
+					webapp = new WebApp(); // prevent null in getCustomEventsList
+					processNotFound404(response, baseRequest);
+				}
+				
+				
+				WebAppEventListIterator wAppEIt = new WebAppEventListIterator(webapp);
+				WebAppEvent currWebAppEvent = null;
+				returnResp += "rows:[\n";
+				while(wAppEIt.hasNext()){
+					currWebAppEvent = wAppEIt.next();
+					
+					returnResp += "{c:[\n";
+					returnResp += "{v:new Date(" + currWebAppEvent.getDateFormatedGWT()+")},\n";
+					returnResp += "{v:"+currWebAppEvent.getLatency()+"},\n";
+					returnResp += "{v:"+currWebAppEvent.getPageLoadTime()+"},\n";
+					returnResp += "{v:'"+currWebAppEvent.getDescription()+"'},\n";
+					returnResp += "]},";
+				}
+				
+				// Remove the last "," from the response
+				returnResp = returnResp.substring(0, returnResp.length()-1);
+				
+
+				returnResp += "]\n"+
+						"}}\n"+
+						");\n";
+
+				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
+				response.setContentType(MimeTypes.TEXT_JSON_UTF_8);
+				response.setStatus(HttpServletResponse.SC_OK);
+				// Disable cache
+				response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
+				writer.write(returnResp);
 				writer.flush();
 				response.setContentLength(writer.size());
 				OutputStream out = response.getOutputStream();

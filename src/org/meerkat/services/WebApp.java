@@ -132,6 +132,13 @@ public class WebApp {
 		events = new CopyOnWriteArrayList<WebAppEvent>();
 		groups = new CopyOnWriteArrayList<String>();
 		mkm = new MasterKeyManager();
+
+		// Setup connection
+		if(conn == null){
+			embDB = new EmbeddedDB();
+			conn = embDB.getConnForQueries();
+		}
+
 	}
 
 	/**
@@ -501,14 +508,6 @@ public class WebApp {
 	}
 
 	/**
-	 * addEmbeddedDB
-	 * @param conn
-	 */
-	public final void addEmbeddedDB(Connection conn){
-		this.conn = conn;
-	}
-
-	/**
 	 * addEvent
 	 * 
 	 * @param event
@@ -554,15 +553,18 @@ public class WebApp {
 	 * 
 	 * @return EventList
 	 */
+	/**
 	public final Iterator<WebAppEvent> getEventListIterator() {
 		events = getEvents();
 		return events.iterator();
 	}
+	 */
 
 	/**
 	 * getEvents
 	 * @return events list
 	 */
+	 /**
 	private List<WebAppEvent> getEvents(){
 		if(conn == null){
 			embDB = new EmbeddedDB();
@@ -617,6 +619,39 @@ public class WebApp {
 		}
 		return events;
 	}
+	//
+
+	/**
+	 * getAppLoadTimeAVG
+	 * @return
+	 */
+	public double getAppLoadTimeAVG(){
+		int decimalPlaces = 2;
+		double loadTimeAVG = 0.0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT AVG(LOADTIME) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
+			rs = ps.executeQuery();
+
+			rs.next();
+			loadTimeAVG = rs.getInt(1);
+
+			rs.close();
+			ps.close();
+			conn.commit();
+
+		} catch (SQLException e) {
+			log.error("Failed query number of events from application "+this.getName());
+			log.error("", e);
+		}
+
+		BigDecimal bd = new BigDecimal(loadTimeAVG);
+		bd = bd.setScale(decimalPlaces, BigDecimal.ROUND_DOWN);
+		loadTimeAVG = bd.doubleValue();
+
+		return loadTimeAVG;
+	}
 
 
 	/**
@@ -625,8 +660,31 @@ public class WebApp {
 	 * @return NumberOfEvents
 	 */
 	public final int getNumberOfEvents() {
-		events = getEvents();
-		return events.size();
+		// Setup connection
+		if(conn == null){
+			embDB = new EmbeddedDB();
+			conn = embDB.getConnForQueries();
+		}
+
+		int numberOfEvents = 0;
+		PreparedStatement ps;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
+			rs = ps.executeQuery();
+
+			rs.next();
+			numberOfEvents = rs.getInt(1);
+
+			rs.close();
+			ps.close();
+			conn.commit();
+
+		} catch (SQLException e) {
+			log.error("Failed query number of events from application "+this.getName());
+			log.error("", e);
+		}
+		return numberOfEvents;
 	}
 
 	/**
@@ -681,39 +739,6 @@ public class WebApp {
 			log.error("", e);
 		}
 		return numberOfOfflines;
-	}
-
-
-	/**
-	 * getPageLoadsAverage
-	 * 
-	 * @return PageLoadsAverage
-	 */
-	public final double getLoadsAverage() {
-		double loadTimeAvg = 0;
-		PreparedStatement ps;
-		ResultSet rs = null;
-		try {
-			ps = conn.prepareStatement("SELECT AVG(LOADTIME) FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
-			rs = ps.executeQuery();
-
-			rs.next();
-			loadTimeAvg = rs.getDouble(1);
-
-			rs.close();
-			ps.close();
-			conn.commit();
-
-		} catch (SQLException e) {
-			log.error("Failed query average load time from application "+this.getName());
-			log.error("", e);
-		}
-
-		BigDecimal bd = new BigDecimal(loadTimeAvg);
-		bd = bd.setScale(3, BigDecimal.ROUND_DOWN);
-		loadTimeAvg = bd.doubleValue();
-
-		return loadTimeAvg;
 	}
 
 	/**
@@ -788,11 +813,13 @@ public class WebApp {
 	 * 
 	 * @return JSAnnotatedTimeLine
 	 */
+	/**
 	public final String getGoogleAnnotatedTimeLine() {
 		Visualization gv = new Visualization();
 		gv.setAppVersion(appVersion);
 		return gv.getAnnotatedTimeLine(this);
 	}
+	 */
 
 	/**
 	 * getJSDataTable
@@ -1144,7 +1171,7 @@ public class WebApp {
 	 * 			(No decimal plates considered)
 	 */
 	public double getLoadTimeIndicator() {
-		double doubleLoadTimeAverage = getLoadsAverage();
+		double doubleLoadTimeAverage = getAppLoadTimeAVG();
 		BigDecimal bd = new BigDecimal(doubleLoadTimeAverage);
 		bd = bd.setScale(0, BigDecimal.ROUND_DOWN);
 		double loadTimeAverage = bd.doubleValue();
@@ -1301,7 +1328,7 @@ public class WebApp {
 				"WHERE APPNAME LIKE '"+this.name+"' \n"+
 				"ORDER BY "+orderByStr+" "+asdDSC+" \n" +
 				"OFFSET "+rowBegin+" ROWS FETCH NEXT "+nRows+" ROWS ONLY ";
-		
+
 		int id;
 		boolean critical;
 		String date;
