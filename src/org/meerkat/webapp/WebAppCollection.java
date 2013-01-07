@@ -203,8 +203,8 @@ public class WebAppCollection {
 	 * 
 	 * @return JSDataTable
 	 */
+	/**
 	private String DISABLED_getJSCollectionMotionChart() {
-		/**
 		WebApp webApp;
 		WebAppEvent webAppEvent;
 		String statusText = "";
@@ -256,17 +256,16 @@ public class WebAppCollection {
 						+ webAppEvent.getDescription() + "']);\n";
 			}
 		}
-		return dataTableBegin + dataTableData + dataTableEnd;
-		*/
-		return "";
+		return dataTableBegin + dataTableData + dataTableEnd;	
 	}
+	*/
 
 
 	/**
 	 * writeWebAppCollectionDataFile
 	 */
+	/**
 	public final void DISABLED_writeWebAppCollectionMotionChart() {
-		/**
 		final WebAppCollection wap = this;
 		// With many records this will be time consuming
 		Runnable dataCollectionWriter = new Runnable(){
@@ -317,8 +316,8 @@ public class WebAppCollection {
 		};
 		Thread visDataWriterThread = new Thread(dataCollectionWriter);
 		visDataWriterThread.start();
-		*/
 	}
+	*/
 
 	/**
 	 * isWebAppByNamePresent

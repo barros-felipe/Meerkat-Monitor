@@ -60,7 +60,7 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 				currId = rs.getInt(1);
 
 			}
-			
+
 			ps1 = conn.prepareStatement("SELECT ID FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.webApp.getName()+"' " +
 					"ORDER BY ID DESC FETCH FIRST 1 ROWS ONLY");
 			rs1 = ps1.executeQuery();
@@ -69,7 +69,7 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 				lastId = rs1.getInt(1);
 
 			}
-			
+
 			rs.close();
 			ps.close();
 			rs1.close();
@@ -161,5 +161,113 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 	public void remove() {
 		// Do nothing
 	}
+	/**
+	 * getJsonFormatLastXAppEvents
+	 * @param webApp
+	 * @return Last X events of the webApp
+	 */
+	public final String getJsonFormatLastXAppEvents(int numberOfLastEvents){
+		WebAppEvent currEv = null;
+		boolean critical;
+		String date;
+		boolean online;
+		String availability;
+		String loadTime;
+		String latency;
+		int httStatusCode;
+		String description;
+		String response;
+		
+		// Generate Random number for sig
+		// Math.random() * ( Max - Min )
+		double rand = Math.random() * 19;
+		
+		String jsonResponse = "google.visualization.Query.setResponse({\n";
+		jsonResponse += "version:'0.6',\n"+
+				"reqId:'0',\n"+
+				"status:'ok',\n"+
+				"sig:'"+rand+"',\n";
+
+		jsonResponse += "table:{\n"+
+				"cols:[\n";
+
+
+		jsonResponse += "{id:'Col1',\n"+
+				"label:'Date',\n"+
+				"type:'datetime'\n"+
+				"},\n"+
+
+			"{id:'Col2',\n"+
+			"label:'Network Latency',\n"+
+			"type:'number'\n"+
+			"},\n"+
+
+			"{id:'Col3',\n"+
+			"label:'Load Time',\n"+
+			"type:'number'\n"+
+			"},\n"+
+
+			"{id:'Col4',\n"+
+			"label:'Status Desc.',\n"+
+			"type:'string'\n"+
+			"}],";
+		
+		PreparedStatement ps;
+		ResultSet rs = null;
+		
+		// Start of response data
+		jsonResponse += "rows:[\n";
+		
+		try {
+			ps = conn.prepareStatement("SELECT * FROM MEERKAT.EVENTS "+ 
+					"WHERE APPNAME LIKE '"+webApp.getName()+"' "+
+					"ORDER BY ID DESC "+
+					"FETCH FIRST "+numberOfLastEvents+" ROWS ONLY");
+			rs = ps.executeQuery();
+
+			while(rs.next()) {
+				critical = rs.getBoolean(3);
+				date = rs.getTimestamp(4).toString();
+				online = rs.getBoolean(5);
+				availability = String.valueOf(rs.getDouble(6));
+				loadTime = String.valueOf(rs.getDouble(7));
+				latency = String.valueOf(rs.getDouble(8));
+				httStatusCode = rs.getInt(9);
+				description = rs.getString(10);
+				response = rs.getString(11);
+
+				currEv = new WebAppEvent(critical, date, online, availability, httStatusCode, description);
+				currEv.setID(rs.getInt(1));
+				currEv.setPageLoadTime(loadTime);
+				currEv.setLatency(latency);
+				currEv.setCurrentResponse(response);
+				
+				jsonResponse += "{c:[\n";
+				jsonResponse += "{v:new Date(" + currEv.getDateFormatedGWT()+")},\n";
+				jsonResponse += "{v:"+currEv.getLatency()+"},\n";
+				jsonResponse += "{v:"+currEv.getPageLoadTime()+"},\n";
+				jsonResponse += "{v:'"+currEv.getDescription()+"'},\n";
+				jsonResponse += "]},";
+			}
+
+			rs.close();
+			ps.close();
+
+		} catch (SQLException e) {
+			log.error("Failed query events from application "+webApp.getName());
+			log.error("", e);
+		}
+
+		// Remove the last "," from the response
+		jsonResponse = jsonResponse.substring(0, jsonResponse.length()-1);
+		// Close the response
+		jsonResponse += "]\n"+
+				"}}\n"+
+				");\n";
+
+		return jsonResponse;
+	}
+
+
 
 }

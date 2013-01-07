@@ -27,6 +27,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +40,9 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.ByteArrayISO8859Writer;
 import org.eclipse.jetty.util.IO;
 import org.meerkat.services.WebApp;
+import org.meerkat.util.Counter;
 import org.meerkat.util.HtmlOperations;
+import org.meerkat.util.PropertiesLoader;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
 import org.meerkat.webapp.WebAppEventListIterator;
@@ -54,6 +57,7 @@ public class CustomResourceHandler extends ResourceHandler {
 	private String eventListGoogleVisualizationRequest = "/event-gv-list-";
 	int eventListRequestLength = eventListRequest.length();
 	private WebAppCollection wac;
+	private static String propertiesFile = "meerkat.properties";
 
 	private String notFound = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
 			+ "<html>\n"
@@ -266,79 +270,34 @@ public class CustomResourceHandler extends ResourceHandler {
 
 			// Deal with request for Google Visualization events
 			else if(request.getRequestURI().contains(eventListGoogleVisualizationRequest)){
+				// Get properties
+				PropertiesLoader pl = new PropertiesLoader(propertiesFile);
+				Properties prop = pl.getPropetiesFromFile();
+
+				// Get the max number of records
+				int maxNumberRecordsToShow = Integer.valueOf(prop.getProperty("meerkat.app.timeline.maxrecords"));
+				
+				
 				// Get application
 				String requestRef = request.getRequestURI();
 				requestRef = requestRef.substring(eventListGoogleVisualizationRequest.length(), requestRef.length());
 				String appName = URLDecoder.decode(requestRef, "UTF-8");
-
-
-				String returnResp = "google.visualization.Query.setResponse({\n";
-				returnResp += "version:'0.6',\n"+
-						"reqId:'0',\n"+
-						"status:'ok',\n"+
-						"sig:'5982206968295329968',\n";
-
-				returnResp += "table:{\n"+
-						"cols:[\n";
-
-
-				returnResp += "{id:'Col1',\n"+
-						"label:'Date',\n"+
-						"type:'datetime'\n"+
-						"},\n"+
-
-					"{id:'Col2',\n"+
-					"label:'Network Latency',\n"+
-					"type:'number'\n"+
-					"},\n"+
-
-					"{id:'Col3',\n"+
-					"label:'Load Time',\n"+
-					"type:'number'\n"+
-					"},\n"+
-
-					"{id:'Col4',\n"+
-					"label:'Status Desc.',\n"+
-					"type:'string'\n"+
-					"}],";
-
-
 				WebApp webapp = wac.getWebAppByName(appName);
-				if(webapp == null){
-					log.info("Application "+appName+" not present!");
-					webapp = new WebApp(); // prevent null in getCustomEventsList
-					processNotFound404(response, baseRequest);
-				}
-				
-				
+	
 				WebAppEventListIterator wAppEIt = new WebAppEventListIterator(webapp);
-				WebAppEvent currWebAppEvent = null;
-				returnResp += "rows:[\n";
-				while(wAppEIt.hasNext()){
-					currWebAppEvent = wAppEIt.next();
-					
-					returnResp += "{c:[\n";
-					returnResp += "{v:new Date(" + currWebAppEvent.getDateFormatedGWT()+")},\n";
-					returnResp += "{v:"+currWebAppEvent.getLatency()+"},\n";
-					returnResp += "{v:"+currWebAppEvent.getPageLoadTime()+"},\n";
-					returnResp += "{v:'"+currWebAppEvent.getDescription()+"'},\n";
-					returnResp += "]},";
-				}
 				
-				// Remove the last "," from the response
-				returnResp = returnResp.substring(0, returnResp.length()-1);
+				Counter c = new Counter();
+				c.startCounter();
+				String jsonResponse = wAppEIt.getJsonFormatLastXAppEvents(maxNumberRecordsToShow);
+				c.stopCounter();
+				log.info("TOOK "+c.getDurationSeconds()+" FOR LAST "+maxNumberRecordsToShow+" OF "+appName);
 				
-
-				returnResp += "]\n"+
-						"}}\n"+
-						");\n";
-
 				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
 				response.setContentType(MimeTypes.TEXT_JSON_UTF_8);
 				response.setStatus(HttpServletResponse.SC_OK);
 				// Disable cache
 				response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
-				writer.write(returnResp);
+				writer.write(jsonResponse);
 				writer.flush();
 				response.setContentLength(writer.size());
 				OutputStream out = response.getOutputStream();

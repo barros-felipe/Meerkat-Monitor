@@ -61,7 +61,7 @@ public class HttpServer {
 	private static String webLogFile = "log.txt";
 	private String rssResource = "/rss.xml";
 	private String wsdlUrl = "";
-	private String timeLineFile = "TimeLine.html";
+	//private String timeLineFile = "TimeLine.html";
 	private String hostname = netUtil.getHostname();
 	private CustomResourceHandler customResHandler;
 

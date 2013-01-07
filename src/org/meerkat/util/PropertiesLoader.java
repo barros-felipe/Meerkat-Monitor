@@ -47,7 +47,7 @@ public class PropertiesLoader {
 		
 		// NOTE: all properties are also referenced in 
 		//		 in function generateDefaultPropertiesFile()
-		expectedProperties = new String[22];
+		expectedProperties = new String[23];
 		expectedProperties[0] = "meerkat.email.send.emails";
 		expectedProperties[1] = "meerkat.email.smtp.server";
 		expectedProperties[2] = "meerkat.email.smtp.security";
@@ -70,6 +70,7 @@ public class PropertiesLoader {
 		expectedProperties[19] = "meerkat.embeddeddb.user";
 		expectedProperties[20] = "meerkat.embeddeddb.passwd";
 		expectedProperties[21] = "meerkat.embeddeddb.dbname";
+		expectedProperties[22] = "meerkat.app.timeline.maxrecords";
 		
 		File tmpPropFile = new File(propertiesFile);
 		if(!tmpPropFile.exists()){
@@ -203,6 +204,7 @@ public class PropertiesLoader {
 		prop.put("meerkat.embeddeddb.user", "meerkat");
 		prop.put("meerkat.embeddeddb.passwd", "meerkatmonitor");
 		prop.put("meerkat.embeddeddb.dbname", "db");
+		prop.put("meerkat.app.timeline.maxrecords", "2500");
 
 		Properties defaultProperties = new Properties();
 		defaultProperties.putAll(prop);
