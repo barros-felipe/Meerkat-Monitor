@@ -79,8 +79,7 @@ public class Monitor {
 	 */
 	public final void startMonitor(){
 		webAppsCollection.saveConfigXMLFile();
-		httpWebServer.refreshIndex();
-
+		
 		List<WebApp> webAppListCopy = webAppsCollection.getCopyWebApps();
 		Iterator<WebApp> i = webAppListCopy.iterator();
 		
@@ -90,6 +89,8 @@ public class Monitor {
 			currentWebApp.setTempWorkingDir(tempWorkingDir);
 			currentWebApp.writeWebAppVisualizationInfoWorkingOn(); // shows user that's working on data
 		}
+		
+		httpWebServer.refreshIndex();
 		log.info("");
 		
 		// Launch the monitor process
@@ -314,7 +315,7 @@ public class Monitor {
 			percent = 0;
 			roundCompletedApps = 0;
 
-			httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
+			//httpWebServer.setDataSources(webAppsCollection, appGroupCollection);
 
 			// Get the time between rounds
 			properties = pL.getPropetiesFromFile();

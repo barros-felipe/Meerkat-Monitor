@@ -89,11 +89,11 @@ public class HttpServer {
 
 		// Add custom resource handler
 		customResHandler = new CustomResourceHandler();
-		
+
 		HandlerList handlers = new HandlerList();
 		handlers.setHandlers(new Handler[] { resourceHandler, customResHandler });
 		mServer.setHandler(handlers);
-		
+
 		try {
 			mServer.start();
 		} catch (Exception e) {
@@ -190,7 +190,7 @@ public class HttpServer {
 				+ "<a href=\""
 				+ timeLineFile
 				+ "\"><img src=\"resources/tango_timeline.png\" alt=\"Timeline\" align=\"right\" style=\"border-style: none\"/></a>\n"
-				*/
+				 */
 				+ "<a href=\""
 				+ rssResource
 				+ "\"><img src=\"resources/tango_rss.png\" alt=\"RSS\" align=\"right\" style=\"border-style: none\"/></a> \n"
@@ -454,10 +454,10 @@ public class HttpServer {
 				responseStatus += bodyEnd;
 
 				// Write the index file
-				File f = new File(tempWorkingDir + "index.html");
-				if (!f.delete()) {
-					log.warn("Failed to remove file: " + f.toString());
-				}
+				//File f = new File(tempWorkingDir + "index.html");
+				//if (!f.delete()) {
+				//	log.warn("Failed to remove file: " + f.toString());
+				//}
 				fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
 			}
 		};

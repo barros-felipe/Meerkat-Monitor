@@ -122,12 +122,13 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(!wapc.isWebAppByNamePresent(name)){
 			return "Application "+name+" does not exist!";
 		}else{
+			int nEvents = wapc.resetAllAppDataFromName(name); // Delete DB records
 			WebApp tmp = wapc.getWebAppByName(name);
 			wapc.removeWebApp(tmp);
 			wapc.saveConfigXMLFile();
 			httpServer.refreshIndex();
 
-			log.info("WS request ["+getRequestClientIP()+"]: removeAppByName() named: "+name);
+			log.info("WS request ["+getRequestClientIP()+"]: removeAppByName() named: "+name+"(and "+nEvents+" records from DB)");
 			return "Application "+name+" removed successfully.";
 		}
 	}

@@ -118,8 +118,9 @@ public class FileUtil {
 	 */
 	public final void writeToFile(String filename, String contents){
 		RandomAccessFile destFile = null;
+		File tmpFile;
 		try {
-			File tmpFile = new File(filename);
+			tmpFile = new File(filename);
 			if(tmpFile.exists()){
 				tmpFile.delete();
 			}
