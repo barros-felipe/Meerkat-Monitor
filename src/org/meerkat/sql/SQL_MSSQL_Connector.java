@@ -21,9 +21,7 @@ package org.meerkat.sql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
@@ -75,46 +73,9 @@ public class SQL_MSSQL_Connector {
 			return result;
 		}
 
-		Statement stmt = null;
-		try {
-			stmt = conn.createStatement();
-		} catch (SQLException e) {
-			log.error("Cannot create Statement: " + dbMachine + ":" + port
-					+ "/" + db +". "+e.getMessage());
-			result += e.getMessage();
-			return result;
-		}
+		SQL_Statement_Executor executor = new SQL_Statement_Executor(conn, query);
 
-		try {
-			ResultSet rs = stmt.executeQuery(query);
-			try {
-				rs.next();
-				result = String.valueOf(rs.getObject(1));
-			} finally {
-				try {
-					rs.close();
-				} catch (SQLException ignore) { /*
-				 * Propagate the original
-				 * exception instead of this
-				 */
-				}
-			}
-		} catch (SQLException e) {
-			log.error("Cannot execute query (" + dbMachine + ":" + port + "/"
-					+ db + "). "+e.getMessage());
-			result += e.getMessage();
-			return result;
-		} finally {
-			try {
-				stmt.close();
-			} catch (SQLException ignore) { /*
-			 * Propagate the original exception
-			 * instead of this
-			 */
-			}
-		}
-
-		return result;
+		return executor.getResultQueryString();
 	}
 
 }

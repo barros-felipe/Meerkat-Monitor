@@ -40,7 +40,6 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.ByteArrayISO8859Writer;
 import org.eclipse.jetty.util.IO;
 import org.meerkat.services.WebApp;
-import org.meerkat.util.Counter;
 import org.meerkat.util.HtmlOperations;
 import org.meerkat.util.PropertiesLoader;
 import org.meerkat.webapp.WebAppCollection;
@@ -286,11 +285,7 @@ public class CustomResourceHandler extends ResourceHandler {
 	
 				WebAppEventListIterator wAppEIt = new WebAppEventListIterator(webapp);
 				
-				Counter c = new Counter();
-				c.startCounter();
 				String jsonResponse = wAppEIt.getJsonFormatLastXAppEvents(maxNumberRecordsToShow);
-				c.stopCounter();
-				log.info("TOOK "+c.getDurationSeconds()+" FOR LAST "+maxNumberRecordsToShow+" OF "+appName);
 				
 				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
 				response.setContentType(MimeTypes.TEXT_JSON_UTF_8);

@@ -38,7 +38,7 @@ public class WebAppEvent {
 	private String availability;
 	private String description;
 	private String pageLoadTime;
-	private String latency;
+	private String latency = "0";
 	private boolean critical;
 	private int httpStatusCode;
 	private String noValueString = null;
