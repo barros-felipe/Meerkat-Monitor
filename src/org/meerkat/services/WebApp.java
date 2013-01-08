@@ -564,7 +564,7 @@ public class WebApp {
 	 * getEvents
 	 * @return events list
 	 */
-	 /**
+	/**
 	private List<WebAppEvent> getEvents(){
 		if(conn == null){
 			embDB = new EmbeddedDB();
@@ -837,17 +837,9 @@ public class WebApp {
 	 */
 	public final void writeWebAppVisualizationDataFile() {
 		final WebApp curr = this;
-		// With many records this will be time consuming
-		Runnable visDataWriter = new Runnable(){
-			@Override
-			public void run() {
-				Visualization gv = new Visualization();
-				gv.setAppVersion(appVersion);
-				gv.writeWebAppVisualizationDataFile(curr);
-			}
-		};
-		Thread visDataWriterThread = new Thread(visDataWriter);
-		visDataWriterThread.start();
+		Visualization gv = new Visualization();
+		gv.setAppVersion(appVersion);
+		gv.writeWebAppVisualizationDataFile(curr);
 	}
 
 	/**

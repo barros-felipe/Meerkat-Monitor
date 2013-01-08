@@ -89,7 +89,6 @@ public class Monitor {
 			currentWebApp = i.next();
 			currentWebApp.setTempWorkingDir(tempWorkingDir);
 			currentWebApp.writeWebAppVisualizationInfoWorkingOn(); // shows user that's working on data
-			currentWebApp.writeWebAppVisualizationDataFile(); // this takes time - executed in new thread
 		}
 		log.info("");
 		
@@ -305,12 +304,12 @@ public class Monitor {
 				
 				// increase checked apps
 				roundCompletedApps++;
+				
+				// update index and app file
+				httpWebServer.refreshIndex();
+				currentWebApp.writeWebAppVisualizationDataFile();
 			}
-			
-			// Refresh dashboard and app in (not every app cycle because its heavy!)
-			//webAppsCollection.writeWebAppCollectionMotionChart();
-			httpWebServer.refreshIndex();
-			
+									
 			// reset percentage
 			percent = 0;
 			roundCompletedApps = 0;
