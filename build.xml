@@ -85,7 +85,7 @@
 	</target>
 	
 	<!-- CREATE WIN INSTALLER -->
-	<target name="win-installer">
+	<target name="win-installer" if="isWindows">
 		<!-- Get a clean base -->
 		<antcall target="clean_base"/>
 		
@@ -147,6 +147,10 @@
 	
 	<!-- CREATE DIST -->
 	<target name="dist" depends="bundle">
+		<condition property="isWindows">
+			<os family="windows" />
+		</condition>
+		
 		<antcall target="win-installer" />
 		<antcall target="linux-jar-sh" />
 		
