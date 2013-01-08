@@ -130,7 +130,7 @@ public class WebApp {
 		this.expectedString = expectedString;
 		this.actionExecOutput = "";
 		events = new CopyOnWriteArrayList<WebAppEvent>();
-		groups = new CopyOnWriteArrayList<String>();
+		groups = new ArrayList<String>();
 		mkm = new MasterKeyManager();
 
 		// Setup connection
