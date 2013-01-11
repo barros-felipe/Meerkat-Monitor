@@ -32,7 +32,6 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.network.NetworkUtil;
 import org.meerkat.services.WebApp;
-import org.meerkat.util.Counter;
 import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
 import org.meerkat.util.PropertiesLoader;
@@ -247,9 +246,6 @@ public class HttpServer {
 		Runnable refresher = new Runnable(){
 			@Override
 			public void run() {
-				Counter c = new Counter();
-				c.startCounter();
-								
 				// Refresh the index
 				Iterator<WebApp> i = wac.getWebAppCollectionIterator();
 				WebApp wApp;
@@ -302,8 +298,6 @@ public class HttpServer {
 				}
 
 				while (i.hasNext()) {
-					Counter appIteratorCounter = new Counter();
-					appIteratorCounter.startCounter();
 					wApp = i.next();
 					if (wApp.isActive()) {
 						// using CSS grade so we can later set a grade for each application type
@@ -441,8 +435,6 @@ public class HttpServer {
 											+ "</strong></a></td>\n</tr>\n";
 						}
 						
-						appIteratorCounter.stopCounter();
-						log.info("APP FULL ITERATION TOOK: "+appIteratorCounter.getDurationSeconds());
 					}
 				}
 
@@ -479,9 +471,6 @@ public class HttpServer {
 				//}
 				//fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
 				indexContents = responseStatus;
-				
-				c.stopCounter();
-				log.info("INDEX GENERATION: "+c.getDurationSeconds());
 			}
 		};
 		Thread refresherThread = new Thread(refresher);

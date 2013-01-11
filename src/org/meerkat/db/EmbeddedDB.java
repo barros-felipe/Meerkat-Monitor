@@ -239,7 +239,7 @@ public class EmbeddedDB implements Runnable{
 			}
 
 			counter.stopCounter();
-			log.info("DB maintenance finished ("+counter.getDurationSeconds()+"s).");
+			log.info("\tFinished. Took "+counter.getDurationSeconds()+"s");
 		}
 	}
 
