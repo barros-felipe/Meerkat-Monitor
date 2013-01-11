@@ -19,7 +19,6 @@
 
 package org.meerkat.httpServer;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Locale;
@@ -33,6 +32,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.network.NetworkUtil;
 import org.meerkat.services.WebApp;
+import org.meerkat.util.Counter;
 import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
 import org.meerkat.util.PropertiesLoader;
@@ -45,7 +45,7 @@ public class HttpServer {
 	private String version;
 	private int webServerPort;
 	private NetworkUtil netUtil = new NetworkUtil();
-	private FileUtil fu = new FileUtil();
+	//private FileUtil fu = new FileUtil();
 	private String tempWorkingDir;
 	private String propertiesFile = "meerkat.properties";
 
@@ -69,6 +69,7 @@ public class HttpServer {
 
 	private String bottomContent = "</tbody>\n</table>\n" + "</div>\n";
 	private String bodyEnd = "</body>\n" + "</html>\n";
+	private String indexContents = "";
 
 	public HttpServer(final int webServerPort, String version, String wsdlUrl, String tempWorkingDir) {
 		this.webServerPort = webServerPort;
@@ -81,14 +82,19 @@ public class HttpServer {
 		createStartupPage("Please wait while Meerkat is getting ready to work....");
 
 		Server mServer = new Server(webServerPort);
-
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setDirectoriesListed(true);
-		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
+		resourceHandler.setWelcomeFiles(new String[] { "index.htm" });
 		resourceHandler.setResourceBase(tempWorkingDir);
 
+		// Create the index file which redirects to dynamic response listening on "index.html"
+		String redirectCode = "<html>\n<head>\n<meta http-equiv=\"refresh\" content=\"0;url=index.html\">"+
+				"\n</head>\n<body>\n</body>\n</html>";
+		FileUtil fu = new FileUtil();
+		fu.writeToFile(tempWorkingDir+"/index.htm", redirectCode);
+
 		// Add custom resource handler
-		customResHandler = new CustomResourceHandler();
+		customResHandler = new CustomResourceHandler(this);
 
 		HandlerList handlers = new HandlerList();
 		handlers.setHandlers(new Handler[] { resourceHandler, customResHandler });
@@ -228,6 +234,11 @@ public class HttpServer {
 		footer = htmlc.getFooter();
 	}
 
+
+	public final String getIndexPageContents(){
+		return indexContents;
+	}
+
 	/**
 	 * refresh
 	 */
@@ -236,6 +247,9 @@ public class HttpServer {
 		Runnable refresher = new Runnable(){
 			@Override
 			public void run() {
+				Counter c = new Counter();
+				c.startCounter();
+								
 				// Refresh the index
 				Iterator<WebApp> i = wac.getWebAppCollectionIterator();
 				WebApp wApp;
@@ -288,6 +302,8 @@ public class HttpServer {
 				}
 
 				while (i.hasNext()) {
+					Counter appIteratorCounter = new Counter();
+					appIteratorCounter.startCounter();
 					wApp = i.next();
 					if (wApp.isActive()) {
 						// using CSS grade so we can later set a grade for each application type
@@ -424,6 +440,9 @@ public class HttpServer {
 											Locale.getDefault())
 											+ "</strong></a></td>\n</tr>\n";
 						}
+						
+						appIteratorCounter.stopCounter();
+						log.info("APP FULL ITERATION TOOK: "+appIteratorCounter.getDurationSeconds());
 					}
 				}
 
@@ -458,7 +477,11 @@ public class HttpServer {
 				//if (!f.delete()) {
 				//	log.warn("Failed to remove file: " + f.toString());
 				//}
-				fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
+				//fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
+				indexContents = responseStatus;
+				
+				c.stopCounter();
+				log.info("INDEX GENERATION: "+c.getDurationSeconds());
 			}
 		};
 		Thread refresherThread = new Thread(refresher);
@@ -484,11 +507,14 @@ public class HttpServer {
 				+ "</body>\n" + "</html>\n";
 
 		// Write the startup index file
+		/**
 		File f = new File(tempWorkingDir + "index.html");
 		if (f.exists() && !f.delete()) {
 			log.warn("Cannot remove " + f.toString());
 		}
 		fu.writeToFile(tempWorkingDir + "index.html", pageContents);
+		 */
+		indexContents = pageContents;
 	}
 
 	/**

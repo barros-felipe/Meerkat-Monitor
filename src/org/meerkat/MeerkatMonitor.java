@@ -73,7 +73,7 @@ public class MeerkatMonitor {
 		catch ( Exception e ) {
 			log.info("Desktop environment not available. [Running in console mode]");
 		}
-				
+
 		// Setup general log settings
 		log.info("Updating log setting...");
 		LogSettings ls = new LogSettings();
@@ -85,11 +85,20 @@ public class MeerkatMonitor {
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
 		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "error");
-
+		System.setProperty("derby.locks.deadlockTrace", "true");
+		
 		// Load SQL Drivers
 		log.info("Loading JDBC Drivers...");
 		SQLDriverLoader sqlDL = new SQLDriverLoader();
 		sqlDL.loadDrivers();
+
+		// Setup embedded Database
+		log.info("Setting up embedded database...");
+		EmbeddedDB ebd = new EmbeddedDB();
+		// Load the driver first time
+		ebd.loadDriver();		
+		ebd.initializeDB();
+		ebd.executeDBMaintenance();
 
 		// Prepare applications settings
 		log.info("Loading application settings...");
@@ -136,10 +145,7 @@ public class MeerkatMonitor {
 		log.info("Extracting resources...");
 		mgo.extractWebResourcesResources();
 
-		// Setup embedded Database
-		log.info("Setting up embedded database...");
-		EmbeddedDB ebd = new EmbeddedDB();
-		ebd.initializeDB();
+		// Link DB to app
 		webAppsCollection.setDB(ebd);
 
 		// Setup web server
@@ -152,7 +158,7 @@ public class MeerkatMonitor {
 		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));
 		// set the httpServer to webapp collection
 		webAppsCollection.setHttpServer(httpWebServer);
-		
+
 		// Open Dashboard in default browser if available
 		try {
 			java.awt.Desktop desktop = java.awt.Desktop.getDesktop();

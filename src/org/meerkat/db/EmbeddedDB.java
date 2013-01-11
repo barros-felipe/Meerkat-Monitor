@@ -28,6 +28,7 @@ import java.sql.Statement;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.meerkat.util.Counter;
 import org.meerkat.util.PropertiesLoader;
 
 public class EmbeddedDB implements Runnable{
@@ -39,8 +40,17 @@ public class EmbeddedDB implements Runnable{
 	private String dbName = "";
 	Connection connQueries = null;
 	Connection connUpdates = null;
+	boolean settingsLoaded = false;
+	boolean freshDB = false;
 
 	public EmbeddedDB(){
+
+	}
+
+	/**
+	 * loadSettings
+	 */
+	private void loadSettings(){
 		PropertiesLoader pL = new PropertiesLoader("meerkat.properties");
 		Properties appProps = pL.getPropetiesFromFile();
 
@@ -49,8 +59,10 @@ public class EmbeddedDB implements Runnable{
 		dbProps.put("password", appProps.get("meerkat.embeddeddb.passwd"));
 		dbName = (String)appProps.get("meerkat.embeddeddb.dbname");
 
-		this.loadDriver();
+		settingsLoaded = true;
+
 	}
+
 
 	/**
 	 * loadDriver
@@ -71,10 +83,13 @@ public class EmbeddedDB implements Runnable{
 	 * Create DB if not present
 	 */
 	public final void initializeDB(){
+		if(!settingsLoaded){
+			loadSettings();
+		}
 		Connection c = getConnForUpdates();
-		PreparedStatement ps;
+		PreparedStatement ps = null;
 		Statement st, st1, st2, st3, st4, st5, st6, st7;
-		ResultSet rs;
+		ResultSet rs = null;
 		try {
 			ps = getConnForUpdates().prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS");
 			rs = ps.executeQuery();
@@ -122,8 +137,9 @@ public class EmbeddedDB implements Runnable{
 					st5.close();
 					st6.close();
 					st7.close();
-					c.commit();
-					c.close();
+
+					freshDB = true; // Flag to no-maintenance needed
+
 				} catch (SQLException e1) {
 					log.error("Error creating database!", e1);
 					logSQLException(e1);
@@ -132,9 +148,101 @@ public class EmbeddedDB implements Runnable{
 				log.error("Error initializing database!", e);
 				logSQLException(e);
 			}
+		}finally{		
+			try {
+				c.commit();
+				ps.close();
+				rs.close();
+				c.close();
+			} catch (SQLException e) {
+				log.error("Error closing SQL resources for initializeDB()", e);
+			}
 		}
 
 	}
+
+
+	public final void executeDBMaintenance(){
+		if(freshDB){
+			log.info("No DB maintenance needed.");
+
+		}else{
+			log.info("DB maintenance started...");
+			Counter counter = new Counter();
+			counter.startCounter();
+
+			Connection c = getConnForUpdates();
+			Statement st1, st2, st3, st4, st5, st6, st7, stdl;
+			Statement std1, std2, std3, std4, std5, std6, std7;
+			try {
+
+				stdl = c.createStatement();
+				stdl.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '60')");
+				c.commit();
+
+				// Remove indexes
+				std1 = c.createStatement();
+				std2 = c.createStatement();
+				std3 = c.createStatement();
+				std4 = c.createStatement();
+				std5 = c.createStatement();
+				std6 = c.createStatement();
+				std7 = c.createStatement();
+
+				std1.execute("DROP INDEX MEERKAT.IDX_APPNAME");
+				std2.execute("DROP INDEX MEERKAT.IDX_DATEEV");
+				std3.execute("DROP INDEX MEERKAT.IDX_ONLINE");
+				std4.execute("DROP INDEX MEERKAT.IDX_AVAILABILITY");
+				std5.execute("DROP INDEX MEERKAT.IDX_LATENCY");
+				std6.execute("DROP INDEX MEERKAT.IDX_HTTPSTATUSCODE");
+				std7.execute("DROP INDEX MEERKAT.IDX_DESCRIPTION");
+				c.commit();
+
+				// Re-create indexes
+				st1 = c.createStatement();
+				st2 = c.createStatement();
+				st3 = c.createStatement();
+				st4= c.createStatement();
+				st5 = c.createStatement();
+				st6 = c.createStatement();
+				st7 = c.createStatement();
+
+				st1.executeUpdate("CREATE INDEX MEERKAT.IDX_APPNAME ON MEERKAT.EVENTS (APPNAME)");
+				st2.executeUpdate("CREATE INDEX MEERKAT.IDX_DATEEV ON MEERKAT.EVENTS (DATEEV)");
+				st3.executeUpdate("CREATE INDEX MEERKAT.IDX_ONLINE ON MEERKAT.EVENTS (ONLINE)");
+				st4.executeUpdate("CREATE INDEX MEERKAT.IDX_AVAILABILITY ON MEERKAT.EVENTS (AVAILABILITY)");
+				st5.executeUpdate("CREATE INDEX MEERKAT.IDX_LATENCY ON MEERKAT.EVENTS (LATENCY)");
+				st6.executeUpdate("CREATE INDEX MEERKAT.IDX_HTTPSTATUSCODE ON MEERKAT.EVENTS (HTTPSTATUSCODE)");
+				st7.executeUpdate("CREATE INDEX MEERKAT.IDX_DESCRIPTION ON MEERKAT.EVENTS (DESCRIPTION)");
+
+				st1.close();
+				st2.close();
+				st3.close();
+				st4.close();
+				st5.close();
+				st6.close();
+				st7.close();
+
+				std1.close();
+				std2.close();
+				std3.close();
+				std4.close();
+				std5.close();
+				std6.close();
+				std7.close();
+
+				c.commit();
+				c.close();
+			} catch (SQLException e1) {
+				log.error("Error executing database maintenance!", e1);
+				logSQLException(e1);
+			}
+
+			counter.stopCounter();
+			log.info("DB maintenance finished ("+counter.getDurationSeconds()+"s).");
+		}
+	}
+
 
 	@Override
 	public void run() {
@@ -145,6 +253,9 @@ public class EmbeddedDB implements Runnable{
 	 * @return
 	 */
 	public final Connection getConnForQueries(){
+		if(!settingsLoaded){
+			loadSettings();
+		}
 		try {
 			connQueries = DriverManager.getConnection(protocol + dbName + ";create=true", dbProps);
 		} catch (SQLException e) {
@@ -153,7 +264,7 @@ public class EmbeddedDB implements Runnable{
 		}
 
 		try {
-			connQueries.setAutoCommit(true);
+			connQueries.setAutoCommit(false);
 		} catch (SQLException e) {
 			log.error("Failed to set DB auto-commit to false! "+e.getMessage());
 			logSQLException(e);
@@ -163,6 +274,9 @@ public class EmbeddedDB implements Runnable{
 	}
 
 	public final Connection getConnForUpdates(){
+		if(!settingsLoaded){
+			loadSettings();
+		}
 		try {
 			connUpdates = DriverManager.getConnection(protocol + dbName + ";create=true", dbProps);
 		} catch (SQLException e) {
@@ -185,6 +299,9 @@ public class EmbeddedDB implements Runnable{
 	 * shutdownDB
 	 */
 	public final void shutdownDB(){
+		if(!settingsLoaded){
+			loadSettings();
+		}
 		try{
 			DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		}
@@ -209,6 +326,9 @@ public class EmbeddedDB implements Runnable{
 	 * @return id
 	 */
 	public int getMaxIDofApp(String appName){
+		if(!settingsLoaded){
+			loadSettings();
+		}
 		PreparedStatement ps;
 		ResultSet rs = null;
 
@@ -232,7 +352,6 @@ public class EmbeddedDB implements Runnable{
 		return maxId;
 
 	}
-
 
 
 	/**

@@ -649,7 +649,7 @@ public class WebApp {
 		BigDecimal bd = new BigDecimal(loadTimeAVG);
 		bd = bd.setScale(decimalPlaces, BigDecimal.ROUND_DOWN);
 		loadTimeAVG = bd.doubleValue();
-
+		
 		return loadTimeAVG;
 	}
 
@@ -711,6 +711,7 @@ public class WebApp {
 			log.error("Failed query number of critical events from application "+this.getName());
 			log.error("", e);
 		}
+		
 		return numberOfCriticalEvents;
 	}
 
@@ -765,6 +766,7 @@ public class WebApp {
 			log.error("Failed query average load time from application "+this.getName());
 			log.error("", e);
 		}
+
 		return latencyAvg;
 	}
 
@@ -1198,7 +1200,7 @@ public class WebApp {
 		BigDecimal bd1 = new BigDecimal(lastLoadTime);
 		bd1 = bd1.setScale(3, BigDecimal.ROUND_DOWN);
 		lastLoadTime = bd1.doubleValue();
-
+	
 		if(lastLoadTime > loadTimeAverage){
 			return 1;
 		}else if(lastLoadTime < loadTimeAverage){
