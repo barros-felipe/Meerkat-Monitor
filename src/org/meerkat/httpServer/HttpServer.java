@@ -70,6 +70,8 @@ public class HttpServer {
 	private String bodyEnd = "</body>\n" + "</html>\n";
 	private String indexContents = "";
 
+	private Thread indexRefresherThread = new Thread();
+
 	public HttpServer(final int webServerPort, String version, String wsdlUrl, String tempWorkingDir) {
 		this.webServerPort = webServerPort;
 		this.version = version;
@@ -434,7 +436,7 @@ public class HttpServer {
 											Locale.getDefault())
 											+ "</strong></a></td>\n</tr>\n";
 						}
-						
+
 					}
 				}
 
@@ -473,8 +475,13 @@ public class HttpServer {
 				indexContents = responseStatus;
 			}
 		};
-		Thread refresherThread = new Thread(refresher);
-		refresherThread.start();
+
+		// Check if a indexRefresherThread is already running
+		// If so, do not launch another because it's not necessary
+		if(!indexRefresherThread.isAlive()){
+			indexRefresherThread = new Thread(refresher);
+			indexRefresherThread.start();
+		}
 	}
 
 	/**

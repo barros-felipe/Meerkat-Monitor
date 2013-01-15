@@ -19,6 +19,7 @@
 
 package org.meerkat.db;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -172,14 +173,16 @@ public class EmbeddedDB implements Runnable{
 			counter.startCounter();
 
 			Connection c = getConnForUpdates();
-			Statement st1, st2, st3, st4, st5, st6, st7, stdl;
+			Statement st1, st2, st3, st4, st5, st6, st7;
 			Statement std1, std2, std3, std4, std5, std6, std7;
 			try {
-
-				stdl = c.createStatement();
-				stdl.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '60')");
-				c.commit();
-
+				
+				// Set lock timeout to 30s
+				CallableStatement cst = c.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+				cst.setString(1, "derby.locks.waitTimeout");
+				cst.setString(2, "30");
+				cst.execute();
+				
 				// Remove indexes
 				std1 = c.createStatement();
 				std2 = c.createStatement();
@@ -214,7 +217,8 @@ public class EmbeddedDB implements Runnable{
 				st5.executeUpdate("CREATE INDEX MEERKAT.IDX_LATENCY ON MEERKAT.EVENTS (LATENCY)");
 				st6.executeUpdate("CREATE INDEX MEERKAT.IDX_HTTPSTATUSCODE ON MEERKAT.EVENTS (HTTPSTATUSCODE)");
 				st7.executeUpdate("CREATE INDEX MEERKAT.IDX_DESCRIPTION ON MEERKAT.EVENTS (DESCRIPTION)");
-
+				c.commit();
+				
 				st1.close();
 				st2.close();
 				st3.close();
@@ -231,7 +235,17 @@ public class EmbeddedDB implements Runnable{
 				std6.close();
 				std7.close();
 
-				c.commit();
+				// Compress table using the SEQUENTIAL option
+				// recommended to issue the SYSCS_UTIL.SYSCS_COMPRESS_TABLE procedure in auto-commit mode.
+				// (SYSCS_COMPRESS_TABLE will also update the statistics for all indexes on that table. 
+				//	No need to execute SYSCS_UPDATE_STATISTICS)
+				c.setAutoCommit(true); 
+				CallableStatement cs = c.prepareCall("CALL SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?)");
+				cs.setString(1, "MEERKAT");
+				cs.setString(2, "EVENTS");
+				cs.setShort(3, (short) 1);
+				cs.execute();
+
 				c.close();
 			} catch (SQLException e1) {
 				log.error("Error executing database maintenance!", e1);
