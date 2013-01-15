@@ -98,6 +98,7 @@ public class Visualization {
 				+ "     \"bProcessing\": true, \n"
 				+ "     \"bServerSide\": true, \n"
 				+ "     \"sAjaxSource\": \"/event-list-"+webApp.getName()+"\", \n"
+				+ "     \"aaSorting\": [[ 1, \"desc\" ]],\n"
 				+ "		\"aoColumns\": [ \n"
 				+ "				/* Id */   		{ \"sClass\": \"center\", \"sWidth\": \"50px\" }, \n"
 				+ "		        /* Date */  	{ \"sClass\": \"center\", \"sWidth\": \"180px\" }, \n"

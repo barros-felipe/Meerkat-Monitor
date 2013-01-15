@@ -529,10 +529,10 @@ public class WebApp {
 
 		queryValues += ", "+Integer.valueOf(ev.getHttpStatusCode())+", '"+ev.getDescription()+"', ?";
 
-		if(ev.getCurrentResponse().length() > 20000){
+		if(ev.getCurrentResponse().length() > 50000){
 			// truncate the size of response
-			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, 20000));
-			log.warn("Response of "+this.getName()+" bigger than 20000 (truncated!).");
+			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, 50000));
+			log.warn("Response of "+this.getName()+" bigger than 50000 chars (truncated!).");
 		}
 
 		try {
