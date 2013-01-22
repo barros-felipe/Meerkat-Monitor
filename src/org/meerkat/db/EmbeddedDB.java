@@ -87,6 +87,7 @@ public class EmbeddedDB implements Runnable{
 		if(!settingsLoaded){
 			loadSettings();
 		}
+		
 		Connection c = getConnForUpdates();
 		PreparedStatement ps = null;
 		Statement st, st1, st2, st3, st4, st5, st6, st7;
@@ -95,9 +96,14 @@ public class EmbeddedDB implements Runnable{
 			ps = getConnForUpdates().prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS");
 			rs = ps.executeQuery();
 			rs.next();
+			
+			ps.close();
+			rs.close();
+			
 		} catch (SQLException e) {
 			String message = e.getMessage();
 			if(message.contains(" does not exist")){ // Create the table
+				log.info("\tCreating new DB...");
 				try {
 					st = c.createStatement();
 					st.executeUpdate("CREATE TABLE MEERKAT.EVENTS( "+
@@ -152,8 +158,6 @@ public class EmbeddedDB implements Runnable{
 		}finally{		
 			try {
 				c.commit();
-				ps.close();
-				rs.close();
 				c.close();
 			} catch (SQLException e) {
 				log.error("Error closing SQL resources for initializeDB()", e);
