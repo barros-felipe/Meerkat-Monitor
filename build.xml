@@ -3,6 +3,7 @@
 
 	<property name="mm.id" value="Meerkat-Monitor" />
 	<property name="mm.exe.file" value="${mm.id}.jar" />
+	<property name="mm.deps.file" value="${mm.id}-deps.jar" />
 	<property name="launch4j.dir" location="external_tools/launch4j" />
 	<property name="nsis.dir" location="${basedir}/external_tools/nsis" />
 	
@@ -36,6 +37,10 @@
 		<javac destdir="build/classes" debug="true" srcdir="src" includeantruntime="no">
 			<classpath refid="compile.classpath"/>
 		</javac>
+		
+		<!-- create the dep package (needed by web client) -->
+		<jar destfile="dist/${mm.deps.file}" basedir="build/classes"/>
+		
 	</target>
 	
 	<!-- CREATE BUNDLE -->
