@@ -33,6 +33,10 @@ public interface MeerkatWebServiceManager{
 
 	@WebMethod(operationName = "getVersion", action = "getversion")
 	String getVersion();
+	
+	@WebMethod(operationName = "checkKey", action = "checkKey")
+	boolean checkKey(
+			@WebParam(name="givenKey") String givenKey);
 
 	@WebMethod(operationName = "changeMasterKey", action = "changeMasterKey")
 	String changeMasterKey(

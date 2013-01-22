@@ -72,8 +72,9 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	 * @param givenKey
 	 * @return
 	 */
-	private boolean checkKey(String givenKey){
-		if(givenKey.equals(mkm.getMasterKey())){
+	@Override
+	public boolean checkKey(String givenKey){
+		if(givenKey != null && givenKey.length() > 0 && givenKey.equals(mkm.getMasterKey())){
 			return true;
 		}
 		return false;
@@ -135,7 +136,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 	@Override
 	public String changeMasterKey(String currentMasterKey, String newMasterKey) {
-		if(!checkKey(currentMasterKey)){
+		if(!checkKey(currentMasterKey) || newMasterKey == null){
 			log.info("WS BAD request ["+getRequestClientIP()+"]: changeMasterKey(). Bad attempt to change MasterKey!");
 			return "Incorrect current key!";
 		}
