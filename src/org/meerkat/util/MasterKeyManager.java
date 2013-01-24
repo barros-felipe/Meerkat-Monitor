@@ -72,7 +72,7 @@ public class MasterKeyManager {
 		pl = new PropertiesLoader(propertiesFile);
 		Properties prop = pl.getPropetiesFromFile();
 		prop.setProperty("meerkat.password.master", newMasterKey);
-		pl.writePropertiesToFile(prop, propertiesFile);
+		pl.writePropertiesToFile(prop);
 
 		// Update the password for all applications
 		BasicTextEncryptor oldTextEncrypt = new BasicTextEncryptor();

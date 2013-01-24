@@ -138,34 +138,51 @@ public class PropertiesLoader {
 			}
 		}
 
-		// Check existence of properties inside the properties file
-		String missingProperties = "Following properties are missing in properties file:";
-		int numberOfMissingProperties = 0;
-		for (int i = 0; i < expectedProperties.length; i++) {
-			if (!propertiesFileContents.contains(expectedProperties[i])) {
-				missingProperties += "\n - " + expectedProperties[i];
-				numberOfMissingProperties++;
-			}
-		}
-
-		if (numberOfMissingProperties > 0) {
+		String missingProperties = validateStringProperties(propertiesFileContents);
+		if(!missingProperties.equals("")){	
 			log.error(missingProperties);
-			log.fatal("Required properties missing in properties file");
+			log.fatal("Required properties missing!");
 		} else {
+			missingProperties = "";
 			log.info("Validated required properties");
 		}
 
 	}
 
 	/**
+	 * validateStringProperties
+	 * @param strProperties
+	 */
+	public final String validateStringProperties(String strProperties){
+		String missingProperties = "Following properties are missing:";
+		
+		int numberOfMissingProperties = 0;
+		for (int i = 0; i < expectedProperties.length; i++) {
+			if (!strProperties.contains(expectedProperties[i])) {
+				missingProperties += "\n - " + expectedProperties[i];
+				numberOfMissingProperties++;
+			}
+		}
+		
+		if (numberOfMissingProperties > 0) {
+			log.error(missingProperties);
+		} else {
+			missingProperties = "";
+		}
+		
+		return missingProperties;
+	}
+	
+	
+	/**
 	 * writePropertiesToFile
 	 * 
 	 * @param p
 	 * @param file
 	 */
-	public final void writePropertiesToFile(Properties p, String file) {
+	public final void writePropertiesToFile(Properties p) {
 		try {
-			p.store(new FileOutputStream(file), "Meerkat-Monitor\n meerkat-monitor.org");
+			p.store(new FileOutputStream(propertiesFile), "Meerkat-Monitor\n meerkat-monitor.org");
 		} catch (FileNotFoundException e) {
 			log.error("Failed to write properties file (not found)!", e);
 		} catch (IOException e) {
@@ -209,7 +226,7 @@ public class PropertiesLoader {
 		Properties defaultProperties = new Properties();
 		defaultProperties.putAll(prop);
 
-		writePropertiesToFile(defaultProperties, file);
+		writePropertiesToFile(defaultProperties);
 
 	}
 	

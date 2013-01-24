@@ -118,5 +118,14 @@ public interface MeerkatWebServiceManager{
 	String removeAllApps(
 			@WebParam(name="masterKey") String masterKey);
 	
+	@WebMethod(operationName = "getProperties", action = "getProperties")
+	byte[] getProperties(
+			@WebParam(name="masterKey") String masterKey);
+	
+	@WebMethod(operationName = "updateProperties", action = "updateProperties")
+	String updateProperties(
+			@WebParam(name="masterKey") String masterKey,
+			@WebParam(name="properties") byte[] properties);
+	
 }
 
