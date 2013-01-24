@@ -60,7 +60,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	 * @param webAppsCollection
 	 * @param httpServer
 	 */
-	public MeerkatWebService(final MasterKeyManager mkm, WebAppCollection webAppsCollection, HttpServer httpServer){
+	public MeerkatWebService(MasterKeyManager mkm, WebAppCollection webAppsCollection, HttpServer httpServer){
 		this.mkm = mkm;
 		this.httpServer = httpServer;
 		this.wapc = webAppsCollection;
@@ -391,7 +391,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		
 		// save properties in temp file
 		String tempWorkingDir = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator");
-		String tempPropertiesFile = tempWorkingDir+"/mmproperties.tmp";
+		String tempPropertiesFile = tempWorkingDir + System.getProperty("file.separator") +"mmproperties.tmp";
 		FileUtil fu = new FileUtil();
 		
 		String pr = "";
@@ -408,12 +408,15 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			return valiPropString;
 		}
 		
+		// update the key internally before saving the properties file
+		mkm.changeMasterKey(String.valueOf(pL.getPropetiesFromFile().getProperty("meerkat.password.master")));
+				
 		// Save the new properties
 		PropertiesLoader pLnew = new PropertiesLoader(propertiesFile);
 		pLnew.writePropertiesToFile(new PropertiesLoader(tempPropertiesFile).getPropetiesFromFile());
-		fu.removeFile(tempPropertiesFile); // Delete the temp file
-		
+				
 		// update settings
+		fu.removeFile(tempPropertiesFile); // Delete the temp file
 		httpServer.refreshIndex();
 		
 		return "Properties updated!";

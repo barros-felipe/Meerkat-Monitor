@@ -34,6 +34,7 @@ public class MasterKeyManager {
 	private WebAppCollection wac;
 	private PropertiesLoader pl;
 	private String propertiesFile;
+	private String propKeyStr = "meerkat.password.master";
 
 	/**
 	 * MasterKeyManager
@@ -58,7 +59,7 @@ public class MasterKeyManager {
 	public final String getMasterKey(){
 		pl = new PropertiesLoader(propertiesFile);
 		Properties prop = pl.getPropetiesFromFile();
-		return prop.getProperty("meerkat.password.master");
+		return prop.getProperty(propKeyStr);
 	}
 
 	/**
@@ -68,12 +69,15 @@ public class MasterKeyManager {
 	public synchronized void changeMasterKey(String newMasterKey){
 		String currMasterPasswd = getMasterKey();
 
-		// Change value in properties file first
+		// Change value in properties file first 
+		// (if needed - if updated trough WS may not be needed)
 		pl = new PropertiesLoader(propertiesFile);
 		Properties prop = pl.getPropetiesFromFile();
-		prop.setProperty("meerkat.password.master", newMasterKey);
-		pl.writePropertiesToFile(prop);
-
+		if(!prop.getProperty(propKeyStr).equals(newMasterKey)){
+			prop.setProperty(propKeyStr, newMasterKey);
+			pl.writePropertiesToFile(prop);
+		}
+		
 		// Update the password for all applications
 		BasicTextEncryptor oldTextEncrypt = new BasicTextEncryptor();
 		oldTextEncrypt.setPassword(currMasterPasswd);
@@ -86,11 +90,10 @@ public class MasterKeyManager {
 			String type = curr.getType();
 
 			if(type.equals(WebApp.TYPE_SSH)){ // If SSH we need to update the encrypted password
-				SecureShellSSH app = (SecureShellSSH)curr;
-				passwd = app.getPassword();
-				currPasswd = oldTextEncrypt.decrypt(passwd);
-				app.setPasswd(currPasswd);
-
+					SecureShellSSH app = (SecureShellSSH)curr;
+					passwd = app.getPassword();
+					currPasswd = oldTextEncrypt.decrypt(passwd);
+					app.setPasswd(currPasswd);
 			}else if(type.equals(WebApp.TYPE_DATABASE)){ // If SQL we need to update the encrypted password
 				SQLService app = (SQLService)curr;
 				passwd = app.getPassword();
@@ -99,6 +102,7 @@ public class MasterKeyManager {
 			}
 		}
 		wac.saveConfigXMLFile();
+
 	}
 
 	/**
