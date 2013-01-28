@@ -113,13 +113,14 @@ public class PropertiesLoader {
 	 * 
 	 * @param propertiesList
 	 */
-	public final void validateProperties() {
+	public final boolean validateProperties() {
 		FileInputStream stream = null;
 		String propertiesFileContents = "";
 		try {
 			stream = new FileInputStream(new File(propertiesFile));
 		} catch (FileNotFoundException e1) {
 			log.fatal("Properties file not found.", e1);
+			return false;
 		}
 		try {
 			FileChannel fc = stream.getChannel();
@@ -130,11 +131,13 @@ public class PropertiesLoader {
 					.toString();
 		} catch (IOException e) {
 			log.error("Error validating properties file.", e);
+			return false;
 		} finally {
 			try {
 				stream.close();
 			} catch (IOException e) {
 				log.error("Error closing validation of properties file.", e);
+				return false;
 			}
 		}
 
@@ -142,9 +145,11 @@ public class PropertiesLoader {
 		if(!missingProperties.equals("")){	
 			log.error(missingProperties);
 			log.fatal("Required properties missing!");
+			return false;
 		} else {
 			missingProperties = "";
 			log.info("Validated required properties");
+			return true;
 		}
 
 	}
