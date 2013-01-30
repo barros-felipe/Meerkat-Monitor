@@ -30,6 +30,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 public class FileUtil {
@@ -46,11 +47,11 @@ public class FileUtil {
 	 * @param filename
 	 */
 	public final void removeFile(String filename) {
-		File file = new File(filename);
-		if (file.exists()) {
-			if (!file.delete()) {
-				log.error("Deleting file: " + filename);
-			}
+		try {
+			FileUtils.forceDelete(new File(filename));
+		} catch (IOException e) {
+			log.error(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

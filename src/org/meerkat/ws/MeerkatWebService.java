@@ -18,9 +18,6 @@
  */
 package org.meerkat.ws;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import javax.annotation.Resource;
@@ -29,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.services.SQLService;
@@ -368,19 +364,10 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			return "Incorrect key!".getBytes();
 		}
 
-		byte[] contentBytes = "".getBytes();
-		File pFile = new File(propertiesFile);
-		InputStream is;
-		try {
-			is = new FileInputStream(pFile);
-			contentBytes = IOUtils.toByteArray(is);
-			is.close();
-		} catch (Exception e) {
-			return e.getMessage().getBytes();
-		}
-       
-		return contentBytes;
+		PropertiesLoader pL = new PropertiesLoader(propertiesFile);
+		byte[] contentBytes = PropertiesLoader.getPropertiesAsContentString(pL.getPropetiesFromFile()).getBytes();
 		
+		return contentBytes;
 	}
 
 	@Override
@@ -389,9 +376,9 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			return "Incorrect key!";
 		}
 		
-		// save properties in temp file
-		String tempWorkingDir = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator");
-		String tempPropertiesFile = tempWorkingDir + System.getProperty("file.separator") +"mmproperties.tmp";
+		//String tempWorkingDir = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator");
+		//String tempPropertiesFile = tempWorkingDir + System.getProperty("file.separator") +"mmproperties.tmp";
+		String tempPropertiesFile = "mmproperties.tmp";
 		FileUtil fu = new FileUtil();
 		
 		String pr = "";
@@ -402,7 +389,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 		fu.writeToFile(tempPropertiesFile, pr);
 		PropertiesLoader pL = new PropertiesLoader(tempPropertiesFile);			
-		String valiPropString = pL.validateStringProperties(pr);
+		String valiPropString = PropertiesLoader.validateStringProperties(pr);
 		
 		if(valiPropString.length() > 0){ // Properties are not valid
 			return valiPropString;

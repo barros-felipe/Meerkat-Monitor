@@ -110,12 +110,12 @@ public class Visualization {
 		// omit http status code if doesn't make sense
 		if (webApp.getType().equals(WebApp.TYPE_WEBAPP)
 				|| webApp.getType().equals(WebApp.TYPE_WEBSERVICE)) {
-			dataTableBegin += "/* HTTP code */ { \"sClass\": \"center\" }, \n";
+			dataTableBegin += "		        /* HTTP code */ { \"sClass\": \"center\" }, \n";
 		}else{
-			dataTableBegin += "/* HTTP code */ { \"sClass\": \"center\", \"bVisible\": false }, \n";
+			dataTableBegin += "		        /* HTTP code */ { \"sClass\": \"center\", \"bVisible\": false }, \n";
 		}
 
-		dataTableBegin += "     /* Desc. */ 	{ \"sClass\": \"center\" }, \n"
+		dataTableBegin += "		        /* Desc. */ 	{ \"sClass\": \"center\" }, \n"
 				+ "		        /* Response */ 	{ \"sClass\": \"center\", \"bSearchable\": false, \"bSortable\": false}, \n"
 				+ "		]    } ); \n"
 				+ "	} ); \n"

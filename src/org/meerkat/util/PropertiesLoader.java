@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -35,43 +36,43 @@ import org.apache.log4j.Logger;
 
 public class PropertiesLoader {
 
+	// NOTE: all properties are also referenced in 
+	//		 in function generateDefaultPropertiesFile()
+	private static String[] expectedProperties = {
+		"meerkat.email.send.emails", 
+		"meerkat.email.smtp.server", 
+		"meerkat.email.smtp.security", 
+		"meerkat.email.smtp.port", 
+		"meerkat.email.smtp.user", 
+		"meerkat.email.smtp.password", 
+		"meerkat.email.to", 
+		"meerkat.email.from", 
+		"meerkat.email.subjectPrefix", 
+		"meerkat.email.sending.test", 
+		"meerkat.monit.test.time", 
+		"meerkat.webserver.port", 
+		"meerkat.ssl.keystore", 
+		"meerkat.ssl.password", 
+		"meerkat.dashboard.gauge", 
+		"meerkat.webserver.rconfig", 
+		"meerkat.password.master", 
+		"meerkat.webserver.logaccess", 
+		"meerkat.webserver.showapptype", 
+		"meerkat.embeddeddb.user", 
+		"meerkat.embeddeddb.passwd", 
+		"meerkat.embeddeddb.dbname", 
+		"meerkat.app.timeline.maxrecords"
+	};
+	
 	private static Logger log = Logger.getLogger(PropertiesLoader.class);
 	private String propertiesFile;
-	private String[] expectedProperties;
+	private String missingProperties = "";
 	
 	/**
 	 * PropertiesLoader
 	 */
 	public PropertiesLoader(String propertiesFile){
 		this.propertiesFile = propertiesFile;
-		
-		// NOTE: all properties are also referenced in 
-		//		 in function generateDefaultPropertiesFile()
-		expectedProperties = new String[23];
-		expectedProperties[0] = "meerkat.email.send.emails";
-		expectedProperties[1] = "meerkat.email.smtp.server";
-		expectedProperties[2] = "meerkat.email.smtp.security";
-		expectedProperties[3] = "meerkat.email.smtp.port";
-		expectedProperties[4] = "meerkat.email.smtp.user";
-		expectedProperties[5] = "meerkat.email.smtp.password";
-		expectedProperties[6] = "meerkat.email.to";
-		expectedProperties[7] = "meerkat.email.from";
-		expectedProperties[8] = "meerkat.email.subjectPrefix";
-		expectedProperties[9] = "meerkat.email.sending.test";
-		expectedProperties[10] = "meerkat.monit.test.time";
-		expectedProperties[11] = "meerkat.webserver.port";
-		expectedProperties[12] = "meerkat.ssl.keystore";
-		expectedProperties[13] = "meerkat.ssl.password";
-		expectedProperties[14] = "meerkat.dashboard.gauge";
-		expectedProperties[15] = "meerkat.webserver.rconfig";
-		expectedProperties[16] = "meerkat.password.master";
-		expectedProperties[17] = "meerkat.webserver.logaccess";
-		expectedProperties[18] = "meerkat.webserver.showapptype";
-		expectedProperties[19] = "meerkat.embeddeddb.user";
-		expectedProperties[20] = "meerkat.embeddeddb.passwd";
-		expectedProperties[21] = "meerkat.embeddeddb.dbname";
-		expectedProperties[22] = "meerkat.app.timeline.maxrecords";
-		
 		File tmpPropFile = new File(propertiesFile);
 		if(!tmpPropFile.exists()){
 			log.warn("- Properties not found. Generating a default one...");
@@ -141,25 +142,33 @@ public class PropertiesLoader {
 			}
 		}
 
-		String missingProperties = validateStringProperties(propertiesFileContents);
-		if(!missingProperties.equals("")){	
-			log.error(missingProperties);
+		this.missingProperties = validateStringProperties(propertiesFileContents);
+		if(!this.missingProperties.equals("")){	
+			log.error(this.missingProperties);
 			log.fatal("Required properties missing!");
 			return false;
 		} else {
-			missingProperties = "";
-			log.info("Validated required properties");
+			this.missingProperties = "";
 			return true;
 		}
 
 	}
 
 	/**
+	 * getMissingProperties
+	 * @return
+	 */
+	public final String getMissingProperties(){
+		return missingProperties;
+	}
+	
+	
+	/**
 	 * validateStringProperties
 	 * @param strProperties
 	 */
-	public final String validateStringProperties(String strProperties){
-		String missingProperties = "Following properties are missing:";
+	public static String validateStringProperties(String strProperties){
+		String missingProperties = "Following properties are missing or invalid:";
 		
 		int numberOfMissingProperties = 0;
 		for (int i = 0; i < expectedProperties.length; i++) {
@@ -234,6 +243,45 @@ public class PropertiesLoader {
 		writePropertiesToFile(defaultProperties);
 
 	}
+	
+	/**
+	 * getPropertiesAsContentString
+	 * @param prop
+	 * @return
+	 */
+	public static String getPropertiesAsContentString(Properties prop){
+		String propAsContentString = "";
+		Enumeration<?> keys = prop.keys();
+		
+		while (keys.hasMoreElements()) {
+		  String key = (String)keys.nextElement();
+		  String value = (String)prop.get(key);
+		  propAsContentString += key+"="+value+"\n";
+		}
+		
+		return propAsContentString;
+	}
+	
+
+	/**
+	 * getStringContentAsProperties
+	 * @param strProps
+	 * @return
+	 */
+	public static Properties getStringContentAsProperties(String strProps){
+		Properties prop = new Properties();
+		String[] rawProperties = strProps.split("\n");
+		
+		String[] currProp;
+		for(int i=0; i<rawProperties.length; i++){
+			currProp = rawProperties[i].split("=");
+			prop.put(currProp[0], currProp[1]);
+		}
+		
+		return prop;
+	}
+	
+	
 	
 	/**
 	 * getPropertiesFile

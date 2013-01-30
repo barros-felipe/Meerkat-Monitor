@@ -19,7 +19,6 @@
 
 package org.meerkat.webapp;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -65,7 +64,7 @@ public class WebAppCollection {
 	HttpServer httpServer;
 	@XStreamOmitField
 	AppGroupCollection appGroupCollection;
-	
+
 
 	/**
 	 * WebAppCollection
@@ -90,7 +89,7 @@ public class WebAppCollection {
 	public final void setHttpServer(HttpServer httpServer){
 		this.httpServer = httpServer;
 	}
-	
+
 	/**
 	 * setGroupCollection
 	 * @param appGroupCollection
@@ -98,7 +97,7 @@ public class WebAppCollection {
 	public final void setGroupCollection(AppGroupCollection appGroupCollection){
 		this.appGroupCollection = appGroupCollection;
 	}
-	
+
 	/**
 	 * setConfigFile
 	 * 
@@ -110,20 +109,6 @@ public class WebAppCollection {
 
 	public final void setTempWorkingDir(String tempWorkingDir) {
 		this.tempWorkingDir = tempWorkingDir;
-
-		// Create the timeline file (with empty data)
-		String contents = "There is no data available yet. Please come back later.";
-
-		fu = new FileUtil();
-		File tmp = new File(tempWorkingDir);
-		if (!tmp.exists()) {
-			if (!tmp.mkdirs()) {
-				log.error("ERROR creating temporary directory: "
-						+ tempWorkingDir);
-			}
-		}
-		fu.removeFile(tmp + "/" + this.getCollectionDataFileName());
-		fu.writeToFile(tmp + "/" + this.getCollectionDataFileName(), contents);
 	}
 
 	/**
@@ -258,7 +243,7 @@ public class WebAppCollection {
 		}
 		return dataTableBegin + dataTableData + dataTableEnd;	
 	}
-	*/
+	 */
 
 
 	/**
@@ -317,7 +302,7 @@ public class WebAppCollection {
 		Thread visDataWriterThread = new Thread(dataCollectionWriter);
 		visDataWriterThread.start();
 	}
-	*/
+	 */
 
 	/**
 	 * isWebAppByNamePresent
@@ -456,11 +441,11 @@ public class WebAppCollection {
 		} catch (SQLException e) {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
 		}
-		
+
 		//this.writeWebAppCollectionMotionChart();
-		
+
 		httpServer.refreshIndex();
-		
+
 		return nEvents;
 	}
 
@@ -480,13 +465,13 @@ public class WebAppCollection {
 		} catch (SQLException e) {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
 		}
-		
+
 		this.getWebAppByName(appName).writeWebAppVisualizationDataFile();
 		httpServer.refreshIndex();
-		
+
 		return nEvents;
 	}
-	
+
 	/**
 	 * removeAllApps
 	 * @return
@@ -496,10 +481,10 @@ public class WebAppCollection {
 		this.resetAllAppsData(); // Clear DB
 		webAppsCollection.clear(); // Clear Apps
 		appGroupCollection.populateGroups(this); // Clear Groups
-		
+
 		return nWebApps;
 	}
-	
+
 	/**
 	 * getEmbeddedDB
 	 * @return
