@@ -36,8 +36,11 @@ import org.apache.log4j.Logger;
 
 public class PropertiesLoader {
 
-	// NOTE: all properties are also referenced in 
-	//		 in function generateDefaultPropertiesFile()
+	// NOTE1: all properties are also referenced in 
+	//		  in function generateDefaultPropertiesFile()
+	// NOTE2: In case of new additions don't forget to
+	// 		  add data type validation in function 
+	//		  validateStringProperties()	
 	private static String[] expectedProperties = {
 		"meerkat.email.send.emails", 
 		"meerkat.email.smtp.server", 
@@ -168,7 +171,7 @@ public class PropertiesLoader {
 	 * @param strProperties
 	 */
 	public static String validateStringProperties(String strProperties){
-		String missingProperties = "Following properties are missing or invalid:";
+		String missingProperties = "Invalid data: ";
 		
 		int numberOfMissingProperties = 0;
 		for (int i = 0; i < expectedProperties.length; i++) {
@@ -180,11 +183,84 @@ public class PropertiesLoader {
 		
 		if (numberOfMissingProperties > 0) {
 			log.error(missingProperties);
+			return missingProperties;
 		} else {
-			missingProperties = "";
+			// Validate data types
+			boolean allValid = true;
+			Properties props = getStringContentAsProperties(strProperties);
+			
+			if(!DataTypePropertiesValidator.isBoolean(props.getProperty("meerkat.email.send.emails"))){
+				missingProperties += "Email Notifications, ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isInteger(props.getProperty("meerkat.email.smtp.port"))){
+				missingProperties += "SMTP Port, ";
+				allValid = false;
+			}
+			
+			//not validating TO address(es) for now... Just FROM
+			
+			if(!DataTypePropertiesValidator.isEmailAddress(props.getProperty("meerkat.email.from"))){
+				missingProperties += "FROM Address, ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isBoolean(props.getProperty("meerkat.email.sending.test"))){
+				missingProperties += "Send test email at startup, ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isInteger(props.getProperty("meerkat.monit.test.time"))){
+				missingProperties += "Pause between rounds, ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isInteger(props.getProperty("meerkat.webserver.port")) || 
+					Integer.parseInt(props.getProperty("meerkat.webserver.port")) <= 1024){
+				missingProperties += "Web server port (should be >1024), ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isBoolean(props.getProperty("meerkat.dashboard.gauge"))){
+				missingProperties += "Availability gauge, ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isBoolean(props.getProperty("meerkat.webserver.rconfig"))){
+				missingProperties += "Allow access to applications config, ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isBoolean(props.getProperty("meerkat.webserver.logaccess"))){
+				missingProperties += "Allow access to application log, ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isBoolean(props.getProperty("meerkat.webserver.showapptype"))){
+				missingProperties += "Show application type, ";
+				allValid = false;
+			}
+			
+			if(!DataTypePropertiesValidator.isInteger(props.getProperty("meerkat.app.timeline.maxrecords")) || 
+					Integer.parseInt(props.getProperty("meerkat.webserver.port")) <= 0){
+				missingProperties += "Timeline Max. records, ";
+				allValid = false;
+			}
+
+			if(allValid){
+				return "";
+			}else{
+				// Remove the last ", "
+				StringBuilder b = new StringBuilder(missingProperties);
+				b.replace(missingProperties.lastIndexOf(", "), missingProperties.lastIndexOf(", ") + 2, "" );
+				missingProperties = b.toString();	
+				
+				return missingProperties;
+			}
 		}
 		
-		return missingProperties;
+		
 	}
 	
 	
@@ -214,14 +290,14 @@ public class PropertiesLoader {
 		Map<String, String> prop = new HashMap<String, String>();
 
 		prop.put("meerkat.email.send.emails", "false");
-		prop.put("meerkat.email.smtp.server", "not_defined");
+		prop.put("meerkat.email.smtp.server", "smtp.domain");
 		prop.put("meerkat.email.smtp.security", "none");
 		prop.put("meerkat.email.smtp.port", "25");
-		prop.put("meerkat.email.smtp.user", "not_defined");
-		prop.put("meerkat.email.smtp.password", "not_defined");
-		prop.put("meerkat.email.to", "not_defined@domain");
-		prop.put("meerkat.email.from", "not_defined@domain");
-		prop.put("meerkat.email.subjectPrefix", "Meerkat-Monitor");
+		prop.put("meerkat.email.smtp.user", "user");
+		prop.put("meerkat.email.smtp.password", "password");
+		prop.put("meerkat.email.to", "user@domain");
+		prop.put("meerkat.email.from", "user@domain");
+		prop.put("meerkat.email.subjectPrefix", "Meerkat-Monitor Notification");
 		prop.put("meerkat.email.sending.test", "false");
 		prop.put("meerkat.monit.test.time", "5");
 		prop.put("meerkat.webserver.port", "6777");
@@ -274,8 +350,10 @@ public class PropertiesLoader {
 		
 		String[] currProp;
 		for(int i=0; i<rawProperties.length; i++){
-			currProp = rawProperties[i].split("=");
-			prop.put(currProp[0], currProp[1]);
+			if(!rawProperties[i].contains("#")){ // discard properties commments
+				currProp = rawProperties[i].split("=");
+				prop.put(currProp[0], currProp[1].replace("\n", "").replace("\r", ""));
+			}
 		}
 		
 		return prop;

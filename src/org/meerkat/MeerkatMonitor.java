@@ -98,7 +98,7 @@ public class MeerkatMonitor {
 		// Load the driver first time
 		ebd.loadDriver();		
 		ebd.initializeDB();
-		ebd.executeDBMaintenance();
+		//ebd.executeDBMaintenance();
 
 		// Prepare applications settings
 		log.info("Loading application settings...");

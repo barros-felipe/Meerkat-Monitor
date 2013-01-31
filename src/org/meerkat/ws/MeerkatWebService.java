@@ -19,6 +19,7 @@
 package org.meerkat.ws;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Properties;
 
 import javax.annotation.Resource;
 import javax.jws.WebService;
@@ -33,7 +34,6 @@ import org.meerkat.services.SecureShellSSH;
 import org.meerkat.services.SocketService;
 import org.meerkat.services.WebApp;
 import org.meerkat.services.WebServiceApp;
-import org.meerkat.util.FileUtil;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.util.PropertiesLoader;
 import org.meerkat.webapp.WebAppCollection;
@@ -306,7 +306,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 		int nEvents = wapc.resetAllAppsData();
 		log.info("WS request ["+getRequestClientIP()+"]: resetAllData()");
-		
+
 		return "Removed all applications events ("+nEvents+"). (DB is now empty!)";
 
 	}
@@ -340,7 +340,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		log.info("Finished. Meerkat-Monitor stopped!");
 		log.info("");
 		System.exit(0);
-		
+
 		return ""; // keep the compiler happy
 	}
 
@@ -349,12 +349,12 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
-		
+
 		int nEvents = wapc.getNumberOfEventsInCollection();
 		int nApps = wapc.removeAllApps();
-		
+
 		log.info("WS request ["+getRequestClientIP()+"]: removeAllApps()");
-		
+
 		return "Removed "+nEvents+" events and "+nApps+" applications";
 	}
 
@@ -366,7 +366,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 		PropertiesLoader pL = new PropertiesLoader(propertiesFile);
 		byte[] contentBytes = PropertiesLoader.getPropertiesAsContentString(pL.getPropetiesFromFile()).getBytes();
-		
+
 		return contentBytes;
 	}
 
@@ -375,41 +375,32 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
-		
-		//String tempWorkingDir = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator");
-		//String tempPropertiesFile = tempWorkingDir + System.getProperty("file.separator") +"mmproperties.tmp";
-		String tempPropertiesFile = "mmproperties.tmp";
-		FileUtil fu = new FileUtil();
-		
-		String pr = "";
+
+		Properties prop;
 		try {
-			pr = new String(properties, "UTF-8");
+			prop = PropertiesLoader.getStringContentAsProperties(new String(properties, "UTF-8"));
+			String validationStr = PropertiesLoader.validateStringProperties(new String(properties, "UTF-8"));
+			if(validationStr.length() > 0){ // Properties are not valid
+				return validationStr;
+			}
 		} catch (UnsupportedEncodingException e) {
 			return e.getMessage();
 		}
-		fu.writeToFile(tempPropertiesFile, pr);
-		PropertiesLoader pL = new PropertiesLoader(tempPropertiesFile);			
-		String valiPropString = PropertiesLoader.validateStringProperties(pr);
-		
-		if(valiPropString.length() > 0){ // Properties are not valid
-			return valiPropString;
-		}
-		
+
 		// update the key internally before saving the properties file
-		mkm.changeMasterKey(String.valueOf(pL.getPropetiesFromFile().getProperty("meerkat.password.master")));
-				
+		mkm.changeMasterKey(String.valueOf(prop.getProperty("meerkat.password.master")));
+
 		// Save the new properties
 		PropertiesLoader pLnew = new PropertiesLoader(propertiesFile);
-		pLnew.writePropertiesToFile(new PropertiesLoader(tempPropertiesFile).getPropetiesFromFile());
-				
+		pLnew.writePropertiesToFile(prop);
+
 		// update settings
-		fu.removeFile(tempPropertiesFile); // Delete the temp file
 		httpServer.refreshIndex();
-		
+
 		return "Properties updated!";
 	}
 
-	
-	
+
+
 
 }
