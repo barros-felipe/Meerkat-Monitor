@@ -120,7 +120,6 @@ public class MeerkatMonitor {
 		// Generate applications groups
 		log.info("Creating applications groups...");
 		AppGroupCollection appGroupCollection = new AppGroupCollection();
-		appGroupCollection.setTempWorkingDir(tempWorkingDir);
 		appGroupCollection.populateGroups(webAppsCollection);
 		appGroupCollection.printLogGroupMembers();
 		webAppsCollection.setGroupCollection(appGroupCollection); // Set group to app collection

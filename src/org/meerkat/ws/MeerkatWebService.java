@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
+import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.network.MailManager;
@@ -241,17 +242,37 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 	@Override
 	public String addWeb(String masterKey, String name, String url, String expectedString,
-			String executeOnOffline) {
+			String executeOnOffline, String groups, String active) {
 
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
 
+		// validate input
+		String invalidData = "";
+		// App name
+		if(name.length() <=0){
+			invalidData += "Name; ";
+		}
+		// App URL
+		try{ 
+			new HttpGet(url);
+		}catch(Exception e){
+			invalidData += "URL; ";
+		}
+		
+		if(invalidData.length() > 0){
+			return "Invalid data: "+invalidData;
+		}
+		
+		
 		if(wapc.isWebAppByNamePresent(name)){
-			return "Invalid or duplicated name!";
+			return "App already present with same name: "+name;
 		}
 
 		WebApp webApp = new WebApp(name, url, expectedString, executeOnOffline);
+		webApp.addGroups(groups);
+		webApp.setActive(Boolean.parseBoolean(active));
 
 		WebAppResponse currentStatus = webApp.checkWebAppStatus();
 		String online = "OFFLINE";

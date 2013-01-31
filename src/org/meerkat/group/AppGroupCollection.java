@@ -19,7 +19,6 @@
 
 package org.meerkat.group;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +27,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.meerkat.services.WebApp;
-import org.meerkat.util.FileUtil;
 import org.meerkat.webapp.WebAppCollection;
 
 public class AppGroupCollection {
@@ -37,8 +35,6 @@ public class AppGroupCollection {
 	private List<AppGroup> appGroupCollection = Collections
 			.synchronizedList(new ArrayList<AppGroup>());
 	private int numberOfGroups = 0;
-	private String tempWorkingDir = "";
-	private String dataFileName = "groupsAvailabilityGauge.html";
 
 	/**
 	 * 
@@ -68,15 +64,6 @@ public class AppGroupCollection {
 			appGroupCollection.add(appGroup);
 			numberOfGroups++;
 		}
-	}
-
-	/**
-	 * setTempWorkingDir
-	 * 
-	 * @param workingDir
-	 */
-	public final void setTempWorkingDir(String workingDir) {
-		this.tempWorkingDir = workingDir;
 	}
 
 	/**
@@ -186,59 +173,7 @@ public class AppGroupCollection {
 		}
 
 		return gaugeData;
-
 	}
 
-	/**
-	 * writeAppGroupCollectionDataFileGauge
-	 */
-	public final void writeAppGroupCollectionAvailabilityDataFileGauge() {
-		FileUtil fu = new FileUtil();
-
-		String htmlFileContentsTop = "<html>\n"
-				+ "<head>\n"
-				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>"
-				+ "<title>Group Collection Gauges</title>\n"
-				+ "<link rel=\"icon\"  href=\"/resources/faviconM.gif\"  type=\"image/x-icon\"></link>\n"
-				+ "<script type='text/javascript' src='http://www.google.com/jsapi'></script>\n"
-				+ "<script type=\"text/javascript\">\n"
-				+ "google.load('visualization', '1', {packages: ['gauge']});\n"
-				+ "</script>\n"
-				+ "<script type=\"text/javascript\">\n"
-				+ "function drawVisualization() {\n"
-
-				+ "var options = {width: 1000, height: 200, redFrom: 0, redTo: 95,\n"
-				+ "               yellowFrom: 95, yellowTo: 98, greenFrom: 98, greenTo: 100, \n"
-				+ "				  minorTicks: 5};\n"
-
-				+ "var data = new google.visualization.DataTable();\n";
-
-		String htmlFileContentsEnd = "new google.visualization.Gauge(document.getElementById('visualization')).\n"
-				+ "draw(data, options);\n"
-				+ " }\n"
-				+ "google.setOnLoadCallback(drawVisualization);\n"
-				+ "</script>\n"
-				+ "</head>\n"
-				+ "<body style=\"font-family: Arial;border: 0 none;\">\n"
-				+ "<a href=\"javascript:history.go(-1)\"><img src=\"resources/tango-previous.png\" border=\"0\"></a>\n"
-				+ "<h1>Group Availability</h1>\n"
-				+ "<div id=\"visualization\"></div>\n"
-				+ "</body>\n"
-				+ "</html>";
-
-		String htmlFileContents = htmlFileContentsTop
-				+ this.getAvailabilityGaugeData() + htmlFileContentsEnd;
-
-		File tmp = new File(tempWorkingDir);
-		if (!tmp.exists()) {
-			if (!tmp.mkdirs()) {
-				log.error("ERROR creating temporary directory: "
-						+ tempWorkingDir);
-			}
-		}
-
-		fu.removeFile(tmp + "/" + this.dataFileName);
-		fu.writeToFile(tmp + "/" + dataFileName, htmlFileContents);
-	}
 
 }

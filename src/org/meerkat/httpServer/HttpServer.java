@@ -50,7 +50,6 @@ public class HttpServer {
 
 	//private WebAppCollection wac;
 	private WebAppCollection wac;
-	private AppGroupCollection agc;
 	private Properties prop;
 	boolean displayGroupGauge;
 
@@ -118,7 +117,6 @@ public class HttpServer {
 	 */
 	public final void setDataSources(WebAppCollection wac, AppGroupCollection agc) {
 		this.wac = wac;
-		this.agc = agc;
 		customResHandler.setWebAppCollection(wac);
 	}
 
@@ -127,7 +125,7 @@ public class HttpServer {
 	 * 
 	 * @return
 	 */
-	private String getTopContent(AppGroupCollection agc, boolean showGauge, boolean showAppType) {
+	private String getTopContent(boolean showGauge, boolean showAppType) {
 		String topContent = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 				+ "<html><head>\n"
 				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
@@ -155,8 +153,7 @@ public class HttpServer {
 				+ "				  minorTicks: 5};\n"
 				+ "var data = new google.visualization.DataTable();\n"
 
-				+ agc.getAvailabilityGaugeData()
-
+				+ wac.getpAppGroupCollection().getAvailabilityGaugeData()
 				+ "new google.visualization.Gauge(document.getElementById('visualization')).\n"
 				+ "draw(data, options);\n"
 				+ " }\n"
@@ -265,9 +262,9 @@ public class HttpServer {
 
 				displayGroupGauge = Boolean.parseBoolean(prop.getProperty("meerkat.dashboard.gauge"));
 				if (displayGroupGauge) {
-					responseStatus = getTopContent(agc, displayGroupGauge, appTypePrefixEnabled);
+					responseStatus = getTopContent(displayGroupGauge, appTypePrefixEnabled);
 				} else {
-					responseStatus = getTopContent(agc, false, appTypePrefixEnabled);
+					responseStatus = getTopContent(false, appTypePrefixEnabled);
 				}
 
 				// Check if remote access to config is allowed

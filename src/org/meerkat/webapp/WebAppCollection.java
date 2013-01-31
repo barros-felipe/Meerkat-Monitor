@@ -127,6 +127,7 @@ public class WebAppCollection {
 	public final void addWebApp(WebApp app) {
 		app.setTempWorkingDir(this.tempWorkingDir);
 		webAppsCollection.add(app);
+		appGroupCollection.populateGroups(this);
 	}
 
 	/**
@@ -485,6 +486,14 @@ public class WebAppCollection {
 		return nWebApps;
 	}
 
+	/**
+	 * AppGroupCollection
+	 * @return
+	 */
+	public final AppGroupCollection getpAppGroupCollection(){
+		return appGroupCollection;
+	}
+	
 	/**
 	 * getEmbeddedDB
 	 * @return

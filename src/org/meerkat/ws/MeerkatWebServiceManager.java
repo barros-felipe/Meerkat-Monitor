@@ -89,7 +89,9 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="name") String name, 
 			@WebParam(name="url") String url, 
 			@WebParam(name="expectedString") String expectedString,
-			@WebParam(name="executeOnOffline") String executeOnOffline);
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "addWebService", action = "addWebService")
 	String addWebService(
