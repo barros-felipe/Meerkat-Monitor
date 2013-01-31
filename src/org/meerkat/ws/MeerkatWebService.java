@@ -29,6 +29,7 @@ import javax.xml.ws.handler.MessageContext;
 
 import org.apache.log4j.Logger;
 import org.meerkat.httpServer.HttpServer;
+import org.meerkat.network.MailManager;
 import org.meerkat.services.SQLService;
 import org.meerkat.services.SecureShellSSH;
 import org.meerkat.services.SocketService;
@@ -398,6 +399,26 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		httpServer.refreshIndex();
 
 		return "Properties updated!";
+	}
+
+	@Override
+	public String sendTestEmail(String masterKey,
+			String from,
+			String to,
+			String smtpServer,
+			String smtpPort,
+			String smtpSecurity,
+			String smtpUser,
+			String smtpPassword) {
+		
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+		
+		MailManager testMailManager = new MailManager();
+		String result = testMailManager.sendTestEmailSettingsFromWebService(from, to, smtpServer, smtpPort, smtpSecurity, smtpUser, smtpPassword);
+				
+		return result;
 	}
 
 

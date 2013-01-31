@@ -127,5 +127,15 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="masterKey") String masterKey,
 			@WebParam(name="properties") byte[] properties);
 	
+	@WebMethod(operationName = "sendTestEmail", action = "sendTestEmail")
+	String sendTestEmail(
+			@WebParam(name="masterKey") String masterKey,
+			@WebParam(name="from") String from,
+			@WebParam(name="to") String to,
+			@WebParam(name="smtpServer") String smtpServer,
+			@WebParam(name="smtpPort") String smtpPort,
+			@WebParam(name="smtpSecurity") String smtpSecurity,
+			@WebParam(name="smtpUser") String smtpUser,
+			@WebParam(name="smtpPassword") String smtpPassword);
 }
 
