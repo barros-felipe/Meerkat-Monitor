@@ -95,16 +95,43 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	}
 
 	@Override
-	public String addSSH(String masterKey, String name, String user, String passwd, String host, String port, String expectedResponse, String cmdToExecute){
+	public String addSSH(String masterKey, String name, String user, String passwd, String host, String port, 
+			String expectedResponse, String cmdToExecute, String executeOnOffline, String groups, String active){
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
 
+		// validate input
+		String invalidData = "";
+		// App name
+		if(name.length() <=0){
+			invalidData += "Name; ";
+		}
+		if(host.length() <=0){
+			invalidData += "Host; ";
+		}
+		// port
+		try{ 
+			int iport = Integer.valueOf(port);
+			if(iport <= 0){
+				throw new Exception();
+			}
+		}catch(Exception e){
+			invalidData += "Port; ";
+		}
+
+		if(invalidData.length() > 0){
+			return "Invalid data: "+invalidData;
+		}
+
 		if(wapc.isWebAppByNamePresent(name)){
-			return "Invalid or duplicated name!";
+			return "App already present with same name: "+name;
 		}
 
 		SecureShellSSH sshApp = new SecureShellSSH(name, user, passwd, host, port, expectedResponse, cmdToExecute);
+		sshApp.addGroups(groups);
+		sshApp.setActive(Boolean.parseBoolean(active));
+
 		WebAppResponse currentStatus = sshApp.checkWebAppStatus();
 		String online = "OFFLINE";
 		if(currentStatus.isOnline()){
@@ -260,12 +287,12 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}catch(Exception e){
 			invalidData += "URL; ";
 		}
-		
+
 		if(invalidData.length() > 0){
 			return "Invalid data: "+invalidData;
 		}
-		
-		
+
+
 		if(wapc.isWebAppByNamePresent(name)){
 			return "App already present with same name: "+name;
 		}
@@ -431,14 +458,14 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			String smtpSecurity,
 			String smtpUser,
 			String smtpPassword) {
-		
+
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
-		
+
 		MailManager testMailManager = new MailManager();
 		String result = testMailManager.sendTestEmailSettingsFromWebService(from, to, smtpServer, smtpPort, smtpSecurity, smtpUser, smtpPassword);
-				
+
 		return result;
 	}
 

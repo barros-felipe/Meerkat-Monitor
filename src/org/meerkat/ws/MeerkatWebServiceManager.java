@@ -57,7 +57,10 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="host") String host, 
 			@WebParam(name="port") String port, 
 			@WebParam(name="expectedResponse") String expectedResponse, 
-			@WebParam(name="cmdToExecute") String cmdToExecute);
+			@WebParam(name="cmdToExecute") String cmdToExecute,
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "addSocket", action = "addSocket")
 	String addSocket (
