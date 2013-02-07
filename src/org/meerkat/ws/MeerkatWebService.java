@@ -402,6 +402,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 		int nEvents = wapc.getNumberOfEventsInCollection();
 		int nApps = wapc.removeAllApps();
+		wapc.saveConfigXMLFile();
 
 		log.info("WS request ["+getRequestClientIP()+"]: removeAllApps()");
 
