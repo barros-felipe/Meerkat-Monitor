@@ -190,17 +190,45 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 	@Override
 	public String addSocket(String masterKey, String name, String host, String port,
-			String sendString, String expectedString, String executeOnOffline) {
+			String sendString, String expectedString, String executeOnOffline, 
+			String groups, String active) {
 
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
 
-		if(wapc.isWebAppByNamePresent(name)){
-			return "Invalid or duplicated name!";
+		// validate input
+		String invalidData = "";
+		// App name
+		if(name.length() <=0){
+			invalidData += "Name; ";
+		}
+		// host
+		if(host.length() <=0){
+			invalidData += "Host; ";
+		}
+		// port
+		try{ 
+			int iport = Integer.valueOf(port);
+			if(iport <= 0){
+				throw new Exception();
+			}
+		}catch(Exception e){
+			invalidData += "Port; ";
 		}
 
+		if(invalidData.length() > 0){
+			return "Invalid data: "+invalidData;
+		}
+
+		if(wapc.isWebAppByNamePresent(name)){
+			return "App already present with same name: "+name;
+		}
+
+
 		SocketService socketService = new SocketService(name, host, port, sendString, expectedString, executeOnOffline);
+		socketService.addGroups(groups);
+		socketService.setActive(Boolean.parseBoolean(active));
 		WebAppResponse currentStatus = socketService.checkWebAppStatus();
 		String online = "OFFLINE";
 		if(currentStatus.isOnline()){
@@ -476,7 +504,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
-		
+
 		String appList = "";
 		Iterator<WebApp> it = wapc.getWebAppCollectionIterator();
 		WebApp currApp;
