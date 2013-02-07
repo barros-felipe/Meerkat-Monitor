@@ -357,7 +357,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		int nEvents = wapc.resetAllAppsData();
 		log.info("WS request ["+getRequestClientIP()+"]: resetAllData()");
 
-		return "Removed all applications events ("+nEvents+"). (DB is now empty!)";
+		return "Removed all "+nEvents+" applications events.";
 
 	}
 
