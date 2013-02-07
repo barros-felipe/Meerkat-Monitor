@@ -405,7 +405,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 		log.info("WS request ["+getRequestClientIP()+"]: removeAllApps()");
 
-		return "Removed "+nEvents+" events and "+nApps+" applications";
+		return "Deleted "+nApps+" application(s) [with "+nEvents+" events].";
 	}
 
 	@Override
