@@ -79,7 +79,7 @@ public class HttpServer {
 		this.tempWorkingDir = tempWorkingDir;
 
 		// Create the index startup page
-		createStartupPage("Please wait while Meerkat is getting ready to work....");
+		createStartupPage("Please wait while Meerkat-Monitor is getting ready to work....");
 
 		Server mServer = new Server(webServerPort);
 		ResourceHandler resourceHandler = new ResourceHandler();
@@ -496,7 +496,7 @@ public class HttpServer {
 				+ "<h2>"
 				+ message
 				+ "</h2>\n"
-				+ "<h3>Your browser will reload automatically when Meerkat is ready.</h3>\n"
+				+ "<h3>Your browser will reload automatically when Meerkat-Monitor is ready.</h3>\n"
 				+ "</body>\n" + "</html>\n";
 
 		// Write the startup index file
