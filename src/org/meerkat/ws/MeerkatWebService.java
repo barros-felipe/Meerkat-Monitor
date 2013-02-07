@@ -19,6 +19,7 @@
 package org.meerkat.ws;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 import java.util.Properties;
 
 import javax.annotation.Resource;
@@ -467,6 +468,24 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		String result = testMailManager.sendTestEmailSettingsFromWebService(from, to, smtpServer, smtpPort, smtpSecurity, smtpUser, smtpPassword);
 
 		return result;
+	}
+
+	@Override
+	public String getAppList(String masterKey) {
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+		
+		String appList = "";
+		Iterator<WebApp> it = wapc.getWebAppCollectionIterator();
+		WebApp currApp;
+		while(it.hasNext()){
+			currApp = it.next();
+			appList += currApp.getName()+", ";
+		}
+
+		// return the app list (with the last "," removed)
+		return appList.substring(0, appList.length()-2);
 	}
 
 

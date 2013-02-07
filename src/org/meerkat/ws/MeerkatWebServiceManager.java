@@ -142,5 +142,10 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="smtpSecurity") String smtpSecurity,
 			@WebParam(name="smtpUser") String smtpUser,
 			@WebParam(name="smtpPassword") String smtpPassword);
+	
+	@WebMethod(operationName = "getAppList", action = "getAppList")
+	String getAppList(
+			@WebParam(name="masterKey") String masterKey);
+	
 }
 
