@@ -485,7 +485,12 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		}
 
 		// return the app list (with the last "," removed)
-		return appList.substring(0, appList.length()-2);
+		if(appList.length() > 0){
+			return appList.substring(0, appList.length()-2);
+		}else{
+			return "";
+		}
+
 	}
 
 
