@@ -134,7 +134,7 @@ public class WebServiceApp extends WebApp {
 			// Set status code
 			statusCode = httpresponse.getStatusLine().getStatusCode();
 		} catch (Exception e) {
-			log.error("ClientProtocolException: "+e.getMessage());
+			log.error("WebService Exception: "+e.getMessage()+" [URL: "+this.getUrl()+"]");
 			httpClient.getConnectionManager().shutdown();
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());

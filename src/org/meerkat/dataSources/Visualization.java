@@ -217,7 +217,12 @@ public class Visualization {
 				log.error("ERROR creating temporary file: " + tempDir);
 			}
 		}
-		fu.removeFile(tmp + "/" + webApp.getDataFileName());
+
+		// Remove current file if exists
+		if(new File(tmp + "/" + webApp.getDataFileName()).exists()){
+			fu.removeFile(tmp + "/" + webApp.getDataFileName());
+		}
+
 		fu.writeToFile(tmp + "/" + webApp.getDataFileName(), htmlFileContents);
 
 	}

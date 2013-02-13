@@ -444,7 +444,6 @@ public class WebAppCollection {
 		}
 
 		//this.writeWebAppCollectionMotionChart();
-
 		httpServer.refreshIndex();
 
 		return nEvents;

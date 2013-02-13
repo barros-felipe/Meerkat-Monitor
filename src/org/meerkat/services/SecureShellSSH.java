@@ -127,7 +127,7 @@ public class SecureShellSSH extends WebApp {
 			channel.disconnect();
 			session.disconnect();
 		} catch (Exception e) {
-			log.error("Failed to execute ssh command:"+e.getMessage());
+			log.error("Failed to execute ssh command: "+e.getMessage());
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());
 			setCurrentResponse(e.toString());

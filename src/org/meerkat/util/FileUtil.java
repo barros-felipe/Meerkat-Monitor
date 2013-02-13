@@ -50,7 +50,7 @@ public class FileUtil {
 		try {
 			FileUtils.forceDelete(new File(filename));
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			log.error("Error removing file. "+"["+e.getMessage()+"]");
 			e.printStackTrace();
 		}
 	}
