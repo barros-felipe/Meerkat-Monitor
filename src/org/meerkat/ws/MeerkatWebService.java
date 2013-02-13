@@ -391,6 +391,9 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			invalidData += "Name; ";
 		}
 		// App URL
+		if(url.length() <=0){
+			invalidData += "URL; ";
+		}
 		try{ 
 			new HttpGet(url);
 		}catch(Exception e){
