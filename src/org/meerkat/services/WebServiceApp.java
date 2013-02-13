@@ -100,20 +100,11 @@ public class WebServiceApp extends WebApp {
 		// Prepare HTTP post
 		HttpPost httpPost = new HttpPost(strURL);
 
-		// Get the post data from file
-		/**
-		 * String postStringRequestFromFile = ""; FileUtil fu = new FileUtil();
-		 * postStringRequestFromFile = fu.readFileContents(postXML);
-		 * 
-		 * if (postStringRequestFromFile.equals("")) { log.error(super.getName()
-		 * + " has postXMLFile empty!"); }
-		 */
-
 		StringEntity strEntity = null;
 		try {
 			strEntity = new StringEntity(postXML, "UTF-8");
 		} catch (UnsupportedEncodingException e3) {
-			log.error("UnsupportedEncodingException ", e3);
+			log.error("UnsupportedEncodingException: "+e3.getMessage());
 		}
 		httpPost.setEntity(strEntity);
 
@@ -143,7 +134,7 @@ public class WebServiceApp extends WebApp {
 			// Set status code
 			statusCode = httpresponse.getStatusLine().getStatusCode();
 		} catch (Exception e) {
-			log.error("ClientProtocolException ", e);
+			log.error("ClientProtocolException: "+e.getMessage());
 			httpClient.getConnectionManager().shutdown();
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());
@@ -160,9 +151,9 @@ public class WebServiceApp extends WebApp {
 			br = new BufferedReader(new InputStreamReader(httpresponse
 					.getEntity().getContent(), "UTF-8"));
 		} catch (IllegalStateException e1) {
-			log.error("IllegalStateException in http buffer", e1);
+			log.error("IllegalStateException in http buffer: "+e1.getMessage());
 		} catch (IOException e1) {
-			log.error("IOException in http buffer", e1);
+			log.error("IOException in http buffer: "+e1.getMessage());
 		}
 
 		String readLine;
@@ -172,13 +163,13 @@ public class WebServiceApp extends WebApp {
 				responseBody += "\n" + readLine;
 			}
 		} catch (IOException e) {
-			log.error("IOException in http response", e);
+			log.error("IOException in http response: "+e.getMessage());
 		}
 
 		try {
 			br.close();
 		} catch (IOException e1) {
-			log.error("Closing BufferedReader", e1);
+			log.error("Closing BufferedReader: "+e1.getMessage());
 		}
 
 		response.setHttpTextResponse(responseBody);
@@ -215,7 +206,7 @@ public class WebServiceApp extends WebApp {
 					.format(responseFromPostXMLRequest.trim());
 			xmlResponseExpected = formatter.format(responseXML);
 		} catch (Exception e) {
-			log.error("Error parsing XML!", e);
+			log.error("Error parsing XML: "+e.getMessage());
 		}
 
 		try {
@@ -226,7 +217,7 @@ public class WebServiceApp extends WebApp {
 				response.setContainsWebServiceExpectedResponse(true);
 			}
 		} catch (Exception e) {
-			log.error("Error parsing XML for comparison!");
+			log.error("Error parsing XML for comparison: "+e.getMessage());
 		}
 
 		return response;
