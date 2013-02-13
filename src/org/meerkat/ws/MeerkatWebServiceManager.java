@@ -86,7 +86,9 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="dbType") String dbType,
 			@WebParam(name="query") String query, 
 			@WebParam(name="expectedResponse") String expectedResponse,
-			@WebParam(name="executeOnOffline") String executeOnOffline);
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "addWeb", action = "addWeb")
 	String addWeb(
@@ -106,7 +108,9 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="soapAction") String soapAction,
 			@WebParam(name="sendXML") String sendXML,
 			@WebParam(name="responseXML") String responseXML,
-			@WebParam(name="executeOnOffline") String executeOnOffline);
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "resetAllData", action = "resetAllData")
 	String resetAllData(

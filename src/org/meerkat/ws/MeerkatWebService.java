@@ -247,28 +247,58 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	@Override
 	public String addDB(String masterKey, String name, String host,
 			String port, String instanceName, String username, String password,
-			String dbType, String query, String expectedResponse, String executeOnOffline) {
+			String dbType, String query, String expectedResponse, String executeOnOffline,
+			String groups, String active) {
 
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
+		}
+
+		// validate input
+		String invalidData = "";
+		// App name
+		if(name.length() <=0){
+			invalidData += "Name; ";
+		}
+		// App host
+		if(host.length() <=0){
+			invalidData += "Host; ";
+		}
+		// Port
+		try{ 
+			int iport = Integer.valueOf(port);
+			if(iport <= 0){
+				throw new Exception();
+			}
+		}catch(Exception e){
+			invalidData += "Port; ";
+		}
+		// App instance
+		if(instanceName.length() <=0){
+			invalidData += "Instance/Service name; ";
+		}
+		// Database type
+		if(!dbType.equalsIgnoreCase(SQLService.TYPE_MSSQL) && 
+				!dbType.equalsIgnoreCase(SQLService.TYPE_MYSQL) &&
+				!dbType.equalsIgnoreCase(SQLService.TYPE_ORA)){
+
+			invalidData += "Please add a valid database type! (" +
+					SQLService.TYPE_MYSQL+", "+
+					SQLService.TYPE_ORA+" or "+
+					SQLService.TYPE_MSSQL+"); ";
+		}
+
+		if(invalidData.length() > 0){
+			return "Invalid data: "+invalidData;
 		}
 
 		if(wapc.isWebAppByNamePresent(name)){
 			return "Invalid or duplicated name!";
 		}
 
-		// Check the database type
-		if(!dbType.equalsIgnoreCase(SQLService.TYPE_MSSQL) && 
-				!dbType.equalsIgnoreCase(SQLService.TYPE_MYSQL) &&
-				!dbType.equalsIgnoreCase(SQLService.TYPE_ORA)){
-
-			return "Please add a valid database type! " +
-					SQLService.TYPE_MYSQL+", "+
-					SQLService.TYPE_ORA+" or "+
-					SQLService.TYPE_MSSQL;
-		}
-
 		SQLService sqlService = new SQLService(name, query, expectedResponse, host, port, instanceName, username, password);
+		sqlService.addGroups(groups);
+		sqlService.setActive(Boolean.parseBoolean(active));
 
 		// Set the correct database type
 		if(dbType.equals(SQLService.TYPE_MSSQL)){
@@ -347,19 +377,40 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 
 	@Override
 	public String addWebService(String masterKey, String name, String url,
-			String soapAction, String sendXML, String responseXML, String executeOnOffline) {
+			String soapAction, String sendXML, String responseXML, String executeOnOffline,
+			String groups, String active){
 
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
 
+		// validate input
+		String invalidData = "";
+		// App name
+		if(name.length() <=0){
+			invalidData += "Name; ";
+		}
+		// App URL
+		try{ 
+			new HttpGet(url);
+		}catch(Exception e){
+			invalidData += "URL; ";
+		}
+
+		if(invalidData.length() > 0){
+			return "Invalid data: "+invalidData;
+		}
+
+
 		if(wapc.isWebAppByNamePresent(name)){
-			return "Invalid or duplicated name!";
+			return "App already present with same name: "+name;
 		}
 
 		WebServiceApp webServApp = new WebServiceApp(name, url, soapAction, executeOnOffline);
 		webServApp.setPostXML(sendXML);
 		webServApp.setResponseXML(responseXML);
+		webServApp.addGroups(groups);
+		webServApp.setActive(Boolean.parseBoolean(active));
 
 		WebAppResponse currentStatus = webServApp.checkWebAppStatus();
 		String online = "OFFLINE";
