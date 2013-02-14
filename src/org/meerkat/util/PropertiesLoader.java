@@ -305,7 +305,7 @@ public class PropertiesLoader {
 		prop.put("meerkat.ssl.password", "meerkatKeystorePassword");
 		prop.put("meerkat.dashboard.gauge", "true");
 		prop.put("meerkat.webserver.rconfig", "true");
-		prop.put("meerkat.password.master", "changeMe");
+		prop.put("meerkat.password.master", "meerkat");
 		prop.put("meerkat.webserver.logaccess", "true");
 		prop.put("meerkat.webserver.showapptype", "true");
 		prop.put("meerkat.embeddeddb.user", "meerkat");
