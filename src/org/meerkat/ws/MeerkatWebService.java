@@ -594,7 +594,28 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 		
-		return null;
+		if(active){
+			return "OK - "+appName+" is now enabled.";
+		}else{
+			return "OK - "+appName+" is now disabled.";
+		}
+	}
+
+	@Override
+	public String isActive(String masterKey, String appName) {
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+		
+		if(!wapc.isWebAppByNamePresent(appName)){
+			return "Application "+appName+" does not exist.";
+		}
+		
+		WebApp theApp = wapc.getWebAppByName(appName);
+		if(theApp.isActive()){
+			return "true";
+		}
+		return "false";
 	}
 
 

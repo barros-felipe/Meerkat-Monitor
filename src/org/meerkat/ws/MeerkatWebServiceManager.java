@@ -159,5 +159,10 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="appName") String appName, 
 			@WebParam(name="active") boolean active);
 	
+	@WebMethod(operationName = "isActive", action = "isActive")
+	String isActive(
+			@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="appName") String appName);
+	
 }
 
