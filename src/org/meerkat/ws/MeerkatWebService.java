@@ -21,6 +21,7 @@ package org.meerkat.ws;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import javax.jws.WebService;
@@ -51,6 +52,8 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	private MasterKeyManager mkm;
 	private static String propertiesFile = "meerkat.properties";
 
+	private Pattern specialCharsPattern = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+		
 	@Resource WebServiceContext wsContext;
 
 	/**
@@ -105,7 +108,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		// validate input
 		String invalidData = "";
 		// App name
-		if(name.length() <=0){
+		if(name.length() <=0 || specialCharsPattern.matcher(name).find()){
 			invalidData += "Name; ";
 		}
 		if(host.length() <=0){
@@ -200,7 +203,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		// validate input
 		String invalidData = "";
 		// App name
-		if(name.length() <=0){
+		if(name.length() <=0 || specialCharsPattern.matcher(name).find()){
 			invalidData += "Name; ";
 		}
 		// host
@@ -257,7 +260,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		// validate input
 		String invalidData = "";
 		// App name
-		if(name.length() <=0){
+		if(name.length() <=0 || specialCharsPattern.matcher(name).find()){
 			invalidData += "Name; ";
 		}
 		// App host
@@ -337,7 +340,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		// validate input
 		String invalidData = "";
 		// App name
-		if(name.length() <=0){
+		if(name.length() <=0 || specialCharsPattern.matcher(name).find()){
 			invalidData += "Name; ";
 		}
 		// App URL
@@ -387,7 +390,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		// validate input
 		String invalidData = "";
 		// App name
-		if(name.length() <=0){
+		if(name.length() <=0 || specialCharsPattern.matcher(name).find()){
 			invalidData += "Name; ";
 		}
 		// App URL
@@ -574,6 +577,24 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			return "";
 		}
 
+	}
+
+	@Override
+	public String setActive(String masterKey, String appName, boolean active) {
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+		
+		if(!wapc.isWebAppByNamePresent(appName)){
+			return "Application "+appName+" does not exist.";
+		}
+		
+		WebApp theApp = wapc.getWebAppByName(appName);
+		theApp.setActive(active);
+		wapc.saveConfigXMLFile();
+		httpServer.refreshIndex();
+		
+		return null;
 	}
 
 
