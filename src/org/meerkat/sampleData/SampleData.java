@@ -33,7 +33,7 @@ public class SampleData {
 	 * @return WebApp
 	 */
 	public static WebApp getSampleWebApp_SelfTestWSDL(){
-		WebApp wa = new WebApp("[DEMO] Meerkat Self Test Webpage WSDL", "http://"+nu.getHostname()+":6778/api?wsdl", "MeerkatWebService");
+		WebApp wa = new WebApp("Meerkat Monitor WSDL", "http://"+nu.getHostname()+":6778/api?wsdl", "MeerkatWebService");
 		wa.addGroups("Web");
 
 		return wa;
@@ -44,7 +44,7 @@ public class SampleData {
 	 * @return WebServiceApp
 	 */
 	public static WebServiceApp getSampleWebService_SelfWSgetVersion(String version){
-		WebServiceApp ws = new WebServiceApp("[DEMO] Meerkat Self Test WebService getVersion()", "http://"+nu.getHostname()+":6778/api", "getversion", "");
+		WebServiceApp ws = new WebServiceApp("Meerkat Monitor WebService getVersion", "http://"+nu.getHostname()+":6778/api", "getversion", "");
 		XmlFormatter xmlf = new XmlFormatter();
 		String postXML = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ws=\"http://ws.meerkat.org/\">"+
 				"<soapenv:Header/>"+
@@ -74,7 +74,7 @@ public class SampleData {
 	 * @return SocketService
 	 */
 	public static SocketService getSampleSocketService_SelfHTTP_Port(){
-		SocketService ss = new SocketService("[DEMO] Meerkat Self Test Socket HTTP", nu.getHostname(), "6777", "", "", "");
+		SocketService ss = new SocketService("Meerkat Monitor HTTP Socket", nu.getHostname(), "6777", "", "", "");
 		ss.addGroups("Sockets");
 
 		return ss;
