@@ -71,6 +71,7 @@ public class WebAppCollection {
 	 */
 	public WebAppCollection() {
 		webAppsCollection = new CopyOnWriteArrayList<WebApp>();
+		appGroupCollection = new AppGroupCollection();
 	}
 
 	/**
