@@ -19,6 +19,8 @@
 
 package org.meerkat.httpServer;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Locale;
@@ -27,8 +29,11 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.network.NetworkUtil;
 import org.meerkat.services.WebApp;
@@ -68,6 +73,7 @@ public class HttpServer {
 	private String bottomContent = "</tbody>\n</table>\n" + "</div>\n";
 	private String bodyEnd = "</body>\n" + "</html>\n";
 	private String indexContents = "";
+	private Server mServer;
 
 	private Thread indexRefresherThread = new Thread();
 
@@ -81,11 +87,23 @@ public class HttpServer {
 		// Create the index startup page
 		createStartupPage("Please wait while Meerkat-Monitor is getting ready to work....");
 
-		Server mServer = new Server(webServerPort);
+		mServer = new Server(webServerPort);
+
+		// Handler for Meerkat-Monitor
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setDirectoriesListed(true);
 		resourceHandler.setWelcomeFiles(new String[] { "index.htm" });
 		resourceHandler.setResourceBase(tempWorkingDir);
+		
+		ServletContextHandler context0 = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		context0.setContextPath("/");
+		context0.setHandler(resourceHandler);
+		
+		// WebApp context for Web Client Admin  - if client war is available
+		WebAppContext webAppClientWar = embeddedWarClientAppContext();
+		ServletContextHandler context1 = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		context1.setContextPath("/admin");
+		context1.setHandler(webAppClientWar);
 
 		// Create the index file which redirects to dynamic response listening on "index.html"
 		String redirectCode = "<html>\n<head>\n<meta http-equiv=\"refresh\" content=\"0;url=index.html\">"+
@@ -96,9 +114,21 @@ public class HttpServer {
 		// Add custom resource handler
 		customResHandler = new CustomResourceHandler(this);
 
+		ContextHandlerCollection contexts = new ContextHandlerCollection();
+		//contexts.setHandlers(new Handler[] { context0, context1, customResHandler });
+		contexts.setHandlers(new Handler[] { context1});
+		
+		mServer.setHandler(contexts);
+		
+		/**
 		HandlerList handlers = new HandlerList();
 		handlers.setHandlers(new Handler[] { resourceHandler, customResHandler });
 		mServer.setHandler(handlers);
+		*/
+		HandlerList handlers = new HandlerList();
+		handlers.setHandlers(new Handler[] { context0, customResHandler});
+		mServer.setHandler(handlers);
+		
 
 		try {
 			mServer.start();
@@ -517,6 +547,43 @@ public class HttpServer {
 	 */
 	public final String getServerUrl() {
 		return "http://" + hostname + ":" + webServerPort + "/";
+	}
+
+
+	/**
+	 * Create context for web client war
+	 */
+	private final WebAppContext embeddedWarClientAppContext(){
+		WebAppContext webappClient = null;
+
+		File f = new File("./war");
+		FilenameFilter textFilter = new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				String lowercaseName = name.toLowerCase();
+				if (lowercaseName.endsWith(".war")) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};
+
+		String warFileClient = "";
+		File[] files = f.listFiles(textFilter);
+		for (File file : files) {
+			if (!file.isDirectory()) { // Consider the first file found
+				warFileClient = file.getAbsolutePath();
+				break;
+			}
+		}
+
+		if(!warFileClient.equals("")){
+			webappClient = new WebAppContext();
+			//webappClient.setContextPath("/admin");
+			webappClient.setWar(warFileClient);
+		}
+
+		return webappClient;
 	}
 
 

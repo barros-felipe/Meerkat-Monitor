@@ -30,5 +30,10 @@
 	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/derby.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api-2.5.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-webapp-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-security-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-xml-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlets-7.6.4.v20120524.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

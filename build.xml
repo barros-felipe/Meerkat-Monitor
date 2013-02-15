@@ -32,6 +32,9 @@
 			<fileset dir="bundle/lib/jdbc-driver">
 				<include name="**/*.jar"/>
 			</fileset>
+			<fileset dir="bundle/lib/jsp">
+				<include name="**/*.jar"/>
+			</fileset>
 		</path>
 		
 		<javac destdir="build/classes" debug="true" srcdir="src" includeantruntime="no">
@@ -69,6 +72,7 @@
 		
 		<!-- Create misc dir -->
 		<mkdir dir="bundle/log"/>
+		<mkdir dir="bundle/war"/>
 		
 		<!-- Create base -->
 		<antcall target="zip_base" />

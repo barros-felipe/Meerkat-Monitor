@@ -157,7 +157,7 @@ public class MeerkatMonitor {
 		Endpoint.publish(wsdlEndpoint, new MeerkatWebService(mkm, webAppsCollection, httpWebServer));
 		// set the httpServer to webapp collection
 		webAppsCollection.setHttpServer(httpWebServer);
-
+		
 		// Open Dashboard in default browser if available
 		try {
 			java.awt.Desktop desktop = java.awt.Desktop.getDesktop();

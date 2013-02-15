@@ -26,7 +26,7 @@ import javax.jws.soap.SOAPBinding.Style;
 import javax.jws.soap.SOAPBinding.Use;
 
 //Service Endpoint Interface
-@WebService(endpointInterface = "org.meerkat.ws.MeerkatWebServiceManager", serviceName = "MeerkatMonitorWS", portName = "MeerkatMonitorPort")
+@WebService()
 @SOAPBinding(style = Style.RPC, use = Use.LITERAL)
 
 public interface MeerkatWebServiceManager{
