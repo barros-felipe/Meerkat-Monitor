@@ -115,9 +115,7 @@ public class CustomResourceHandler extends ResourceHandler {
 	public final void handle(String target, Request baseRequest,
 			HttpServletRequest request, HttpServletResponse response)
 					throws IOException, ServletException {
-		
-		log.info("|-- CustomHandler Received request!!");
-		
+
 		if (response.isCommitted() || baseRequest.isHandled()) {
 			return;
 		} else {

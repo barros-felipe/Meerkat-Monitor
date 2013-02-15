@@ -29,7 +29,6 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -114,21 +113,12 @@ public class HttpServer {
 		// Add custom resource handler
 		customResHandler = new CustomResourceHandler(this);
 
-		ContextHandlerCollection contexts = new ContextHandlerCollection();
-		//contexts.setHandlers(new Handler[] { context0, context1, customResHandler });
-		contexts.setHandlers(new Handler[] { context1});
-		
-		mServer.setHandler(contexts);
-		
-		/**
+		// Build the handlers list and pass it to the server
+		// Is a Handler Collection that calls each handler in turn until either an exception 
+		// is thrown, the response is committed or the request.isHandled() returns true.
 		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[] { resourceHandler, customResHandler });
+		handlers.setHandlers(new Handler[] { context0, context1, customResHandler });
 		mServer.setHandler(handlers);
-		*/
-		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[] { context0, customResHandler});
-		mServer.setHandler(handlers);
-		
 
 		try {
 			mServer.start();
