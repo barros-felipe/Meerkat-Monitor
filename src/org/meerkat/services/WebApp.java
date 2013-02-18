@@ -529,10 +529,10 @@ public class WebApp {
 
 		queryValues += ", "+Integer.valueOf(ev.getHttpStatusCode())+", '"+ev.getDescription()+"', ?";
 
-		if(ev.getCurrentResponse().length() > 50000){
+		if(ev.getCurrentResponse().length() > EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH){
 			// truncate the size of response
-			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, 50000));
-			log.warn("Response of "+this.getName()+" bigger than 50000 chars (truncated!).");
+			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH));
+			log.warn("Response of "+this.getName()+" bigger than "+EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH+" chars (truncated!).");
 		}
 
 		try {

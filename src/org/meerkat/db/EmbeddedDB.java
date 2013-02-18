@@ -34,6 +34,7 @@ import org.meerkat.util.PropertiesLoader;
 
 public class EmbeddedDB implements Runnable{
 	private static Logger log = Logger.getLogger(EmbeddedDB.class);
+	public static int EVENT_MAX_RESPONSE_LENGTH = 50000;
 	private String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 	private String protocol = "jdbc:derby:";
 
@@ -117,7 +118,7 @@ public class EmbeddedDB implements Runnable{
 							"LATENCY DOUBLE, "+
 							"HTTPSTATUSCODE INT, "+
 							"DESCRIPTION VARCHAR(50), "+
-							"RESPONSE VARCHAR(30000) "+
+							"RESPONSE VARCHAR("+EVENT_MAX_RESPONSE_LENGTH+") "+
 							")");
 
 					st1 = c.createStatement();
