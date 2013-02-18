@@ -34,7 +34,7 @@ import org.meerkat.util.PropertiesLoader;
 
 public class EmbeddedDB implements Runnable{
 	private static Logger log = Logger.getLogger(EmbeddedDB.class);
-	public static int EVENT_MAX_RESPONSE_LENGTH = 50000;
+	public static int EVENT_MAX_RESPONSE_LENGTH =  32672; // See: http://db.apache.org/derby/docs/10.5/ref/rrefsqlj41207.html
 	private String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 	private String protocol = "jdbc:derby:";
 
