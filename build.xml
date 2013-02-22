@@ -67,6 +67,7 @@
 				<attribute name="Build-JDK" value="${ant.java.version}"/>
 				<attribute name="Class-Path" value="${jar.classpath}"/>
 				<attribute name="Main-Class" value="org.meerkat.MeerkatMonitor"/>
+				<attribute name="SplashScreen-Image" value="resources/splashscreen.png"/>
 			</manifest>
 		</jar>
 		
