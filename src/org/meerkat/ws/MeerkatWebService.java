@@ -591,6 +591,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		
 		WebApp theApp = wapc.getWebAppByName(appName);
 		theApp.setActive(active);
+		wapc.getpAppGroupCollection().populateGroups(wapc);
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
 		

@@ -96,6 +96,7 @@ public class AppGroupCollection {
 	 */
 	public final void populateGroups(WebAppCollection wCollection) {
 		// Clean current groups and generate
+		numberOfGroups = 0;
 		appGroupCollection = new ArrayList<AppGroup>();
 
 		Iterator<WebApp> it = wCollection.getWebAppCollectionIterator();
@@ -105,10 +106,11 @@ public class AppGroupCollection {
 		AppGroup tempGroup;
 
 		// Create Groups from apps and add them to group collection
+		// (consider only active apps)
 		while (it.hasNext()) {
 			tempApp = it.next();
 
-			if (tempApp.getNumberOfGroups() > 0) {
+			if (tempApp.getNumberOfGroups() > 0 && tempApp.isActive()) {
 				// Get current groups of app
 				tempIt = tempApp.getGroupIterator();
 
@@ -132,7 +134,7 @@ public class AppGroupCollection {
 			wIt = wCollection.getWebAppCollectionIterator();
 			while (wIt.hasNext()) {
 				tempApp = wIt.next();
-				if (tempApp.hasGroup(currentGroup.getGroupName())) {
+				if (tempApp.hasGroup(currentGroup.getGroupName()) && tempApp.isActive()) {
 					currentGroup.addApp(tempApp);
 				}
 			}
