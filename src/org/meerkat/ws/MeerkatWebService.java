@@ -141,7 +141,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(currentStatus.isOnline()){
 			online = "ONLINE";
 		}
-		wapc.addWebApp(sshApp);
+		wapc.addWebApp(sshApp, true);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
 		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
@@ -237,7 +237,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(currentStatus.isOnline()){
 			online = "ONLINE";
 		}
-		wapc.addWebApp(socketService);
+		wapc.addWebApp(socketService, true);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
 		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
@@ -319,7 +319,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(currentStatus.isOnline()){
 			online = "ONLINE";
 		}
-		wapc.addWebApp(sqlService);
+		wapc.addWebApp(sqlService, true);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
 		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
@@ -368,7 +368,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(currentStatus.isOnline()){
 			online = "ONLINE";
 		}
-		wapc.addWebApp(webApp);
+		wapc.addWebApp(webApp, true);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
 		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();
@@ -423,7 +423,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(currentStatus.isOnline()){
 			online = "ONLINE";
 		}
-		wapc.addWebApp(webServApp);
+		wapc.addWebApp(webServApp, true);
 		wapc.getWebAppByName(name).writeWebAppVisualizationDataFile();
 		//wapc.writeWebAppCollectionMotionChart();
 		wapc.saveConfigXMLFile();

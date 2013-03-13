@@ -32,6 +32,7 @@ import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.services.WebApp;
+import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
 import org.meerkat.util.xml.XStreamMeerkatConfig;
 
@@ -125,10 +126,31 @@ public class WebAppCollection {
 	 * 
 	 * @param app
 	 */
-	public final void addWebApp(WebApp app) {
+	public final void addWebApp(WebApp app, boolean executeFirstTest) {
 		app.setTempWorkingDir(this.tempWorkingDir);
 		webAppsCollection.add(app);
 		appGroupCollection.populateGroups(this);
+
+		if(executeFirstTest){// Execute first monit and add it to app
+			WebAppResponse firstWebAppResponse = new WebAppResponse();
+			firstWebAppResponse = app.checkWebAppStatus();
+
+			DateUtil dateUtil = new DateUtil();
+			String now = dateUtil.now();
+			WebAppEvent ev = new WebAppEvent(
+					false,
+					now,
+					firstWebAppResponse.isOnline(),
+					Double.toString(app.getAvailability()),
+					firstWebAppResponse.getHttpStatus(),
+					"");
+			// Save load time and latency
+			ev.setPageLoadTime(firstWebAppResponse.getPageLoadTime());
+			ev.setLatency(app.getLatency());
+			// Set the response
+			ev.setCurrentResponse(app.getCurrentResponse());
+			app.addEvent(ev);
+		}
 	}
 
 	/**
@@ -493,7 +515,7 @@ public class WebAppCollection {
 	public final AppGroupCollection getpAppGroupCollection(){
 		return appGroupCollection;
 	}
-	
+
 	/**
 	 * getEmbeddedDB
 	 * @return

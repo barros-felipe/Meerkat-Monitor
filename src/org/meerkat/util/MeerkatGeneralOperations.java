@@ -96,9 +96,9 @@ public class MeerkatGeneralOperations {
 			webAppsCollection = new WebAppCollection();
 
 			// Add Meerkat Monitor self test demo data
-			webAppsCollection.addWebApp(SampleData.getSampleWebApp_SelfTestWSDL());
-			webAppsCollection.addWebApp(SampleData.getSampleWebService_SelfWSgetVersion(version));
-			webAppsCollection.addWebApp(SampleData.getSampleSocketService_SelfHTTP_Port());
+			webAppsCollection.addWebApp(SampleData.getSampleWebApp_SelfTestWSDL(), false);
+			webAppsCollection.addWebApp(SampleData.getSampleWebService_SelfWSgetVersion(version), false);
+			webAppsCollection.addWebApp(SampleData.getSampleSocketService_SelfHTTP_Port(), false);
 		}
 
 		webAppsCollection.setConfigFile(xmlConfigFile);
