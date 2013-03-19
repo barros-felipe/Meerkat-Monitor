@@ -164,5 +164,9 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="masterKey") String masterKey, 
 			@WebParam(name="appName") String appName);
 	
+	@WebMethod(operationName = "getDashboardURL", action = "getDashboardURL")
+	String getDashboardURL(
+			@WebParam(name="masterKey") String masterKey);
+	
 }
 

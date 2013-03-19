@@ -53,7 +53,7 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 	private static String propertiesFile = "meerkat.properties";
 
 	private Pattern specialCharsPattern = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
-		
+
 	@Resource WebServiceContext wsContext;
 
 	/**
@@ -584,17 +584,17 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
-		
+
 		if(!wapc.isWebAppByNamePresent(appName)){
 			return "Application "+appName+" does not exist.";
 		}
-		
+
 		WebApp theApp = wapc.getWebAppByName(appName);
 		theApp.setActive(active);
 		wapc.getpAppGroupCollection().populateGroups(wapc);
 		wapc.saveConfigXMLFile();
 		httpServer.refreshIndex();
-		
+
 		if(active){
 			return "OK - "+appName+" is now enabled.";
 		}else{
@@ -607,16 +607,25 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		if(!checkKey(masterKey)){
 			return "Incorrect key!";
 		}
-		
+
 		if(!wapc.isWebAppByNamePresent(appName)){
 			return "Application "+appName+" does not exist.";
 		}
-		
+
 		WebApp theApp = wapc.getWebAppByName(appName);
 		if(theApp.isActive()){
 			return "true";
 		}
 		return "false";
+	}
+
+	@Override
+	public String getDashboardURL(String masterKey) {
+		if(!checkKey(masterKey)){
+			return "Incorrect key!";
+		}
+
+		return httpServer.getServerUrl();
 	}
 
 
