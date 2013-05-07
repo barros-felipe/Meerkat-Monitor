@@ -369,7 +369,8 @@ public class HttpServer {
 						 */
 						responseStatus += "<td class=\"center\">" + wApp.getAvailability();
 
-						// Trend
+						// Trend - Disabled icon indicator because it breaks sorting!!
+						/**
 						double availIndicator = wApp.getAvailabilityIndicator();
 						if (wApp.getNumberOfTests() > 2) {
 							if (availIndicator > 0) {
@@ -380,6 +381,7 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
+						*/
 
 						// Link to events
 						responseStatus += "<td class=\"center\">";
@@ -399,7 +401,8 @@ public class HttpServer {
 						BigDecimal bd = new BigDecimal(wApp.getLatencyAverage());
 						bd = bd.setScale(1, BigDecimal.ROUND_DOWN);
 						responseStatus += bd.doubleValue();
-						// trend
+						// trend - Disabled icon indicator because it breaks sorting!!
+						/**
 						double latencyIndicator = wApp.getLatencyIndicator();
 						if (wApp.getNumberOfTests() > 2) {
 							// check for "undefined" values
@@ -411,6 +414,7 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
+						*/
 
 						/**
 						 * Load Time
@@ -419,7 +423,8 @@ public class HttpServer {
 						BigDecimal bd1 = new BigDecimal(wApp.getAppLoadTimeAVG());
 						bd1 = bd1.setScale(1, BigDecimal.ROUND_DOWN);
 						responseStatus += bd1.doubleValue();
-						// trend
+						// trend - Disabled icon indicator because it breaks sorting!!
+						/**
 						double loadTimeIndicator = wApp.getLoadTimeIndicator();
 						if (wApp.getNumberOfTests() > 2) {
 							if (loadTimeIndicator > 0) {
@@ -430,6 +435,7 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
+						*/
 
 						// Status
 						if (wApp.getlastStatus().equalsIgnoreCase("online")) {
@@ -483,12 +489,6 @@ public class HttpServer {
 				responseStatus += footer;
 				responseStatus += bodyEnd;
 
-				// Write the index file
-				//File f = new File(tempWorkingDir + "index.html");
-				//if (!f.delete()) {
-				//	log.warn("Failed to remove file: " + f.toString());
-				//}
-				//fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
 				indexContents = responseStatus;
 			}
 		};
@@ -519,14 +519,6 @@ public class HttpServer {
 				+ "<h3>Your browser will reload automatically when Meerkat-Monitor is ready.</h3>\n"
 				+ "</body>\n" + "</html>\n";
 
-		// Write the startup index file
-		/**
-		File f = new File(tempWorkingDir + "index.html");
-		if (f.exists() && !f.delete()) {
-			log.warn("Cannot remove " + f.toString());
-		}
-		fu.writeToFile(tempWorkingDir + "index.html", pageContents);
-		 */
 		indexContents = pageContents;
 	}
 
@@ -569,7 +561,6 @@ public class HttpServer {
 
 		if(!warFileClient.equals("")){
 			webappClient = new WebAppContext();
-			//webappClient.setContextPath("/admin");
 			webappClient.setWar(warFileClient);
 		}
 
