@@ -50,8 +50,6 @@ public class WebAppCollection {
 	@XStreamOmitField
 	private String dataFileName = "TimeLine.html";
 	@XStreamOmitField
-	private FileUtil fu;
-	@XStreamOmitField
 	private String appVersion;
 	@XStreamOmitField
 	private String configXMLFile;

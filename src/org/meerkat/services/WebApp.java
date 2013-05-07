@@ -37,7 +37,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -94,8 +93,6 @@ public class WebApp {
 	private String lastStatus = "NA"; // It may be online or offline - NA in the first run
 	@XStreamOmitField
 	private String actionExecOutput = "";
-	@XStreamOmitField
-	private List<WebAppEvent> events;
 	private List<String> groups;
 	@XStreamOmitField
 	private String filenameSuffix = ".html";
@@ -129,7 +126,6 @@ public class WebApp {
 		this.url = url;
 		this.expectedString = expectedString;
 		this.actionExecOutput = "";
-		events = new CopyOnWriteArrayList<WebAppEvent>();
 		groups = new ArrayList<String>();
 		mkm = new MasterKeyManager();
 
@@ -155,7 +151,6 @@ public class WebApp {
 		this.url = url;
 		this.expectedString = expectedString;
 		this.executeOnOffline = executeOnOffline;
-		events = new ArrayList<WebAppEvent>();
 		groups = new ArrayList<String>();
 		mkm = new MasterKeyManager();
 	}
@@ -547,79 +542,6 @@ public class WebApp {
 
 		this.writeWebAppVisualizationDataFile();
 	}
-
-	/**
-	 * getEventList
-	 * 
-	 * @return EventList
-	 */
-	/**
-	public final Iterator<WebAppEvent> getEventListIterator() {
-		events = getEvents();
-		return events.iterator();
-	}
-	 */
-
-	/**
-	 * getEvents
-	 * @return events list
-	 */
-	/**
-	private List<WebAppEvent> getEvents(){
-		if(conn == null){
-			embDB = new EmbeddedDB();
-			conn = embDB.getConnForQueries();
-		}
-
-		events = new CopyOnWriteArrayList<WebAppEvent>();
-
-		boolean critical;
-		String date;
-		boolean online;
-		String availability;
-		String loadTime;
-		String latency;
-		int httStatusCode;
-		String description;
-		String response;
-
-		PreparedStatement ps;
-		ResultSet rs = null;
-		try {
-			ps = conn.prepareStatement("SELECT ID, APPNAME, CRITICAL, DATEEV, ONLINE, AVAILABILITY, " +
-					"LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE " +
-					"FROM MEERKAT.EVENTS WHERE APPNAME LIKE '"+this.name+"'");
-			rs = ps.executeQuery();
-
-			while(rs.next()) {
-				critical = rs.getBoolean(3);
-				date = rs.getTimestamp(4).toString();
-				online = rs.getBoolean(5);
-				availability = String.valueOf(rs.getDouble(6));
-				loadTime = String.valueOf(rs.getDouble(7));
-				latency = String.valueOf(rs.getDouble(8));
-				httStatusCode = rs.getInt(9);
-				description = rs.getString(10);
-				response = rs.getString(11);
-
-				WebAppEvent currEv = new WebAppEvent(critical, date, online, availability, httStatusCode, description);
-				currEv.setID(rs.getInt(1));
-				currEv.setPageLoadTime(loadTime);
-				currEv.setLatency(latency);
-				currEv.setCurrentResponse(response);
-				events.add(currEv);
-			}
-
-			rs.close();
-			ps.close();
-
-		} catch (SQLException e) {
-			log.error("Failed query events from application "+this.getName());
-			log.error("", e);
-		}
-		return events;
-	}
-	//
 
 	/**
 	 * getAppLoadTimeAVG
@@ -1214,7 +1136,6 @@ public class WebApp {
 	 * initialize
 	 */
 	public void initialize(String tempWorkingDir, String version) {
-		events = new ArrayList<WebAppEvent>();
 		setlastStatus("NA");
 		setTempWorkingDir(tempWorkingDir);
 		setAppVersion(version);
