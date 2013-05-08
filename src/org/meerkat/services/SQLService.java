@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.meerkat.sql.SQL_MSSQL_Connector;
 import org.meerkat.sql.SQL_MySQL_Connector;
 import org.meerkat.sql.SQL_ORA_Connector;
+import org.meerkat.sql.SQL_POSTGRE_Connector;
 import org.meerkat.util.Counter;
 import org.meerkat.util.MasterKeyManager;
 import org.meerkat.webapp.WebAppResponse;
@@ -33,6 +34,7 @@ public class SQLService extends WebApp {
 	public static String TYPE_MYSQL = "MYSQL";
 	public static String TYPE_ORA = "ORA";
 	public static String TYPE_MSSQL = "MSSQL";
+	public static String TYPE_POSTGRE = "POSTGRE";
 	private String dbMachine;
 	private String port;
 	private String dbName;
@@ -119,6 +121,8 @@ public class SQLService extends WebApp {
 		} else if (this.getDBType().equals(TYPE_MSSQL)) {
 			// Create an instance of SQL_MySQL_Connector
 			connector = new SQL_MSSQL_Connector(dbMachine, port, dbName, username, mkm.getDecryptedPassword(password));
+		} else if (this.getDBType().equals(TYPE_POSTGRE)) {
+			connector = new SQL_POSTGRE_Connector(dbMachine, port, dbName, username, mkm.getDecryptedPassword(password));
 		}
 
 		WebAppResponse response = new WebAppResponse();
@@ -139,6 +143,8 @@ public class SQLService extends WebApp {
 				setCurrentResponse(((SQL_MySQL_Connector) connector).executeQuery(this.getQuery()));
 			} else if (this.getDBType().equals(TYPE_MSSQL)) {
 				setCurrentResponse(((SQL_MSSQL_Connector) connector).executeQuery(this.getQuery()));
+			} else if (this.getDBType().equals(TYPE_POSTGRE)) {
+				setCurrentResponse(((SQL_POSTGRE_Connector) connector).executeQuery(this.getQuery()));
 			}
 
 		} catch (Exception e) {
@@ -170,85 +176,9 @@ public class SQLService extends WebApp {
 	}
 
 	/**
-	 * getExpectedString
-	 */
-	/**
-	 * @Override public final String getExpectedString() { String configFile =
-	 *           this.getConfigXMLFile();
-	 * 
-	 *           XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-	 *           FileInputStream in = null; try { in = new
-	 *           FileInputStream(configFile); } catch (FileNotFoundException e)
-	 *           { log.error("Cannot open XML config file!", e); }
-	 *           XMLEventReader eventReader = null; try { eventReader =
-	 *           inputFactory.createXMLEventReader(in); } catch
-	 *           (XMLStreamException e) { log.error("Cannot open XML Stream!",
-	 *           e); } boolean current = false; String expectedString = "";
-	 * 
-	 *           while (eventReader.hasNext()) { XMLEvent event = null; try {
-	 *           event = eventReader.nextEvent(); } catch (XMLStreamException e)
-	 *           { log.error("Cannot open XML Stream!", e); }
-	 * 
-	 *           if (event.isStartElement()) { if
-	 *           (event.asStartElement().getName
-	 *           ().getLocalPart().equals("name")) { try { event =
-	 *           eventReader.nextEvent(); } catch (XMLStreamException e) {
-	 *           log.error("Cannot open XML Stream!", e); } String name =
-	 *           event.asCharacters().getData();
-	 * 
-	 *           // Check if is this SQL Service by name
-	 *           if(name.equals(this.getName())){ current = true; } continue; }
-	 * 
-	 *           if (event.asStartElement().getName().getLocalPart().equals(
-	 *           "expectedResponse")) { try { event = eventReader.nextEvent(); }
-	 *           catch (XMLStreamException e) {
-	 *           log.error("Cannot open XML Stream!", e); }
-	 * 
-	 *           // Get the expected response if(current){ expectedString =
-	 *           event.asCharacters().getData(); return expectedString; }
-	 *           continue; } } }
-	 * 
-	 *           return expectedString; }
-	 */
-
-	/**
 	 * getQuery
 	 */
 	public final String getQuery() {
-		/**
-		 * String configFile = this.getConfigXMLFile();
-		 * 
-		 * XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-		 * FileInputStream in = null; try { in = new
-		 * FileInputStream(configFile); } catch (FileNotFoundException e) {
-		 * log.error("Cannot open XML config file!", e); } XMLEventReader
-		 * eventReader = null; try { eventReader =
-		 * inputFactory.createXMLEventReader(in); } catch (XMLStreamException e)
-		 * { log.error("Cannot open XML Stream!", e); } boolean current = false;
-		 * String currQuery = "";
-		 * 
-		 * while (eventReader.hasNext()) { XMLEvent event = null; try { event =
-		 * eventReader.nextEvent(); } catch (XMLStreamException e) {
-		 * log.error("Cannot open XML Stream!", e); }
-		 * 
-		 * if (event.isStartElement()) { if
-		 * (event.asStartElement().getName().getLocalPart().equals("name")) {
-		 * try { event = eventReader.nextEvent(); } catch (XMLStreamException e)
-		 * { log.error("Cannot open XML Stream!", e); } String name =
-		 * event.asCharacters().getData();
-		 * 
-		 * // Check if is this SQL Service by name
-		 * if(name.equals(this.getName())){ current = true; } continue; }
-		 * 
-		 * if (event.asStartElement().getName().getLocalPart().equals("query"))
-		 * { try { event = eventReader.nextEvent(); } catch (XMLStreamException
-		 * e) { log.error("Cannot open XML Stream!", e); }
-		 * 
-		 * // Get the expected response if(current){ currQuery =
-		 * event.asCharacters().getData(); return currQuery; } continue; } } }
-		 * 
-		 * return currQuery;
-		 */
 		return query;
 	}
 
@@ -271,6 +201,13 @@ public class SQLService extends WebApp {
 	 */
 	public final void setDBTypeMSSQL() {
 		this.dbType = TYPE_MSSQL;
+	}
+	
+	/**
+	 * setDBTypePOSTGRE
+	 */
+	public final void setDBTypePOSTGRE() {
+		this.dbType = TYPE_POSTGRE;
 	}
 
 	/**

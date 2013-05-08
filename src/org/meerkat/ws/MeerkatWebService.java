@@ -283,12 +283,10 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 		// Database type
 		if(!dbType.equalsIgnoreCase(SQLService.TYPE_MSSQL) && 
 				!dbType.equalsIgnoreCase(SQLService.TYPE_MYSQL) &&
-				!dbType.equalsIgnoreCase(SQLService.TYPE_ORA)){
+				!dbType.equalsIgnoreCase(SQLService.TYPE_ORA) &&
+				!dbType.equalsIgnoreCase(SQLService.TYPE_POSTGRE)){
 
-			invalidData += "Please add a valid database type! (" +
-					SQLService.TYPE_MYSQL+", "+
-					SQLService.TYPE_ORA+" or "+
-					SQLService.TYPE_MSSQL+"); ";
+			invalidData += "Please add a valid database type!";
 		}
 
 		if(invalidData.length() > 0){
@@ -310,6 +308,8 @@ public class MeerkatWebService implements MeerkatWebServiceManager{
 			sqlService.setDBTypeMySQL();
 		}else if(dbType.equals(SQLService.TYPE_ORA)){
 			sqlService.setDBTypeORA();
+		}else if(dbType.equals(SQLService.TYPE_POSTGRE)){
+			sqlService.setDBTypePOSTGRE();
 		}
 
 		sqlService.setExecuteOnOffline(executeOnOffline);
