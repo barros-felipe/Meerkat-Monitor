@@ -68,7 +68,7 @@ public class SocketService extends WebApp {
 		super();
 		this.setTypeSocketService();
 	}
-	
+
 	@Override
 	public final WebAppResponse checkWebAppStatus() {
 		WebAppResponse response = new WebAppResponse();
@@ -124,6 +124,14 @@ public class SocketService extends WebApp {
 
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());
+
+			try {
+				socket.close();
+			} catch (IOException e1) {
+				log.error("Exception closing socket: "+e.getMessage() );
+				e1.printStackTrace();
+			}
+
 			return response;
 		}
 
@@ -139,6 +147,14 @@ public class SocketService extends WebApp {
 
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());
+
+			try {
+				socket.close();
+			} catch (IOException e1) {
+				log.error("Exception closing socket: "+e.getMessage() );
+				e1.printStackTrace();
+			}
+
 			return response;
 		}
 
