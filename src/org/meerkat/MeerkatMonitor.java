@@ -133,11 +133,14 @@ public class MeerkatMonitor {
 		// Load the driver first time
 		ebd.loadDriver();		
 		ebd.initializeDB();
+		
+		/**
 		if(isSplashSupported){
 			splashScreen.setProgress("Executing database maintenance...", (int)Math.round(currProgress));
 			currProgress += percentIncrease;
 		}
 		ebd.executeDBMaintenance();
+		*/
 
 		// Prepare applications settings
 		if(isSplashSupported){
