@@ -74,7 +74,7 @@ public class HttpServer {
 	private String indexContents = "";
 	private Server mServer;
 
-	private Thread indexRefresherThread = new Thread();
+	private Thread indexRefresherThread = new Thread("indexRefresherThread");
 
 	public HttpServer(final int webServerPort, String version, String wsdlUrl, String tempWorkingDir) {
 		this.webServerPort = webServerPort;
@@ -496,7 +496,7 @@ public class HttpServer {
 		// Check if a indexRefresherThread is already running
 		// If so, do not launch another because it's not necessary
 		if(!indexRefresherThread.isAlive()){
-			indexRefresherThread = new Thread(refresher);
+			indexRefresherThread = new Thread(refresher, "newIndexRefresherThread");
 			indexRefresherThread.start();
 		}
 	}
@@ -542,11 +542,9 @@ public class HttpServer {
 		FilenameFilter textFilter = new FilenameFilter() {
 			public boolean accept(File dir, String name) {
 				String lowercaseName = name.toLowerCase();
-				if (lowercaseName.endsWith(".war")) {
-					return true;
-				} else {
-					return false;
-				}
+				
+				return lowercaseName.endsWith(".war");
+
 			}
 		};
 

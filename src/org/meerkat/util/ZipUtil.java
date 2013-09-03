@@ -102,7 +102,7 @@ public class ZipUtil {
 
 		while (files.hasMoreElements()) {
 			try {
-				ZipEntry entry = (ZipEntry) files.nextElement();
+				ZipEntry entry = files.nextElement();
 				InputStream eis = zip.getInputStream(entry);
 				byte[] buffer = new byte[dataBuffer];
 				int bytesRead = 0;
