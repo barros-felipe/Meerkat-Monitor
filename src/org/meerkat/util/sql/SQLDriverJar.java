@@ -22,9 +22,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public class SQLDriverJar implements Driver  {
 	private Driver driver;
@@ -73,12 +71,6 @@ public class SQLDriverJar implements Driver  {
 	 */
 	public boolean jdbcCompliant() {
 		return this.driver.jdbcCompliant();
-	}
-
-	@Override
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
