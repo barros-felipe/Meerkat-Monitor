@@ -141,7 +141,7 @@ public class PropertiesLoader {
 				stream.close();
 			} catch (IOException e) {
 				log.error("Error closing validation of properties file.", e);
-				return false;
+				return false; // $codepro.audit.disable returnInFinally
 			}
 		}
 

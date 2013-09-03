@@ -55,7 +55,7 @@ public class WebAppActionThread extends Thread {
 			Process pr;
 			BufferedReader input = null;
 			try {
-				pr = rt.exec(command);
+				pr = rt.exec(command); // $codepro.audit.disable commandExecution
 				input = new BufferedReader(new InputStreamReader(
 						pr.getInputStream()));
 

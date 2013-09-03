@@ -1,3 +1,4 @@
+// $codepro.audit.disable logExceptions
 /**
  * Meerkat Monitor - Network Monitor Tool
  * Copyright (C) 2011 Merkat-Monitor
