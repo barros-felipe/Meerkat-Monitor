@@ -92,7 +92,7 @@ public class EmbeddedDB implements Runnable{
 		
 		Connection c = getConnForUpdates();
 		PreparedStatement ps = null;
-		Statement st, st1, st2, st3, st4, st5, st6, st7;
+		Statement st, stev, st1, st2, st3, st4, st5, st6, st7;
 		ResultSet rs = null;
 		try {
 			ps = getConnForUpdates().prepareStatement("SELECT COUNT(*) FROM MEERKAT.EVENTS");
@@ -119,9 +119,17 @@ public class EmbeddedDB implements Runnable{
 							"LATENCY DOUBLE, "+
 							"HTTPSTATUSCODE INT, "+
 							"DESCRIPTION VARCHAR(50), "+
-							"RESPONSE VARCHAR("+EVENT_MAX_RESPONSE_LENGTH+") "+
+							"RESPONSE_ID INTEGER "+
 							")");
 
+					stev = c.createStatement();
+					stev.executeUpdate("CREATE TABLE MEERKAT.EVENTS_RESPONSE( "+
+							"ID INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "+
+							"APPNAME VARCHAR(200), "+
+							"RESPONSE VARCHAR("+EVENT_MAX_RESPONSE_LENGTH+"), "+
+							"PRIMARY KEY (ID) "+
+							")");
+										
 					st1 = c.createStatement();
 					st2 = c.createStatement();
 					st3 = c.createStatement();
@@ -139,6 +147,7 @@ public class EmbeddedDB implements Runnable{
 					st7.executeUpdate("CREATE INDEX MEERKAT.IDX_DESCRIPTION ON MEERKAT.EVENTS (DESCRIPTION)");
 
 					st.close();
+					stev.close();
 					st1.close();
 					st2.close();
 					st3.close();

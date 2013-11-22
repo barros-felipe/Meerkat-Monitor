@@ -463,6 +463,18 @@ public class WebAppCollection {
 		} catch (SQLException e) {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
 		}
+		
+		// Events response table
+		String resetQueryEventsDesc = "DELETE FROM EVENTS_RESPONSE";
+		PreparedStatement statement1;
+		try {
+			statement1 = conn.prepareStatement(resetQueryEventsDesc);
+			statement1.execute();
+			statement1.close();
+			conn.commit();
+		} catch (SQLException e) {
+			log.error("Failed to reset all events response from DB! - "+e.getMessage());
+		}
 
 		//this.writeWebAppCollectionMotionChart();
 		httpServer.refreshIndex();
@@ -485,6 +497,18 @@ public class WebAppCollection {
 			conn.commit();
 		} catch (SQLException e) {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
+		}
+		
+		// EVENTS_RESPONSE
+		String resetAppDataQueryResponse = "DELETE FROM EVENTS_RESPONSE WHERE APPNAME LIKE '"+appName+"'";
+		PreparedStatement statementResponse;
+		try {
+			statementResponse = conn.prepareStatement(resetAppDataQueryResponse);
+			statementResponse.execute();
+			statementResponse.close();
+			conn.commit();
+		} catch (SQLException e) {
+			log.error("Failed to reset all events response from DB! - "+e.getMessage());
 		}
 
 		this.getWebAppByName(appName).writeWebAppVisualizationDataFile();

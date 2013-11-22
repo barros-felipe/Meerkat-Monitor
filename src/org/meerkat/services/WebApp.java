@@ -34,6 +34,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -508,8 +509,59 @@ public class WebApp {
 	 * @param event
 	 */
 	public final void addEvent(WebAppEvent ev) {
+		if(ev.getCurrentResponse().length() > EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH){
+			// truncate the size of response
+			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH));
+			log.warn("Response of "+this.getName()+" bigger than "+EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH+" chars (truncated!).");
+		}
+		
+		// Get the event ID
+		PreparedStatement pstat;
+		ResultSet rs = null;
+		int evID = -1;
+		try{
+			pstat = conn.prepareStatement("SELECT ID FROM MEERKAT.EVENTS_RESPONSE WHERE APPNAME = '"+this.getName()+"' AND RESPONSE LIKE ?");
+			pstat.setString(1, ev.getCurrentResponse());
+			rs = pstat.executeQuery();
+			while(rs.next()) {
+				evID = rs.getInt(1);
+			}
+			rs.close();
+			pstat.close();
+		} catch (SQLException e) {
+			log.error("Failed query events response existence from DB ");
+			log.error("", e);
+		}
+		
+		if(evID < 0){ // No equal event exists, so add a new one
+			PreparedStatement pstatAddEv;
+			String queryInsertNewEv = "INSERT INTO MEERKAT.EVENTS_RESPONSE(APPNAME, RESPONSE) VALUES('"+this.getName()+"', ?) ";
+			try {
+				pstatAddEv = conn.prepareStatement(queryInsertNewEv, Statement.RETURN_GENERATED_KEYS);
+				pstatAddEv.setString(1, ev.getCurrentResponse().toString());
+				pstatAddEv.execute();
+				
+				ResultSet generatedKeys = pstatAddEv.getGeneratedKeys();
+		        if (generatedKeys.next()) {
+		        	evID = (int) generatedKeys.getLong(1);
+		        } else {
+		        	log.error("Error inserting event response, no generated key obtained.");
+		            //throw new SQLException("Error inserting event response, no generated key obtained.");
+		        }
+				
+		        pstatAddEv.close();
+				conn.commit();
+				
+			} catch (SQLException e) {
+				log.error("Failed to insert event response into DB for app: "+this.getName()+"! - "+e.getMessage());
+				//log.error("INSERT DATA IS:"+ev.getCurrentResponse());
+				//EmbeddedDB.logSQLException(e);
+			}
+		}
+		
+		// Add the event referencing the event response id
 		PreparedStatement statement;
-		String queryInsert = "INSERT INTO MEERKAT.EVENTS(APPNAME, CRITICAL, DATEEV, ONLINE, AVAILABILITY, LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE) VALUES(";
+		String queryInsert = "INSERT INTO MEERKAT.EVENTS(APPNAME, CRITICAL, DATEEV, ONLINE, AVAILABILITY, LOADTIME, LATENCY, HTTPSTATUSCODE, DESCRIPTION, RESPONSE_ID) VALUES(";
 
 		String queryValues = "'"+ this.getName() +"', "+ev.isCritical()+", '"+ev.getDate()+"', '"+
 				ev.getStatus()+"', "+Double.valueOf(this.getAvailability())+", "+
@@ -522,17 +574,11 @@ public class WebApp {
 			queryValues += ev.getLatency();
 		}
 
-		queryValues += ", "+Integer.valueOf(ev.getHttpStatusCode())+", '"+ev.getDescription()+"', ?";
-
-		if(ev.getCurrentResponse().length() > EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH){
-			// truncate the size of response
-			ev.setCurrentResponse(ev.getCurrentResponse().substring(0, EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH));
-			log.warn("Response of "+this.getName()+" bigger than "+EmbeddedDB.EVENT_MAX_RESPONSE_LENGTH+" chars (truncated!).");
-		}
+		queryValues += ", "+Integer.valueOf(ev.getHttpStatusCode())+", '"+ev.getDescription()+"', "+evID+"";
 
 		try {
 			statement = conn.prepareStatement(queryInsert+queryValues+")");
-			statement.setString(1, ev.getCurrentResponse());
+			//statement.setInt(1, evID);
 			statement.execute();
 			statement.close();
 			conn.commit();
@@ -571,7 +617,7 @@ public class WebApp {
 		BigDecimal bd = new BigDecimal(loadTimeAVG);
 		bd = bd.setScale(decimalPlaces, BigDecimal.ROUND_DOWN);
 		loadTimeAVG = bd.doubleValue();
-		
+
 		return loadTimeAVG;
 	}
 
@@ -633,7 +679,7 @@ public class WebApp {
 			log.error("Failed query number of critical events from application "+this.getName());
 			log.error("", e);
 		}
-		
+
 		return numberOfCriticalEvents;
 	}
 
@@ -1122,7 +1168,7 @@ public class WebApp {
 		BigDecimal bd1 = new BigDecimal(lastLoadTime);
 		bd1 = bd1.setScale(3, BigDecimal.ROUND_DOWN);
 		lastLoadTime = bd1.doubleValue();
-	
+
 		if(lastLoadTime > loadTimeAverage){
 			return 1;
 		}else if(lastLoadTime < loadTimeAverage){
@@ -1183,6 +1229,21 @@ public class WebApp {
 			conn.commit();
 		} catch (SQLException e) {
 			log.error("Failed to remove events of "+this.name+" from DB! - "+e.getMessage());
+		}
+		
+		// Remove from events response
+		PreparedStatement statementResponse = null;
+
+		String queryDeleteResponse = "DELETE FROM MEERKAT.EVENTS_RESPONSE WHERE APPNAME LIKE '"+this.name+"'";
+
+		try {
+			statementResponse = conn.prepareStatement(queryDeleteResponse);
+			statementResponse.execute();
+
+			statementResponse.close();
+			conn.commit();
+		} catch (SQLException e) {
+			log.error("Failed to remove response events of "+this.name+" from DB! - "+e.getMessage());
 		}
 	}
 

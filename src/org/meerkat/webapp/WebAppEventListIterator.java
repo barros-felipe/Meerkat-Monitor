@@ -93,6 +93,7 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 
 	@Override
 	public WebAppEvent next() {
+		int events_response_id = 0;
 		WebAppEvent currEv = null;
 		boolean critical;
 		String date;
@@ -119,13 +120,14 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 				latency = String.valueOf(rs.getDouble(8));
 				httStatusCode = rs.getInt(9);
 				description = rs.getString(10);
-				response = rs.getString(11);
+				//response = rs.getString(11);
+				events_response_id = rs.getInt(11);
 
 				currEv = new WebAppEvent(critical, date, online, availability, httStatusCode, description);
 				currEv.setID(rs.getInt(1));
 				currEv.setPageLoadTime(loadTime);
 				currEv.setLatency(latency);
-				currEv.setCurrentResponse(response);
+				//currEv.setCurrentResponse(response);
 			}
 
 			rs.close();
@@ -135,6 +137,26 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 			log.error("Failed query events from application "+webApp.getName());
 			log.error("", e);
 		}
+
+		// Get the event response
+		PreparedStatement pss1;
+		ResultSet rss1 = null;
+		try {
+			pss1 = conn.prepareStatement("SELECT * FROM MEERKAT.EVENTS_RESPONSE WHERE ID = "+events_response_id);
+			rss1 = pss1.executeQuery();
+
+			rss1.next();
+			response = rss1.getString(1);
+			currEv.setCurrentResponse(response);
+
+			rss1.close();
+			pss1.close();
+		} catch (SQLException e) {
+			log.error("Failed get event id "+currId+" response. (Exists?)");
+		}
+
+
+
 
 		// Set the next Event ID
 		PreparedStatement ps1;
@@ -176,12 +198,12 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 		String latency;
 		int httStatusCode;
 		String description;
-		String response;
-		
+		//String response;
+
 		// Generate Random number for sig
 		// Math.random() * ( Max - Min )
 		double rand = Math.random() * 19;
-		
+
 		String jsonResponse = "google.visualization.Query.setResponse({\n";
 		jsonResponse += "version:'0.6',\n"+
 				"reqId:'0',\n"+
@@ -211,13 +233,13 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 			"label:'Status Desc.',\n"+
 			"type:'string'\n"+
 			"}],";
-		
+
 		PreparedStatement ps;
 		ResultSet rs = null;
-		
+
 		// Start of response data
 		jsonResponse += "rows:[\n";
-		
+
 		try {
 			ps = conn.prepareStatement("SELECT * FROM MEERKAT.EVENTS "+ 
 					"WHERE APPNAME LIKE '"+webApp.getName()+"' "+
@@ -234,14 +256,14 @@ public class WebAppEventListIterator implements Iterator<WebAppEvent>{
 				latency = String.valueOf(rs.getDouble(8));
 				httStatusCode = rs.getInt(9);
 				description = rs.getString(10);
-				response = rs.getString(11);
+				//response = rs.getString(11);
 
 				currEv = new WebAppEvent(critical, date, online, availability, httStatusCode, description);
 				currEv.setID(rs.getInt(1));
 				currEv.setPageLoadTime(loadTime);
 				currEv.setLatency(latency);
-				currEv.setCurrentResponse(response);
-				
+				//currEv.setCurrentResponse(response);
+
 				jsonResponse += "{c:[\n";
 				jsonResponse += "{v:new Date(" + currEv.getDateFormatedGWT()+")},\n";
 				jsonResponse += "{v:"+currEv.getLatency()+"},\n";
