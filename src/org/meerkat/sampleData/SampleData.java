@@ -29,6 +29,17 @@ public class SampleData {
 	private static NetworkUtil nu = new NetworkUtil();
 
 	/**
+	 * 
+	 * @return
+	 */
+	public static WebApp getSampleWebApp_MeerkatMonitorWebPage(){
+		WebApp meerkatMonitorWP = new WebApp("Meerkat-Monitor.org", "http://meerkat-monitor.org/?utm_source=desktopapp&utm_medium=app&utm_campaign=appstartup", "Meerkat-Monitor");
+		meerkatMonitorWP.addGroups("Web");
+
+		return meerkatMonitorWP;
+	}
+
+	/**
 	 * getSampleWebApp
 	 * @return WebApp
 	 */

@@ -100,6 +100,7 @@ public class MeerkatGeneralOperations {
 			webAppsCollection.addWebApp(SampleData.getSampleWebApp_SelfTestWSDL(), false);
 			webAppsCollection.addWebApp(SampleData.getSampleWebService_SelfWSgetVersion(version), false);
 			webAppsCollection.addWebApp(SampleData.getSampleSocketService_SelfHTTP_Port(), false);
+			webAppsCollection.addWebApp(SampleData.getSampleWebApp_MeerkatMonitorWebPage(), false);
 		}
 
 		webAppsCollection.setConfigFile(xmlConfigFile);

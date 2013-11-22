@@ -220,7 +220,7 @@ public class WebAppEvent {
 	public final String getLatency() {
 		NumberFormat nf = new DecimalFormat("#");
 		String result = "";
-		if(!latency.equals(noValueString)) {
+		if(latency != null && !latency.equals(noValueString)) {
 			Double formatedLatency = Double.valueOf(latency);
 			result = nf.format(formatedLatency);
 		} else {
