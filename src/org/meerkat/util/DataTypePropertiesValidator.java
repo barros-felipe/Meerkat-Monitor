@@ -20,7 +20,6 @@
 
 package org.meerkat.util;
 
-import java.util.regex.Pattern;
 
 
 public class DataTypePropertiesValidator {
@@ -57,11 +56,18 @@ public class DataTypePropertiesValidator {
 	 * @return
 	 */
 	public static boolean isEmailAddress(String value){
+		/** Disable checking emails against RFC2822 to allow local domains (like user@domain) - Only checking for an @
 		Pattern rfc2822 = Pattern.compile("^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
 		if (!rfc2822.matcher(value).matches()) {
 			return false; // Invalid email address
 		}
 		return true;
+		*/
+		if(value.contains("@")){
+			return true;
+		}
+		return false;
+		
 	}
 
 
