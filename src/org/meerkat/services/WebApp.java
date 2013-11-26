@@ -123,7 +123,9 @@ public class WebApp {
 	 *            WebApp expected string in the URL
 	 */
 	public WebApp(String name, String url, String expectedString) {
-		this.name = name;
+		//Make sure no symbols - impacts on admin interface javascript
+		this.name = name.replaceAll("[^A-Za-z0-9]", " ");
+		
 		this.url = url;
 		this.expectedString = expectedString;
 		this.actionExecOutput = "";
