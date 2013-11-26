@@ -7,6 +7,10 @@
 	<property name="launch4j.dir" location="external_tools/launch4j" />
 	<property name="nsis.dir" location="${basedir}/external_tools/nsis" />
 	
+	<property name="web.app.client.build.xml" location="build-webclient-war.xml" />
+	
+	
+	
 	<target name="init" depends="clean">
 		<mkdir dir="build/classes"/>
 		<mkdir dir="dist"/>
@@ -75,9 +79,11 @@
 		<mkdir dir="bundle/log"/>
 		<mkdir dir="bundle/war"/>
 		
-		<!-- Create base -->
-		<antcall target="zip_base" />
+		<!-- Create Web App Client WAR -->
+		<antcall target="webAppClient" />	
 		
+		<!-- Create base -->
+		<antcall target="zip_base" />		
 	</target>
 	
 	<!-- ZIP BASE -->
@@ -85,6 +91,14 @@
 		<!-- create zip with all components -->
 		<!-- used as base for creation of installers -->
 		<zip destfile="temp/${mm.id}.zip" basedir="bundle" />
+	</target>
+	
+	<!-- WEB APP CLIENT -->
+	<target name="webAppClient">
+		<copy file="dist/${mm.deps.file}" todir="WebContent/WEB-INF/lib"/>
+		<ant antfile="${web.app.client.build.xml}" target="all" inheritall="false" />
+		<!-- Copy war file back to dist -->
+		<copy file="dist/MMWebClient.war" todir="bundle/war"/>
 	</target>
 	
 	<!-- CLEAN BASE -->

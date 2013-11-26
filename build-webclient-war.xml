@@ -1,0 +1,86 @@
+<project name="Meerkat-Monitor Client" default="all" basedir="."> 
+
+	
+   <property name="tomcat.home" value="tomcat-6.0.36-deps" />
+   <property name="webapp.path" value="WebAppBundle" />
+   <property name="dist.dir" value="dist" />
+   <property name="dist.war" value="MMWebClient.war" />
+   <import file="${tomcat.home}/bin/catalina-tasks.xml"/>
+  
+   <target name="jspc"> 
+	   	<jasper 
+	    	validateXml="false" 
+	        uriroot="${webapp.path}" 
+	        webXmlFragment="${webapp.path}/WEB-INF/generated_web.xml" 
+	   		addWebXmlMappings="true"
+	        outputDir="${webapp.path}/WEB-INF/src"
+	   		compilerTargetVM="1.6"
+	   	    compilerSourceVM="1.6"
+	   	/> 
+    </target> 
+
+    <target name="compile">
+    	<mkdir dir="${webapp.path}/WEB-INF/classes"/>
+    	<mkdir dir="${webapp.path}/WEB-INF/lib"/>
+
+	    <javac destdir="${webapp.path}/WEB-INF/classes"
+	           optimize="off"
+	           debug="on" failonerror="true"
+	           srcdir="${webapp.path}/WEB-INF/src" 
+		   	   excludes="**/*.smap">
+	      	<classpath>
+	        	<pathelement location="${webapp.path}/WEB-INF/classes"/>
+	        	<fileset dir="${webapp.path}/WEB-INF/lib">
+	          		<include name="*.jar"/>
+	        	</fileset>
+	        	<pathelement location="${tomcat.home}/lib"/>
+	        	<fileset dir="${tomcat.home}/lib">
+	          		<include name="*.jar"/>
+	        	</fileset>
+	        	<fileset dir="${tomcat.home}/bin"> 
+	          	<include name="*.jar"/> 
+	        	</fileset> 
+	      	</classpath>
+	      	<include name="**" />
+	      	<exclude name="tags/**" />
+	     </javac>
+  	</target>
+
+  	<target name="all" depends="init,jspc,compile,war">
+  	</target>
+
+  	<target name="init">
+  		<delete dir="${webapp.path}"/>
+  		<delete dir="${dist.dir}"/>
+  		<mkdir dir="${dist.dir}"/>
+  		<mkdir dir="${webapp.path}/WEB-INF/src"/>
+  		<mkdir dir="${webapp.path}/WEB-INF/lib"/>
+
+  		<copy todir="${webapp.path}/WEB-INF/src">
+  		    <fileset dir="src_webclient"/>
+  		</copy>
+  		<copy todir="${webapp.path}/">
+  			<fileset dir="WebContent"/>
+  		</copy>
+  	</target>
+  	
+	
+	<target name="war">
+		<!-- Delete the original jsp files -->
+		<delete>
+			<fileset dir="${webapp.path}" includes="**/*.jsp"/>
+		</delete>
+		<!-- Delete the source files -->
+		<delete dir="${webapp.path}/WEB-INF/src"/>
+		<!-- Copy Tomcat libs deps -->
+		<copy file="${tomcat.home}/lib/catalina.jar" todir="${webapp.path}/WEB-INF/lib"/>
+		<copy file="${tomcat.home}/bin/tomcat-juli.jar" todir="${webapp.path}/WEB-INF/lib"/>
+		<!-- Generate the final war file -->
+  		<war destfile="${dist.dir}/${dist.war}">
+  		  <fileset dir="${webapp.path}"/>
+  		</war>
+		<!-- Delete temp dir -->
+		<delete dir="${webapp.path}"/>
+	</target>
+
+</project>
