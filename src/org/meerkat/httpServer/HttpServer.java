@@ -94,16 +94,19 @@ public class HttpServer {
 		resourceHandler.setDirectoriesListed(true);
 		resourceHandler.setWelcomeFiles(new String[] { "index.htm" });
 		resourceHandler.setResourceBase(tempWorkingDir);
-		
-		ServletContextHandler context0 = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		context0.setContextPath("/");
-		context0.setHandler(resourceHandler);
-		
+
+		ServletContextHandler rootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		rootContext.setContextPath("/");
+		rootContext.setHandler(resourceHandler);
+
 		// WebApp context for Web Client Admin  - if client war is available
 		WebAppContext webAppClientWar = embeddedWarClientAppContext();
-		ServletContextHandler context1 = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		context1.setContextPath("/admin");
-		context1.setHandler(webAppClientWar);
+		ServletContextHandler adminContext = null;
+		if(webAppClientWar != null){
+			adminContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+			adminContext.setContextPath("/admin");
+			adminContext.setHandler(webAppClientWar);
+		}
 
 		// Create the index file which redirects to dynamic response listening on "index.html"
 		String redirectCode = "<html>\n<head>\n<meta http-equiv=\"refresh\" content=\"0;url=index.html\">"+
@@ -118,7 +121,12 @@ public class HttpServer {
 		// Is a Handler Collection that calls each handler in turn until either an exception 
 		// is thrown, the response is committed or the request.isHandled() returns true.
 		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[] { context0, context1, customResHandler });
+		if(webAppClientWar != null){
+			handlers.setHandlers(new Handler[] { rootContext, adminContext, customResHandler });
+		}else{
+			handlers.setHandlers(new Handler[] { rootContext, customResHandler });
+		}
+
 		mServer.setHandler(handlers);
 
 		try {
@@ -382,7 +390,7 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
-						*/
+						 */
 
 						// Link to events
 						responseStatus += "<td class=\"center\">";
@@ -415,7 +423,7 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
-						*/
+						 */
 
 						/**
 						 * Load Time
@@ -436,7 +444,7 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
-						*/
+						 */
 
 						// Status
 						if (wApp.getlastStatus().equalsIgnoreCase("online")) {
@@ -465,7 +473,7 @@ public class HttpServer {
 				}
 
 				responseStatus += bottomContent;
-				
+
 				// Admin link
 				responseStatus += "<a href=\""
 						+ adminUrl 
@@ -550,7 +558,7 @@ public class HttpServer {
 		FilenameFilter textFilter = new FilenameFilter() {
 			public boolean accept(File dir, String name) {
 				String lowercaseName = name.toLowerCase();
-				
+
 				return lowercaseName.endsWith(".war");
 
 			}
@@ -568,6 +576,9 @@ public class HttpServer {
 		if(!warFileClient.equals("")){
 			webappClient = new WebAppContext();
 			webappClient.setWar(warFileClient);
+		}else{
+			webappClient = null;
+
 		}
 
 		return webappClient;
