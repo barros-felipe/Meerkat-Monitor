@@ -63,6 +63,7 @@ public class HttpServer {
 	private static String webLogFile = "log.txt";
 	private String rssResource = "/rss.xml";
 	private String wsdlUrl = "";
+	private String adminUrl = "/admin";
 	//private String timeLineFile = "TimeLine.html";
 	private String hostname = netUtil.getHostname();
 	private CustomResourceHandler customResHandler;
@@ -464,6 +465,13 @@ public class HttpServer {
 				}
 
 				responseStatus += bottomContent;
+				
+				// Admin link
+				responseStatus += "<a href=\""
+						+ adminUrl 
+						+ "\" target=\"_blank\"><img src=\"resources/tango-preferences-system.png\" alt=\"Admin\" align=\"right\" style=\"border-style: none\"/></a> \n";
+
+				// WebServices Link
 				responseStatus += "<a href=\""
 						+ wsdlUrl
 						+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n";
