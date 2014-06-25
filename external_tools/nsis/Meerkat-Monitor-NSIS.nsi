@@ -43,7 +43,7 @@ Section "Application Files (required)"
   WriteRegStr HKLM SOFTWARE\Meerkat-Monitor "Install_Dir" "$INSTDIR"
   
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Meerkat-Monitor" "DisplayName" "Meerkat-Monitor-daemon.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Meerkat-Monitor" "DisplayName" "Meerkat-Monitor.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Meerkat-Monitor" "Dashboard URL" '"$INSTDIR\Meerkat-Monitor-Dashboard.URL"'
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Meerkat-Monitor" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteUninstaller "uninstall.exe"
@@ -55,7 +55,7 @@ SectionEnd
 Section "Start Menu Shortcuts"
 
   CreateDirectory "$SMPROGRAMS\Meerkat-Monitor"
-  CreateShortCut "$SMPROGRAMS\Meerkat-Monitor\Meerkat-Monitor Daemon.lnk" "$INSTDIR\Meerkat-Monitor-daemon.exe" "" "$INSTDIR\Meerkat-Monitor-daemon.exe" 0
+  CreateShortCut "$SMPROGRAMS\Meerkat-Monitor\Meerkat-Monitor.lnk" "$INSTDIR\Meerkat-Monitor.exe" "" "$INSTDIR\Meerkat-Monitor.exe" 0
   CreateShortCut "$SMPROGRAMS\Meerkat-Monitor\Meerkat-Monitor Dashboard.lnk" "$INSTDIR\Meerkat-Monitor-Dashboard.URL" "" "C:\WINNT\system32\url.dll" 0
   CreateShortCut "$SMPROGRAMS\Meerkat-Monitor\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   
