@@ -75,7 +75,6 @@ public class SQLDriverJar implements Driver  {
 		return this.driver.jdbcCompliant();
 	}
 
-	@Override
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 		return null;
 	}
