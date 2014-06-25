@@ -27,6 +27,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,8 +41,10 @@ import org.eclipse.jetty.util.ByteArrayISO8859Writer;
 import org.eclipse.jetty.util.IO;
 import org.meerkat.services.WebApp;
 import org.meerkat.util.HtmlOperations;
+import org.meerkat.util.PropertiesLoader;
 import org.meerkat.webapp.WebAppCollection;
 import org.meerkat.webapp.WebAppEvent;
+import org.meerkat.webapp.WebAppEventListIterator;
 
 public class CustomResourceHandler extends ResourceHandler {
 	private static Logger log = Logger.getLogger(CustomResourceHandler.class);
@@ -50,8 +53,11 @@ public class CustomResourceHandler extends ResourceHandler {
 	boolean _serveIcon = true;
 	private String eventRequestID = "/event-id-";
 	private String eventListRequest = "/event-list-";
+	private String eventListGoogleVisualizationRequest = "/event-gv-list-";
 	int eventListRequestLength = eventListRequest.length();
 	private WebAppCollection wac;
+	private static String propertiesFile = "meerkat.properties";
+	private HttpServer httpServer;
 
 	private String notFound = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
 			+ "<html>\n"
@@ -86,7 +92,9 @@ public class CustomResourceHandler extends ResourceHandler {
 			+ "</html>\n";
 
 
-	public CustomResourceHandler() {
+	public CustomResourceHandler(HttpServer httpServer) {
+		this.httpServer = httpServer;
+
 		// Set the favicon
 		try {
 			URL fav = this.getClass().getClassLoader()
@@ -120,6 +128,21 @@ public class CustomResourceHandler extends ResourceHandler {
 				baseRequest.setHandled(true);
 				return;
 
+			}else if(request.getRequestURI().contains("index.html")){ // Handle index.html
+				String responseIndex = httpServer.getIndexPageContents();
+				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
+				response.setContentType(MimeTypes.TEXT_HTML);
+				response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
+				writer.write(responseIndex);
+				writer.flush();
+				response.setContentLength(writer.size());
+				OutputStream out = response.getOutputStream();
+				writer.writeTo(out);
+				out.close();
+				writer.close();
+				baseRequest.setHandled(true);
+				return;
+
 			}else if(request.getRequestURI().contains(eventRequestID)){ // This is a request for event
 				// Get request id
 				String requestRef = request.getRequestURI();
@@ -150,7 +173,7 @@ public class CustomResourceHandler extends ResourceHandler {
 					return;
 				}else{
 					writer.close();
-					log.info("-- prepare to load 404 handler..");
+					//log.info("-- prepare to load 404 handler..");
 					processNotFound404(response, baseRequest);
 				}
 
@@ -249,7 +272,45 @@ public class CustomResourceHandler extends ResourceHandler {
 				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
 				response.setContentType(MimeTypes.TEXT_JSON_UTF_8);
 				response.setStatus(HttpServletResponse.SC_OK);
+				// Disable cache
+				response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
 				writer.write(jSONresponse);
+				writer.flush();
+				response.setContentLength(writer.size());
+				OutputStream out = response.getOutputStream();
+				writer.writeTo(out);
+				out.close();
+				writer.close();
+				baseRequest.setHandled(true);
+				return;
+			}
+
+			// Deal with request for Google Visualization events
+			else if(request.getRequestURI().contains(eventListGoogleVisualizationRequest)){
+				// Get properties
+				PropertiesLoader pl = new PropertiesLoader(propertiesFile);
+				Properties prop = pl.getPropetiesFromFile();
+
+				// Get the max number of records
+				int maxNumberRecordsToShow = Integer.valueOf(prop.getProperty("meerkat.app.timeline.maxrecords"));
+
+
+				// Get application
+				String requestRef = request.getRequestURI();
+				requestRef = requestRef.substring(eventListGoogleVisualizationRequest.length(), requestRef.length());
+				String appName = URLDecoder.decode(requestRef, "UTF-8");
+				WebApp webapp = wac.getWebAppByName(appName);
+
+				WebAppEventListIterator wAppEIt = new WebAppEventListIterator(webapp);
+
+				String jsonResponse = wAppEIt.getJsonFormatLastXAppEvents(maxNumberRecordsToShow);
+
+				ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
+				response.setContentType(MimeTypes.TEXT_JSON_UTF_8);
+				response.setStatus(HttpServletResponse.SC_OK);
+				// Disable cache
+				response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
+				writer.write(jsonResponse);
 				writer.flush();
 				response.setContentLength(writer.size());
 				OutputStream out = response.getOutputStream();

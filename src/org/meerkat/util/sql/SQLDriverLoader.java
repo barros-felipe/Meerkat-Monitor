@@ -1,3 +1,4 @@
+// $codepro.audit.disable logExceptions
 /**
  * Meerkat Monitor - Network Monitor Tool
  * Copyright (C) 2012 Merkat-Monitor
@@ -40,6 +41,9 @@ public class SQLDriverLoader {
 	private String MYSQL_JAR_DIR = "lib/jdbc-driver/mysql/";
 	private String MYSQL_CLASS_NAME = "com.mysql.jdbc.Driver";
 	
+	private String POSTGRE_JAR_DIR = "lib/jdbc-driver/postgre/";
+	private String POSTGRE_CLASS_NAME = "org.postgresql.Driver";
+	
 	
 	public SQLDriverLoader(){
 
@@ -52,6 +56,7 @@ public class SQLDriverLoader {
 		this.loadDriver(ORA_JAR_DIR, "Oracle", ORA_CLASS_NAME);
 		this.loadDriver(MSSQL_JAR_DIR, "MSSQL", MSSQL_CLASS_NAME);
 		this.loadDriver(MYSQL_JAR_DIR, "MySQL", MYSQL_CLASS_NAME);
+		this.loadDriver(POSTGRE_JAR_DIR, "PostGreSQL", POSTGRE_CLASS_NAME);
 	
 	}
 	

@@ -1,3 +1,4 @@
+// $codepro.audit.disable logExceptions
 /**
  * Meerkat Monitor - Network Monitor Tool
  * Copyright (C) 2012 Merkat-Monitor
@@ -39,10 +40,14 @@ public class LogSettings {
 	 * setupLogGeneralOptions
 	 */
 	public final void setupLogGeneralOptions(){
-		// Set up embedded jetty log
 		Properties systemProperties = System.getProperties();
-		systemProperties.setProperty("org.eclipse.jetty.LEVEL", "WARN");
-
+		
+		// Custom logging for jetty
+		// systemProperties.setProperty("org.eclipse.jetty.LEVEL", "WARN");
+		// NOTE: JettyCustomLogger is a dummy logger. No log messages are handled
+		org.meerkat.util.JettyCustomLogger jettyCustLogger = new JettyCustomLogger();
+		org.eclipse.jetty.util.log.Log.setLog(jettyCustLogger);
+		
 		// Setup DerbyBD log settings
 		systemProperties.setProperty("derby.stream.error.file", "log/meerkat-derby.log");
 		

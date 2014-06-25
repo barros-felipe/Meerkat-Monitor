@@ -19,7 +19,6 @@
 
 package org.meerkat.webapp;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -31,9 +30,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.log4j.Logger;
 import org.meerkat.db.EmbeddedDB;
 import org.meerkat.group.AppGroupCollection;
-import org.meerkat.httpServer.HTMLComponents;
 import org.meerkat.httpServer.HttpServer;
 import org.meerkat.services.WebApp;
+import org.meerkat.util.DateUtil;
 import org.meerkat.util.FileUtil;
 import org.meerkat.util.xml.XStreamMeerkatConfig;
 
@@ -51,8 +50,6 @@ public class WebAppCollection {
 	@XStreamOmitField
 	private String dataFileName = "TimeLine.html";
 	@XStreamOmitField
-	private FileUtil fu;
-	@XStreamOmitField
 	private String appVersion;
 	@XStreamOmitField
 	private String configXMLFile;
@@ -66,13 +63,14 @@ public class WebAppCollection {
 	HttpServer httpServer;
 	@XStreamOmitField
 	AppGroupCollection appGroupCollection;
-	
+
 
 	/**
 	 * WebAppCollection
 	 */
 	public WebAppCollection() {
 		webAppsCollection = new CopyOnWriteArrayList<WebApp>();
+		appGroupCollection = new AppGroupCollection();
 	}
 
 	/**
@@ -91,7 +89,7 @@ public class WebAppCollection {
 	public final void setHttpServer(HttpServer httpServer){
 		this.httpServer = httpServer;
 	}
-	
+
 	/**
 	 * setGroupCollection
 	 * @param appGroupCollection
@@ -99,7 +97,7 @@ public class WebAppCollection {
 	public final void setGroupCollection(AppGroupCollection appGroupCollection){
 		this.appGroupCollection = appGroupCollection;
 	}
-	
+
 	/**
 	 * setConfigFile
 	 * 
@@ -111,20 +109,6 @@ public class WebAppCollection {
 
 	public final void setTempWorkingDir(String tempWorkingDir) {
 		this.tempWorkingDir = tempWorkingDir;
-
-		// Create the timeline file (with empty data)
-		String contents = "There is no data available yet. Please come back later.";
-
-		fu = new FileUtil();
-		File tmp = new File(tempWorkingDir);
-		if (!tmp.exists()) {
-			if (!tmp.mkdirs()) {
-				log.error("ERROR creating temporary directory: "
-						+ tempWorkingDir);
-			}
-		}
-		fu.removeFile(tmp + "/" + this.getCollectionDataFileName());
-		fu.writeToFile(tmp + "/" + this.getCollectionDataFileName(), contents);
 	}
 
 	/**
@@ -140,9 +124,31 @@ public class WebAppCollection {
 	 * 
 	 * @param app
 	 */
-	public final void addWebApp(WebApp app) {
+	public final void addWebApp(WebApp app, boolean executeFirstTest) {
 		app.setTempWorkingDir(this.tempWorkingDir);
 		webAppsCollection.add(app);
+		appGroupCollection.populateGroups(this);
+
+		if(executeFirstTest){// Execute first monit and add it to app
+			WebAppResponse firstWebAppResponse = new WebAppResponse();
+			firstWebAppResponse = app.checkWebAppStatus();
+
+			DateUtil dateUtil = new DateUtil();
+			String now = dateUtil.now();
+			WebAppEvent ev = new WebAppEvent(
+					false,
+					now,
+					firstWebAppResponse.isOnline(),
+					Double.toString(app.getAvailability()),
+					firstWebAppResponse.getHttpStatus(),
+					"");
+			// Save load time and latency
+			ev.setPageLoadTime(firstWebAppResponse.getPageLoadTime());
+			ev.setLatency(app.getLatency());
+			// Set the response
+			ev.setCurrentResponse(app.getCurrentResponse());
+			app.addEvent(ev);
+		}
 	}
 
 	/**
@@ -204,7 +210,8 @@ public class WebAppCollection {
 	 * 
 	 * @return JSDataTable
 	 */
-	private String getJSCollectionTimeLine() {
+	/**
+	private String DISABLED_getJSCollectionMotionChart() {
 		WebApp webApp;
 		WebAppEvent webAppEvent;
 		String statusText = "";
@@ -231,7 +238,7 @@ public class WebAppCollection {
 
 		while (ia.hasNext()) {
 			webApp = ia.next();
-			Iterator<WebAppEvent> ie = webApp.getEventListIterator();
+			Iterator<WebAppEvent> ie = new WebAppEventListIterator(webApp);
 			while (ie.hasNext()) {
 				webAppEvent = ie.next();
 
@@ -256,13 +263,16 @@ public class WebAppCollection {
 						+ webAppEvent.getDescription() + "']);\n";
 			}
 		}
-		return dataTableBegin + dataTableData + dataTableEnd;
+		return dataTableBegin + dataTableData + dataTableEnd;	
 	}
+	 */
+
 
 	/**
 	 * writeWebAppCollectionDataFile
 	 */
-	public final void writeWebAppCollectionTimeLine() {
+	/**
+	public final void DISABLED_writeWebAppCollectionMotionChart() {
 		final WebAppCollection wap = this;
 		// With many records this will be time consuming
 		Runnable dataCollectionWriter = new Runnable(){
@@ -314,6 +324,7 @@ public class WebAppCollection {
 		Thread visDataWriterThread = new Thread(dataCollectionWriter);
 		visDataWriterThread.start();
 	}
+	 */
 
 	/**
 	 * isWebAppByNamePresent
@@ -453,10 +464,21 @@ public class WebAppCollection {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
 		}
 		
-		this.writeWebAppCollectionTimeLine();
-		
+		// Events response table
+		String resetQueryEventsDesc = "DELETE FROM EVENTS_RESPONSE";
+		PreparedStatement statement1;
+		try {
+			statement1 = conn.prepareStatement(resetQueryEventsDesc);
+			statement1.execute();
+			statement1.close();
+			conn.commit();
+		} catch (SQLException e) {
+			log.error("Failed to reset all events response from DB! - "+e.getMessage());
+		}
+
+		//this.writeWebAppCollectionMotionChart();
 		httpServer.refreshIndex();
-		
+
 		return nEvents;
 	}
 
@@ -477,12 +499,24 @@ public class WebAppCollection {
 			log.error("Failed to reset all events from DB! - "+e.getMessage());
 		}
 		
+		// EVENTS_RESPONSE
+		String resetAppDataQueryResponse = "DELETE FROM EVENTS_RESPONSE WHERE APPNAME LIKE '"+appName+"'";
+		PreparedStatement statementResponse;
+		try {
+			statementResponse = conn.prepareStatement(resetAppDataQueryResponse);
+			statementResponse.execute();
+			statementResponse.close();
+			conn.commit();
+		} catch (SQLException e) {
+			log.error("Failed to reset all events response from DB! - "+e.getMessage());
+		}
+
 		this.getWebAppByName(appName).writeWebAppVisualizationDataFile();
 		httpServer.refreshIndex();
-		
+
 		return nEvents;
 	}
-	
+
 	/**
 	 * removeAllApps
 	 * @return
@@ -492,10 +526,18 @@ public class WebAppCollection {
 		this.resetAllAppsData(); // Clear DB
 		webAppsCollection.clear(); // Clear Apps
 		appGroupCollection.populateGroups(this); // Clear Groups
-		
+
 		return nWebApps;
 	}
-	
+
+	/**
+	 * AppGroupCollection
+	 * @return
+	 */
+	public final AppGroupCollection getpAppGroupCollection(){
+		return appGroupCollection;
+	}
+
 	/**
 	 * getEmbeddedDB
 	 * @return

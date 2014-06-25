@@ -52,4 +52,7 @@ public class WebAppActionResultThread extends Thread {
 		}
 		wA.setActionExecOutput(wT.getCommandExecOutput());
 	}
+	
+	public final void run() {
+	}
 }

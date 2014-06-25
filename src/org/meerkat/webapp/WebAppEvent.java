@@ -1,3 +1,4 @@
+// $codepro.audit.disable logExceptions
 /**
  * Meerkat Monitor - Network Monitor Tool
  * Copyright (C) 2011 Merkat-Monitor
@@ -38,7 +39,7 @@ public class WebAppEvent {
 	private String availability;
 	private String description;
 	private String pageLoadTime;
-	private String latency;
+	private String latency = "0";
 	private boolean critical;
 	private int httpStatusCode;
 	private String noValueString = null;
@@ -218,8 +219,8 @@ public class WebAppEvent {
 	 */
 	public final String getLatency() {
 		NumberFormat nf = new DecimalFormat("#");
-		String result;
-		if(!latency.equals(noValueString)) {
+		String result = "";
+		if(latency != null && !latency.equals(noValueString)) {
 			Double formatedLatency = Double.valueOf(latency);
 			result = nf.format(formatedLatency);
 		} else {
@@ -254,7 +255,9 @@ public class WebAppEvent {
 	public final static WebAppEvent getEventByID(int id){
 		EmbeddedDB embDB = new EmbeddedDB();
 		Connection conn = embDB.getConnForQueries();
-
+		
+		int events_response_id = 0;
+		
 		WebAppEvent currEv = null;
 		boolean critical;
 		String date;
@@ -281,19 +284,37 @@ public class WebAppEvent {
 			latency = String.valueOf(rs.getDouble(8));
 			httStatusCode = rs.getInt(9);
 			description = rs.getString(10);
-			response = rs.getString(11);
+			events_response_id = rs.getInt(11);
 
 			currEv = new WebAppEvent(critical, date, online, availability, httStatusCode, description);
 			currEv.setID(rs.getInt(1));
 			currEv.setPageLoadTime(loadTime);
 			currEv.setLatency(latency);
-			currEv.setCurrentResponse(response);
-			
+						
 			rs.close();
 			ps.close();
 		} catch (SQLException e) {
 			log.error("Failed query event id "+id+". (Exists?)");
 		}
+		
+		
+		// Get the event response
+		PreparedStatement ps1;
+		ResultSet rs1 = null;
+		try {
+			ps1 = conn.prepareStatement("SELECT RESPONSE FROM MEERKAT.EVENTS_RESPONSE WHERE ID = "+events_response_id);
+			rs1 = ps1.executeQuery();
+
+			rs1.next();
+			response = rs1.getString(1);
+			currEv.setCurrentResponse(response);
+			
+			rs1.close();
+			ps1.close();
+		} catch (SQLException e) {
+			log.error("Failed get event id "+id+" response. (Exists?)");
+		}
+		
 		return currEv;
 	}
 

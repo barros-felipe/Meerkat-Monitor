@@ -20,6 +20,7 @@
 package org.meerkat.httpServer;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Locale;
@@ -30,6 +31,8 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.meerkat.group.AppGroupCollection;
 import org.meerkat.network.NetworkUtil;
 import org.meerkat.services.WebApp;
@@ -45,13 +48,12 @@ public class HttpServer {
 	private String version;
 	private int webServerPort;
 	private NetworkUtil netUtil = new NetworkUtil();
-	private FileUtil fu = new FileUtil();
+	//private FileUtil fu = new FileUtil();
 	private String tempWorkingDir;
 	private String propertiesFile = "meerkat.properties";
 
 	//private WebAppCollection wac;
 	private WebAppCollection wac;
-	private AppGroupCollection agc;
 	private Properties prop;
 	boolean displayGroupGauge;
 
@@ -61,7 +63,8 @@ public class HttpServer {
 	private static String webLogFile = "log.txt";
 	private String rssResource = "/rss.xml";
 	private String wsdlUrl = "";
-	private String timeLineFile = "TimeLine.html";
+	private String adminUrl = "/admin";
+	//private String timeLineFile = "TimeLine.html";
 	private String hostname = netUtil.getHostname();
 	private CustomResourceHandler customResHandler;
 
@@ -69,6 +72,10 @@ public class HttpServer {
 
 	private String bottomContent = "</tbody>\n</table>\n" + "</div>\n";
 	private String bodyEnd = "</body>\n" + "</html>\n";
+	private String indexContents = "";
+	private Server mServer;
+
+	private Thread indexRefresherThread = new Thread("indexRefresherThread");
 
 	public HttpServer(final int webServerPort, String version, String wsdlUrl, String tempWorkingDir) {
 		this.webServerPort = webServerPort;
@@ -78,22 +85,50 @@ public class HttpServer {
 		this.tempWorkingDir = tempWorkingDir;
 
 		// Create the index startup page
-		createStartupPage("Please wait while Meerkat is getting ready to work....");
+		createStartupPage("Please wait while Meerkat-Monitor is getting ready to work....");
 
-		Server mServer = new Server(webServerPort);
+		mServer = new Server(webServerPort);
 
+		// Handler for Meerkat-Monitor
 		ResourceHandler resourceHandler = new ResourceHandler();
 		resourceHandler.setDirectoriesListed(true);
-		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
+		resourceHandler.setWelcomeFiles(new String[] { "index.htm" });
 		resourceHandler.setResourceBase(tempWorkingDir);
 
+		ServletContextHandler rootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		rootContext.setContextPath("/");
+		rootContext.setHandler(resourceHandler);
+
+		// WebApp context for Web Client Admin  - if client war is available
+		WebAppContext webAppClientWar = embeddedWarClientAppContext();
+		ServletContextHandler adminContext = null;
+		if(webAppClientWar != null){
+			adminContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+			adminContext.setContextPath("/admin");
+			adminContext.setHandler(webAppClientWar);
+		}
+
+		// Create the index file which redirects to dynamic response listening on "index.html"
+		String redirectCode = "<html>\n<head>\n<meta http-equiv=\"refresh\" content=\"0;url=index.html\">"+
+				"\n</head>\n<body>\n</body>\n</html>";
+		FileUtil fu = new FileUtil();
+		fu.writeToFile(tempWorkingDir+"/index.htm", redirectCode);
+
 		// Add custom resource handler
-		customResHandler = new CustomResourceHandler();
-		
+		customResHandler = new CustomResourceHandler(this);
+
+		// Build the handlers list and pass it to the server
+		// Is a Handler Collection that calls each handler in turn until either an exception 
+		// is thrown, the response is committed or the request.isHandled() returns true.
 		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[] { resourceHandler, customResHandler });
+		if(webAppClientWar != null){
+			handlers.setHandlers(new Handler[] { rootContext, adminContext, customResHandler });
+		}else{
+			handlers.setHandlers(new Handler[] { rootContext, customResHandler });
+		}
+
 		mServer.setHandler(handlers);
-		
+
 		try {
 			mServer.start();
 		} catch (Exception e) {
@@ -110,10 +145,7 @@ public class HttpServer {
 	 * @param agc
 	 */
 	public final void setDataSources(WebAppCollection wac, AppGroupCollection agc) {
-		//this.wac = wac.getCopyWebApps();
 		this.wac = wac;
-		//numberEvents = wac.getNumberOfEventsInCollection();
-		this.agc = agc;
 		customResHandler.setWebAppCollection(wac);
 	}
 
@@ -122,7 +154,7 @@ public class HttpServer {
 	 * 
 	 * @return
 	 */
-	private String getTopContent(AppGroupCollection agc, boolean showGauge, boolean showAppType) {
+	private String getTopContent(boolean showGauge, boolean showAppType) {
 		String topContent = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 				+ "<html><head>\n"
 				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
@@ -150,8 +182,7 @@ public class HttpServer {
 				+ "				  minorTicks: 5};\n"
 				+ "var data = new google.visualization.DataTable();\n"
 
-				+ agc.getAvailabilityGaugeData()
-
+				+ wac.getpAppGroupCollection().getAvailabilityGaugeData()
 				+ "new google.visualization.Gauge(document.getElementById('visualization')).\n"
 				+ "draw(data, options);\n"
 				+ " }\n"
@@ -188,9 +219,11 @@ public class HttpServer {
 		}
 
 		topContent += "<div class=\"full_width big\">\n"
+				/**
 				+ "<a href=\""
 				+ timeLineFile
 				+ "\"><img src=\"resources/tango_timeline.png\" alt=\"Timeline\" align=\"right\" style=\"border-style: none\"/></a>\n"
+				 */
 				+ "<a href=\""
 				+ rssResource
 				+ "\"><img src=\"resources/tango_rss.png\" alt=\"RSS\" align=\"right\" style=\"border-style: none\"/></a> \n"
@@ -228,6 +261,11 @@ public class HttpServer {
 		footer = htmlc.getFooter();
 	}
 
+
+	public final String getIndexPageContents(){
+		return indexContents;
+	}
+
 	/**
 	 * refresh
 	 */
@@ -253,9 +291,9 @@ public class HttpServer {
 
 				displayGroupGauge = Boolean.parseBoolean(prop.getProperty("meerkat.dashboard.gauge"));
 				if (displayGroupGauge) {
-					responseStatus = getTopContent(agc, displayGroupGauge, appTypePrefixEnabled);
+					responseStatus = getTopContent(displayGroupGauge, appTypePrefixEnabled);
 				} else {
-					responseStatus = getTopContent(agc, false, appTypePrefixEnabled);
+					responseStatus = getTopContent(false, appTypePrefixEnabled);
 				}
 
 				// Check if remote access to config is allowed
@@ -340,7 +378,8 @@ public class HttpServer {
 						 */
 						responseStatus += "<td class=\"center\">" + wApp.getAvailability();
 
-						// Trend
+						// Trend - Disabled icon indicator because it breaks sorting!!
+						/**
 						double availIndicator = wApp.getAvailabilityIndicator();
 						if (wApp.getNumberOfTests() > 2) {
 							if (availIndicator > 0) {
@@ -351,6 +390,7 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
+						 */
 
 						// Link to events
 						responseStatus += "<td class=\"center\">";
@@ -370,7 +410,8 @@ public class HttpServer {
 						BigDecimal bd = new BigDecimal(wApp.getLatencyAverage());
 						bd = bd.setScale(1, BigDecimal.ROUND_DOWN);
 						responseStatus += bd.doubleValue();
-						// trend
+						// trend - Disabled icon indicator because it breaks sorting!!
+						/**
 						double latencyIndicator = wApp.getLatencyIndicator();
 						if (wApp.getNumberOfTests() > 2) {
 							// check for "undefined" values
@@ -382,15 +423,17 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
+						 */
 
 						/**
 						 * Load Time
 						 */
 						responseStatus += "<td class=\"center\">\n";
-						BigDecimal bd1 = new BigDecimal(wApp.getLoadsAverage());
+						BigDecimal bd1 = new BigDecimal(wApp.getAppLoadTimeAVG());
 						bd1 = bd1.setScale(1, BigDecimal.ROUND_DOWN);
 						responseStatus += bd1.doubleValue();
-						// trend
+						// trend - Disabled icon indicator because it breaks sorting!!
+						/**
 						double loadTimeIndicator = wApp.getLoadTimeIndicator();
 						if (wApp.getNumberOfTests() > 2) {
 							if (loadTimeIndicator > 0) {
@@ -401,6 +444,7 @@ public class HttpServer {
 								responseStatus += "</td>\n";
 							}
 						}
+						 */
 
 						// Status
 						if (wApp.getlastStatus().equalsIgnoreCase("online")) {
@@ -424,10 +468,18 @@ public class HttpServer {
 											Locale.getDefault())
 											+ "</strong></a></td>\n</tr>\n";
 						}
+
 					}
 				}
 
 				responseStatus += bottomContent;
+
+				// Admin link
+				responseStatus += "<a href=\""
+						+ adminUrl 
+						+ "\" target=\"_blank\"><img src=\"resources/tango-preferences-system.png\" alt=\"Admin\" align=\"right\" style=\"border-style: none\"/></a> \n";
+
+				// WebServices Link
 				responseStatus += "<a href=\""
 						+ wsdlUrl
 						+ "\"><img src=\"resources/tango_wsdl.png\" alt=\"Webservices WSDL\" align=\"right\" style=\"border-style: none\"/></a> \n";
@@ -453,16 +505,16 @@ public class HttpServer {
 				responseStatus += footer;
 				responseStatus += bodyEnd;
 
-				// Write the index file
-				File f = new File(tempWorkingDir + "index.html");
-				if (!f.delete()) {
-					log.warn("Failed to remove file: " + f.toString());
-				}
-				fu.writeToFile(tempWorkingDir + "index.html", responseStatus);
+				indexContents = responseStatus;
 			}
 		};
-		Thread refresherThread = new Thread(refresher);
-		refresherThread.start();
+
+		// Check if a indexRefresherThread is already running
+		// If so, do not launch another because it's not necessary
+		if(!indexRefresherThread.isAlive()){
+			indexRefresherThread = new Thread(refresher, "newIndexRefresherThread");
+			indexRefresherThread.start();
+		}
 	}
 
 	/**
@@ -480,15 +532,10 @@ public class HttpServer {
 				+ "<h2>"
 				+ message
 				+ "</h2>\n"
-				+ "<h3>Your browser will reload automatically when Meerkat is ready.</h3>\n"
+				+ "<h3>Your browser will reload automatically when Meerkat-Monitor is ready.</h3>\n"
 				+ "</body>\n" + "</html>\n";
 
-		// Write the startup index file
-		File f = new File(tempWorkingDir + "index.html");
-		if (f.exists() && !f.delete()) {
-			log.warn("Cannot remove " + f.toString());
-		}
-		fu.writeToFile(tempWorkingDir + "index.html", pageContents);
+		indexContents = pageContents;
 	}
 
 	/**
@@ -498,6 +545,43 @@ public class HttpServer {
 	 */
 	public final String getServerUrl() {
 		return "http://" + hostname + ":" + webServerPort + "/";
+	}
+
+
+	/**
+	 * Create context for web client war
+	 */
+	private final WebAppContext embeddedWarClientAppContext(){
+		WebAppContext webappClient = null;
+
+		File f = new File("./war");
+		FilenameFilter textFilter = new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				String lowercaseName = name.toLowerCase();
+
+				return lowercaseName.endsWith(".war");
+
+			}
+		};
+
+		String warFileClient = "";
+		File[] files = f.listFiles(textFilter);
+		for (File file : files) {
+			if (!file.isDirectory()) { // Consider the first file found
+				warFileClient = file.getAbsolutePath();
+				break;
+			}
+		}
+
+		if(!warFileClient.equals("")){
+			webappClient = new WebAppContext();
+			webappClient.setWar(warFileClient);
+		}else{
+			webappClient = null;
+
+		}
+
+		return webappClient;
 	}
 
 

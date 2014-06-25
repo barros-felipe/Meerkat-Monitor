@@ -26,13 +26,17 @@ import javax.jws.soap.SOAPBinding.Style;
 import javax.jws.soap.SOAPBinding.Use;
 
 //Service Endpoint Interface
-@WebService(endpointInterface = "org.meerkat.ws.MeerkatWebServiceManager", serviceName = "MeerkatMonitorWS", portName = "MeerkatMonitorPort")
+@WebService()
 @SOAPBinding(style = Style.RPC, use = Use.LITERAL)
 
 public interface MeerkatWebServiceManager{
 
 	@WebMethod(operationName = "getVersion", action = "getversion")
 	String getVersion();
+	
+	@WebMethod(operationName = "checkKey", action = "checkKey")
+	boolean checkKey(
+			@WebParam(name="givenKey") String givenKey);
 
 	@WebMethod(operationName = "changeMasterKey", action = "changeMasterKey")
 	String changeMasterKey(
@@ -53,7 +57,10 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="host") String host, 
 			@WebParam(name="port") String port, 
 			@WebParam(name="expectedResponse") String expectedResponse, 
-			@WebParam(name="cmdToExecute") String cmdToExecute);
+			@WebParam(name="cmdToExecute") String cmdToExecute,
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "addSocket", action = "addSocket")
 	String addSocket (
@@ -63,7 +70,9 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="port") String port,
 			@WebParam(name="sendString") String sendString, 
 			@WebParam(name="expectedString") String expectedString, 
-			@WebParam(name="executeOnOffline") String executeOnOffline);
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "addDB", action = "addDB")
 	String addDB(
@@ -77,7 +86,9 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="dbType") String dbType,
 			@WebParam(name="query") String query, 
 			@WebParam(name="expectedResponse") String expectedResponse,
-			@WebParam(name="executeOnOffline") String executeOnOffline);
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "addWeb", action = "addWeb")
 	String addWeb(
@@ -85,7 +96,9 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="name") String name, 
 			@WebParam(name="url") String url, 
 			@WebParam(name="expectedString") String expectedString,
-			@WebParam(name="executeOnOffline") String executeOnOffline);
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "addWebService", action = "addWebService")
 	String addWebService(
@@ -95,7 +108,9 @@ public interface MeerkatWebServiceManager{
 			@WebParam(name="soapAction") String soapAction,
 			@WebParam(name="sendXML") String sendXML,
 			@WebParam(name="responseXML") String responseXML,
-			@WebParam(name="executeOnOffline") String executeOnOffline);
+			@WebParam(name="executeOnOffline") String executeOnOffline,
+			@WebParam(name="groups") String groups,
+			@WebParam(name="active") String active);
 
 	@WebMethod(operationName = "resetAllData", action = "resetAllData")
 	String resetAllData(
@@ -112,6 +127,45 @@ public interface MeerkatWebServiceManager{
 	
 	@WebMethod(operationName = "removeAllApps", action = "removeAllApps")
 	String removeAllApps(
+			@WebParam(name="masterKey") String masterKey);
+	
+	@WebMethod(operationName = "getProperties", action = "getProperties")
+	byte[] getProperties(
+			@WebParam(name="masterKey") String masterKey);
+	
+	@WebMethod(operationName = "updateProperties", action = "updateProperties")
+	String updateProperties(
+			@WebParam(name="masterKey") String masterKey,
+			@WebParam(name="properties") byte[] properties);
+	
+	@WebMethod(operationName = "sendTestEmail", action = "sendTestEmail")
+	String sendTestEmail(
+			@WebParam(name="masterKey") String masterKey,
+			@WebParam(name="from") String from,
+			@WebParam(name="to") String to,
+			@WebParam(name="smtpServer") String smtpServer,
+			@WebParam(name="smtpPort") String smtpPort,
+			@WebParam(name="smtpSecurity") String smtpSecurity,
+			@WebParam(name="smtpUser") String smtpUser,
+			@WebParam(name="smtpPassword") String smtpPassword);
+	
+	@WebMethod(operationName = "getAppList", action = "getAppList")
+	String getAppList(
+			@WebParam(name="masterKey") String masterKey);
+	
+	@WebMethod(operationName = "setActive", action = "setActive")
+	String setActive(
+			@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="appName") String appName, 
+			@WebParam(name="active") boolean active);
+	
+	@WebMethod(operationName = "isActive", action = "isActive")
+	String isActive(
+			@WebParam(name="masterKey") String masterKey, 
+			@WebParam(name="appName") String appName);
+	
+	@WebMethod(operationName = "getDashboardURL", action = "getDashboardURL")
+	String getDashboardURL(
 			@WebParam(name="masterKey") String masterKey);
 	
 }

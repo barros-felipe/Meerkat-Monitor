@@ -68,7 +68,7 @@ public class SocketService extends WebApp {
 		super();
 		this.setTypeSocketService();
 	}
-	
+
 	@Override
 	public final WebAppResponse checkWebAppStatus() {
 		WebAppResponse response = new WebAppResponse();
@@ -85,7 +85,7 @@ public class SocketService extends WebApp {
 			response.setPortListening(true);
 
 		} catch (UnknownHostException e) {
-			log.error("Cannot connect to " + server, e);
+			log.error("Cannot connect to " + server+": "+e.getMessage() );
 			response.setHttpTextResponse(e.toString());
 			response.setPageLoadTime("N/A");
 			setCurrentResponse(e.toString());
@@ -115,15 +115,23 @@ public class SocketService extends WebApp {
 					socket.getOutputStream(), encoding));
 		} catch (UnsupportedEncodingException e) {
 			log.error("UnsupportedEncodingException (" + encoding
-					+ ") creating IO stream from " + server, e);
+					+ ") creating IO stream from " + server+": "+e.getMessage() );
 
 		} catch (IOException e) {
-			log.error("IOException creating IO stream from " + server, e);
+			log.error("IOException creating IO stream from " + server+": "+e.getMessage() );
 			response.setHttpTextResponse(e.toString());
 			setCurrentResponse(e.toString());
 
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());
+
+			try {
+				socket.close();
+			} catch (IOException e1) {
+				log.error("Exception closing socket: "+e.getMessage() );
+				e1.printStackTrace();
+			}
+
 			return response;
 		}
 
@@ -133,12 +141,20 @@ public class SocketService extends WebApp {
 			out.flush();
 			socket.shutdownOutput();
 		} catch (IOException e) {
-			log.error("IOException writing data to " + server, e);
+			log.error("IOException writing data to " + server+": "+e.getMessage() );
 			response.setHttpTextResponse(e.toString());
 			setCurrentResponse(e.toString());
 
 			c.stopCounter();
 			response.setPageLoadTime(c.getDurationSeconds());
+
+			try {
+				socket.close();
+			} catch (IOException e1) {
+				log.error("Exception closing socket: "+e.getMessage() );
+				e1.printStackTrace();
+			}
+
 			return response;
 		}
 
@@ -149,7 +165,7 @@ public class SocketService extends WebApp {
 				returnedResponse += line + "\n";
 			}
 		} catch (IOException e) {
-			log.error("IOException reading data from " + server, e);
+			log.error("IOException reading data from " + server+": "+e.getMessage() );
 		}
 
 		try {
@@ -157,7 +173,7 @@ public class SocketService extends WebApp {
 			in.close();
 			socket.close();
 		} catch (IOException e) {
-			log.error("IOException closing socket (IO streams) to " + server, e);
+			log.error("IOException closing socket (IO streams) to " + server+": "+e.getMessage() );
 		}
 		log.debug("Socket receive: " + returnedResponse + "\n");
 		response.setHttpTextResponse(returnedResponse);

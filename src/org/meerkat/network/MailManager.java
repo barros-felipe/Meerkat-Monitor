@@ -30,9 +30,20 @@ public class MailManager {
 	private static Logger log = Logger.getLogger(MailManager.class);
 	private String propertiesFile;
 	private Properties prop;
+	
+	private String testSubject = "Meerkat Monitor Notification - Email test";
+	private String testMessage = "This is an test email to check email availability.\n"
+			+ "If you're reading this is email, means your email settings are OK.\n"
+			+ "\n\n - Meerkat Monitor - ";
+	
 
 	public MailManager(String propertiesFile){
 		this.propertiesFile = propertiesFile;
+		refreshSettings();
+	}
+	
+	public MailManager(){
+		
 	}
 
 	private final void refreshSettings(){
@@ -84,6 +95,11 @@ public class MailManager {
 		email.setHostName(getSMTPServer());
 		email.setSmtpPort(Integer.valueOf(getSMTPPort()));
 		email.setSubject(subject);
+		try {
+			email.setHtmlMsg(message);
+		} catch (EmailException e2) {
+			log.error("Error in mail message. ", e2);
+		}
 
 		// SMTP security
 		String security = getSMTPSecurity();
@@ -96,7 +112,11 @@ public class MailManager {
 		email.setAuthentication(getSMTPUser(), getSMTPPassword());
 
 		try {
-			email.addTo(getTO());
+			String[] toList = getTO().split(",");
+			for(int i=0; i<toList.length; i++){
+				email.addTo(toList[i].trim());
+			}
+
 		} catch (EmailException e1) {
 			log.error("EmailException: addTo(" + getTO() + "). "+e1.getMessage());
 		}
@@ -111,10 +131,10 @@ public class MailManager {
 		try {
 			email.send();
 		} catch (EmailException e) {
-			log.error("Failed to send email! "+e.getMessage());
+			log.error("Failed to send email!", e);
 		}
 	}
-	
+
 	/**
 	 * sendEmail
 	 * @param message
@@ -127,12 +147,75 @@ public class MailManager {
 	 * testEmailSettings
 	 */
 	public final void sendTestEmail() {
-		String subject = "Meerkat Monitor Notification - Email test";
-		String message = "This is an test email to check email availability.\n"
-				+ "If you're reading this is email, means your email settings are OK.\n"
-				+ "\n\n - Meerkat Monitor - ";
 		log.info("Sending test email to: "+getTO());
-		sendEmail(subject, message);
+		sendEmail(testSubject, testMessage);
+	}
+	
+	
+	/**
+	 * testEmailSettingsFromWebService
+	 * @param from
+	 * @param to
+	 * @param smtpServer
+	 * @param smtpPort
+	 * @param smtpSecurity
+	 * @param smtpUser
+	 * @param smtpPassword
+	 * @return
+	 */
+	public final String sendTestEmailSettingsFromWebService(String from, String to, String smtpServer, String smtpPort, String smtpSecurity,
+			String smtpUser, String smtpPassword){
+		String resultString = "OK";
+		HtmlEmail email = new HtmlEmail();
+		email.setHostName(smtpServer);
+		email.setSmtpPort(Integer.valueOf(smtpPort));
+		email.setSubject(testSubject);
+		try {
+			email.setHtmlMsg(testMessage);
+		} catch (EmailException e2) {
+			resultString = e2.getMessage();
+			return resultString;
+		}
+
+		// SMTP security
+		if (smtpSecurity.equalsIgnoreCase("STARTTLS")) {
+			email.setTLS(true);
+		} else if (smtpSecurity.equalsIgnoreCase("SSLTLS")) {
+			email.setSSL(true);
+			email.setSslSmtpPort(String.valueOf(smtpPort));
+		}
+		email.setAuthentication(smtpUser, smtpPassword);
+
+		try {
+			String[] toList = to.split(",");
+			for(int i=0; i<toList.length; i++){
+				email.addTo(toList[i].trim());
+			}
+
+		} catch (EmailException e1) {
+			resultString = "TO: "+e1.getMessage();
+			return resultString;
+		}
+
+		try {
+			email.setFrom(from);
+		} catch (EmailException e1) {
+			resultString = "FROM: "+e1.getMessage();
+			return resultString;
+		}
+
+		// Send the email
+		try {
+			email.send();
+		} catch (EmailException e) {
+			resultString = e.getMessage();
+			return resultString;
+		}
+		
+		return resultString;
 	}
 
+	
+	
+	
 }

@@ -34,8 +34,7 @@ public class AppGroup {
 	private String groupDesc;
 	private List<WebApp> appGroupedList = Collections
 			.synchronizedList(new ArrayList<WebApp>());
-	private int numberOfMemberApps = 0;
-
+	
 	public AppGroup(String groupName) {
 		this.groupname = groupName;
 	}
@@ -74,7 +73,6 @@ public class AppGroup {
 	public final void addApp(WebApp app) {
 		if (!appGroupedList.contains(app)) {
 			appGroupedList.add(app);
-			numberOfMemberApps++;
 		}
 	}
 
@@ -109,14 +107,18 @@ public class AppGroup {
 	public final double getGroupAvailabilityAvg() {
 		Iterator<WebApp> it = getGroupAppsIterator();
 		double availabilitySUM = 0;
+		int activeMemberApps = 0;
 
 		WebApp tempWebApp;
 		while (it.hasNext()) {
 			tempWebApp = it.next();
-			availabilitySUM += tempWebApp.getAvailability();
+			if(tempWebApp.isActive()){
+				activeMemberApps++;
+				availabilitySUM += tempWebApp.getAvailability();
+			}
 		}
 
-		return availabilitySUM / numberOfMemberApps;
+		return availabilitySUM / activeMemberApps;
 
 	}
 

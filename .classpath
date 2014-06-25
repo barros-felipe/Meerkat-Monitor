@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src_webclient"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/cxf/cxf-2.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/cxf/geronimo-activation_1.1_spec-1.1.jar"/>
@@ -13,22 +14,38 @@
 	<classpathentry kind="lib" path="lib/cxf/woodstox-core-asl-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/cxf/wsdl4j-1.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/cxf/xmlschema-core-2.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/jdbc-driver/mssql/jtds-1.2.5.jar"/>
+	<classpathentry kind="lib" path="lib/jdbc-driver/mysql/mysql-connector-java-5.1.21-bin.jar"/>
+	<classpathentry kind="lib" path="lib/jdbc-driver/postgre/postgresql-9.2-1002.jdbc4.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/com.sun.el-1.0.0.v201105211818.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/javax.el-2.1.0.v201105211819.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/javax.servlet.jsp-2.1.0.v201105211820.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/org.apache.jasper.glassfish-2.1.0.v201110031002.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/org.eclipse.jdt.core-3.7.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/commons-email-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/derby.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.2.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.2.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.2.jar"/>
 	<classpathentry kind="lib" path="lib/jasypt-1.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-security-7.6.4.v20120524.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-server-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlets-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-webapp-7.6.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-xml-7.6.4.v20120524.jar"/>
 	<classpathentry kind="lib" path="lib/jsch-0.1.48.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="lib/mail-1.4.4.jar"/>
-	<classpathentry kind="lib" path="lib/servlet-api-3.0.jar"/>
+	<classpathentry kind="lib" path="lib/servlet-api-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/xstream-1.4.2.jar"/>
-	<classpathentry kind="lib" path="C:/Documents and Settings/pn23729/git/Meerkat-Monitor/lib/derby.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

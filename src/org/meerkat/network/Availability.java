@@ -56,7 +56,7 @@ public class Availability {
 			bd = bd.setScale(decimalPlaces, BigDecimal.ROUND_DOWN);
 			avail = bd.doubleValue();
 		}else{ // first test
-			if(webApp.checkWebAppStatus().isOnline() == true){
+			if(webApp.checkWebAppStatus().isOnline()){
 				return 100.0;
 			}else{
 				return 0.0;

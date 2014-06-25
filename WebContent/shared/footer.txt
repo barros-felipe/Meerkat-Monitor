@@ -1,0 +1,5 @@
+		<div class="wrapper wrapper-style4">
+			<footer>
+				<p id="copyright">&copy; 2013 <a href="http://meerkat-monitor.org">Meerkat-Monitor</a></p>
+			</footer>
+		</div>

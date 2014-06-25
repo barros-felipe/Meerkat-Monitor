@@ -1,6 +1,6 @@
 /**
  * Meerkat Monitor - Network Monitor Tool
- * Copyright (C) 2012 Merkat-Monitor
+ * Copyright (C) 2013 Merkat-Monitor
  * mailto: contact AT meerkat-monitor DOT org
  * 
  * Meerkat Monitor is free software: you can redistribute it and/or modify
@@ -19,62 +19,83 @@
 
 package org.meerkat.gui;
 
-import java.awt.Container;
+import java.awt.BorderLayout;
 import java.awt.Font;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
-import org.apache.log4j.Logger;
+import org.meerkat.MeerkatMonitor;
 
-public class SplashScreen extends JWindow implements Runnable {
+public class SplashScreen extends JWindow {
 
-	private static final long serialVersionUID = 3796550626294085195L;
-	private static Logger log = Logger.getLogger(SplashScreen.class);
-	private String version;
+	private static final long serialVersionUID = 1L;
+	private BorderLayout borderLayout;
+	private JLabel imageLabel;
+	private JLabel lblNewLabel;
+	private JProgressBar progressBar = new JProgressBar(0, 100);
+	private ImageIcon imageIcon = new ImageIcon(MeerkatMonitor.class.getClass().getResource("/resources/splashscreen.png"));
+
+	public SplashScreen(String version) {
+		imageLabel = new JLabel();
+		imageLabel.setIcon(imageIcon);
+		borderLayout = new BorderLayout();
+		lblNewLabel = new JLabel(version, SwingConstants.RIGHT);
+        lblNewLabel.setFont(new Font("Dialog", Font.PLAIN, 12));
+        lblNewLabel.setBounds(182, 74, 126, 15);
+		setLayout(borderLayout);
+		add(imageLabel, BorderLayout.CENTER);
+		add(lblNewLabel, BorderLayout.NORTH);
+		add(progressBar, BorderLayout.SOUTH);
+        
+		pack();
+		setLocationRelativeTo(null);
+	}
+
 
 	/**
-	 * SplashScreen
+	 * showScreen
 	 */
-	public SplashScreen(String version) {
-		this.version = version;
+	public void showScreen() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				setVisible(true);
+			}
+		});
 	}
 
-	@Override
-	public void run() {
-		Container container = getContentPane();
-		getContentPane().setLayout(null);
-
-		JLabel meerkatLogo = new JLabel("");
-		meerkatLogo.setBounds(52, 33, 260, 30);
-		meerkatLogo.setIcon(new ImageIcon(SplashScreen.class.getResource("/resources/meerkat.png")));
-		container.add(meerkatLogo);
-
-		JLabel meerkatIco = new JLabel("");
-		meerkatIco.setBounds(12, 12, 40, 77);
-		meerkatIco.setIcon(new ImageIcon(SplashScreen.class
-				.getResource("/resources/meerkat-small.png")));
-		container.add(meerkatIco);
-
-		JLabel lblNewLabel = new JLabel(version, SwingConstants.RIGHT);
-
-		lblNewLabel.setFont(new Font("Dialog", Font.PLAIN, 12));
-		lblNewLabel.setBounds(182, 74, 126, 15);
-		getContentPane().add(lblNewLabel);
-
-		setSize(320, 100);
-		setLocationRelativeTo(null);
-		setVisible(true);
-
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			log.error("SplashScreen thread sleep error!");
-		}
-		dispose();
-
+	/**
+	 * close
+	 */
+	public void close() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				setVisible(false);
+				dispose();
+			}
+		});
 	}
 
+	/**
+	 * setProgress
+	 * @param message
+	 * @param progress
+	 */
+	public void setProgress(final String message, final int progress) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				progressBar.setValue(progress);
+				if (message == null) {
+					progressBar.setStringPainted(false);
+				} else {
+					progressBar.setStringPainted(true);
+				}
+				progressBar.setString(message);
+			}
+		});
+	}
 }

@@ -1,3 +1,4 @@
+// $codepro.audit.disable logExceptions
 /**
  * Meerkat Monitor - Network Monitor Tool
  * Copyright (C) 2011 Merkat-Monitor
@@ -30,6 +31,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 public class FileUtil {
@@ -46,11 +48,11 @@ public class FileUtil {
 	 * @param filename
 	 */
 	public final void removeFile(String filename) {
-		File file = new File(filename);
-		if (file.exists()) {
-			if (!file.delete()) {
-				log.error("Deleting file: " + filename);
-			}
+		try {
+			FileUtils.forceDelete(new File(filename));
+		} catch (IOException e) {
+			log.error("Error removing file. "+"["+e.getMessage()+"]");
+			e.printStackTrace();
 		}
 	}
 
@@ -118,8 +120,9 @@ public class FileUtil {
 	 */
 	public final void writeToFile(String filename, String contents){
 		RandomAccessFile destFile = null;
+		File tmpFile;
 		try {
-			File tmpFile = new File(filename);
+			tmpFile = new File(filename);
 			if(tmpFile.exists()){
 				tmpFile.delete();
 			}

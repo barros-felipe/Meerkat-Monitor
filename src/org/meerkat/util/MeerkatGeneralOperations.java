@@ -1,3 +1,4 @@
+// $codepro.audit.disable logExceptions
 /**
  * Meerkat Monitor - Network Monitor Tool
  * Copyright (C) 2012 Merkat-Monitor
@@ -96,9 +97,10 @@ public class MeerkatGeneralOperations {
 			webAppsCollection = new WebAppCollection();
 
 			// Add Meerkat Monitor self test demo data
-			webAppsCollection.addWebApp(SampleData.getSampleWebApp_SelfTestWSDL());
-			webAppsCollection.addWebApp(SampleData.getSampleWebService_SelfWSgetVersion(version));
-			webAppsCollection.addWebApp(SampleData.getSampleSocketService_SelfHTTP_Port());
+			webAppsCollection.addWebApp(SampleData.getSampleWebApp_SelfTestWSDL(), false);
+			webAppsCollection.addWebApp(SampleData.getSampleWebService_SelfWSgetVersion(version), false);
+			webAppsCollection.addWebApp(SampleData.getSampleSocketService_SelfHTTP_Port(), false);
+			webAppsCollection.addWebApp(SampleData.getSampleWebApp_MeerkatMonitorWebPage(), false);
 		}
 
 		webAppsCollection.setConfigFile(xmlConfigFile);
@@ -127,7 +129,7 @@ public class MeerkatGeneralOperations {
 		}
 
 		// Register resources
-		String[] resources = new String[25];
+		String[] resources = new String[26];
 		resources[0] = "resources/demo_page.css";
 		resources[1] = "resources/demo_table_jui.css";
 		resources[2] = "resources/jquery-ui-1.8.4.custom.css";
@@ -153,6 +155,7 @@ public class MeerkatGeneralOperations {
 		resources[22] = "resources/tango-find-log.png";
 		resources[23] = "resources/prettify.css";
 		resources[24] = "resources/prettify.js";
+		resources[25] = "resources/tango-preferences-system.png";
 
 		String[] resourcesImages = new String[13];
 		resourcesImages[0] = "resources/images/ui-bg_flat_0_aaaaaa_40x100.png";

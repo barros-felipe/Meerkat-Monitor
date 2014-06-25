@@ -1,6 +1,6 @@
 <launch4jConfig>
   <headerType>gui</headerType>
-  <outfile>../../bundle/Meerkat-Monitor-daemon.exe</outfile>
+  <outfile>../../bundle/Meerkat-Monitor.exe</outfile>
   <jar>../../bundle/Meerkat-Monitor.jar</jar>
   <dontWrapJar>false</dontWrapJar>
   <errTitle>Meerkat Monitor - Error</errTitle>
@@ -36,9 +36,9 @@
     <minVersion>1.6.0</minVersion>
     <!-- <maxVersion>x.x.x[_xx]</maxVersion> -->
     <!-- <jdkPreference>jreOnly|preferJre|preferJdk|jdkOnly</jdkPreference> -->
-    <initialHeapSize>256</initialHeapSize> <!-- MB -->
+    <initialHeapSize>128</initialHeapSize> <!-- MB -->
     <!-- <initialHeapPercent>50</initialHeapPercent> --> <!-- percent -->
-    <maxHeapSize>512</maxHeapSize>
+    <maxHeapSize>256</maxHeapSize>
     <!-- <maxHeapPercent>100</maxHeapPercent> -->
     <!-- <opt>text</opt> -->
   </jre>

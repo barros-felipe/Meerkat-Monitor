@@ -2,9 +2,17 @@
 <project name="Meerkat-Monitor" default="dist" basedir=".">
 
 	<property name="mm.id" value="Meerkat-Monitor" />
+	<property name="built.by" value="pgnunes@meerkat-monitor.org" />
 	<property name="mm.exe.file" value="${mm.id}.jar" />
+	<property name="mm.deps.file" value="${mm.id}-deps.jar" />
 	<property name="launch4j.dir" location="external_tools/launch4j" />
 	<property name="nsis.dir" location="${basedir}/external_tools/nsis" />
+	
+	<property name="web.app.client.build.xml" location="build-webclient-war.xml" />
+	
+	<property name="java.source" value="1.6" />
+	<property name="java.target" value="1.6" />
+	
 	
 	<target name="init" depends="clean">
 		<mkdir dir="build/classes"/>
@@ -31,11 +39,18 @@
 			<fileset dir="bundle/lib/jdbc-driver">
 				<include name="**/*.jar"/>
 			</fileset>
+			<fileset dir="bundle/lib/jsp">
+				<include name="**/*.jar"/>
+			</fileset>
 		</path>
 		
-		<javac destdir="build/classes" debug="true" srcdir="src" includeantruntime="no">
+		<javac destdir="build/classes" debug="true" srcdir="src" source="${java.source}" target="${java.target}" includeantruntime="no" >
 			<classpath refid="compile.classpath"/>
 		</javac>
+		
+		<!-- create the dep package (needed by web client) -->
+		<jar destfile="dist/${mm.deps.file}" basedir="build/classes"/>
+		
 	</target>
 	
 	<!-- CREATE BUNDLE -->
@@ -55,19 +70,23 @@
 		<!-- Create application jar -->
 		<jar destfile="bundle/${mm.exe.file}" basedir="build/classes">
 			<manifest>
-				<attribute name="Built-By" value="pgh.nunes@gmail.com"/> 
+				<attribute name="Built-By" value="${built.by}"/> 
 				<attribute name="Build-JDK" value="${ant.java.version}"/>
 				<attribute name="Class-Path" value="${jar.classpath}"/>
 				<attribute name="Main-Class" value="org.meerkat.MeerkatMonitor"/>
+				<attribute name="SplashScreen-Image" value="resources/splashscreen.png"/>
 			</manifest>
 		</jar>
 		
 		<!-- Create misc dir -->
 		<mkdir dir="bundle/log"/>
+		<mkdir dir="bundle/war"/>
+		
+		<!-- Create Web App Client WAR -->
+		<antcall target="webAppClient" />	
 		
 		<!-- Create base -->
-		<antcall target="zip_base" />
-		
+		<antcall target="zip_base" />		
 	</target>
 	
 	<!-- ZIP BASE -->
@@ -75,6 +94,14 @@
 		<!-- create zip with all components -->
 		<!-- used as base for creation of installers -->
 		<zip destfile="temp/${mm.id}.zip" basedir="bundle" />
+	</target>
+	
+	<!-- WEB APP CLIENT -->
+	<target name="webAppClient">
+		<copy file="dist/${mm.deps.file}" todir="WebContent/WEB-INF/lib"/>
+		<ant antfile="${web.app.client.build.xml}" target="all" inheritall="false" />
+		<!-- Copy war file back to dist -->
+		<copy file="dist/MMWebClient.war" todir="bundle/war"/>
 	</target>
 	
 	<!-- CLEAN BASE -->
@@ -85,7 +112,7 @@
 	</target>
 	
 	<!-- CREATE WIN INSTALLER -->
-	<target name="win-installer">
+	<target name="win-installer" if="isWindows">
 		<!-- Get a clean base -->
 		<antcall target="clean_base"/>
 		
@@ -114,7 +141,7 @@
 		<antcall target="clean_base"/>
 		
 		<!-- Rename the jar -->
-		<move file="bundle/${mm.exe.file}" tofile="bundle/${mm.id}-daemon.jar"/>
+		<move file="bundle/${mm.exe.file}" tofile="bundle/${mm.id}.jar"/>
 		
 		<!-- Create dir and move files -->
 		<mkdir dir="bundle/Meerkat-Monitor"/>
@@ -147,6 +174,10 @@
 	
 	<!-- CREATE DIST -->
 	<target name="dist" depends="bundle">
+		<condition property="isWindows">
+			<os family="windows" />
+		</condition>
+		
 		<antcall target="win-installer" />
 		<antcall target="linux-jar-sh" />
 		
