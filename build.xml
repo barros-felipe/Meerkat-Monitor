@@ -10,6 +10,8 @@
 	
 	<property name="web.app.client.build.xml" location="build-webclient-war.xml" />
 	
+	<property name="java.source" value="1.6" />
+	<property name="java.target" value="1.6" />
 	
 	
 	<target name="init" depends="clean">
@@ -42,7 +44,7 @@
 			</fileset>
 		</path>
 		
-		<javac destdir="build/classes" debug="true" srcdir="src" includeantruntime="no">
+		<javac destdir="build/classes" debug="true" srcdir="src" source="${java.source}" target="${java.target}" includeantruntime="no" >
 			<classpath refid="compile.classpath"/>
 		</javac>
 		
