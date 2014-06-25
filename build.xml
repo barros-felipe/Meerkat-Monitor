@@ -139,7 +139,7 @@
 		<antcall target="clean_base"/>
 		
 		<!-- Rename the jar -->
-		<move file="bundle/${mm.exe.file}" tofile="bundle/${mm.id}-daemon.jar"/>
+		<move file="bundle/${mm.exe.file}" tofile="bundle/${mm.id}.jar"/>
 		
 		<!-- Create dir and move files -->
 		<mkdir dir="bundle/Meerkat-Monitor"/>
