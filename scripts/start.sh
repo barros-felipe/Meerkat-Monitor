@@ -3,7 +3,7 @@
 
 echo ""
 echo "Meerkat-Monitor - [http://meerkat-monitor.org]"
-java -jar Meerkat-Monitor-daemon.jar &
+java -jar Meerkat-Monitor.jar &
 echo "$!" > meerkat-monitor.pid
 
 echo "Application started."
