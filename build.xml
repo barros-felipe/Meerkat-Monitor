@@ -2,6 +2,7 @@
 <project name="Meerkat-Monitor" default="dist" basedir=".">
 
 	<property name="mm.id" value="Meerkat-Monitor" />
+	<property name="built.by" value="pgnunes@meerkat-monitor.org" />
 	<property name="mm.exe.file" value="${mm.id}.jar" />
 	<property name="mm.deps.file" value="${mm.id}-deps.jar" />
 	<property name="launch4j.dir" location="external_tools/launch4j" />
@@ -67,7 +68,7 @@
 		<!-- Create application jar -->
 		<jar destfile="bundle/${mm.exe.file}" basedir="build/classes">
 			<manifest>
-				<attribute name="Built-By" value="pgh.nunes@gmail.com"/> 
+				<attribute name="Built-By" value="${built.by}"/> 
 				<attribute name="Build-JDK" value="${ant.java.version}"/>
 				<attribute name="Class-Path" value="${jar.classpath}"/>
 				<attribute name="Main-Class" value="org.meerkat.MeerkatMonitor"/>
