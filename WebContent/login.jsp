@@ -70,11 +70,13 @@
 							<div class="12u">
 								<form name="login" id="login" action="" method="post">
 									<div class="5grid">
+										<!--
 										<div class="row">
 											<div class="6u">
 												<input type="text" onfocus="this.blur()" name="name" id="name" value="admin" placeholder="admin" />
 											</div>
 										</div>
+										-->
 										<div class="row">	
 											<div class="6u">
 												<input type="password" name="key" id="key" placeholder="User Key" />
