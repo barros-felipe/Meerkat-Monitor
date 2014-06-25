@@ -60,6 +60,7 @@ public class MeerkatMonitor {
 	private static MasterKeyManager mkm;
 	private static MeerkatGeneralOperations mgo;
 	private static boolean isSplashSupported = false;
+	private static SplashScreen splashScreen;
 
 	/**
 	 * main
@@ -70,8 +71,11 @@ public class MeerkatMonitor {
 		int numberStepsToProgress = 14;
 		double percentIncrease = 100 / numberStepsToProgress;
 		double currProgress = 0;
-		
-		final SplashScreen splashScreen = new SplashScreen(version);
+		try{
+			splashScreen = new SplashScreen(version);
+		}catch (Exception e){
+			log.warn("No Graphical interface available: "+e.getMessage());
+		}
 		// Show splash screen if available
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
